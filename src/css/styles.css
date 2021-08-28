@@ -1,6 +1,41 @@
 @import url(nreset.css);
 
 body {
-  background-color: #313131;
   font-family: 'Roboto', sans-serif;
+}
+
+button {
+  height: 2em;
+  width: 4em;
+}
+
+.task {
+  background-color: #31313133;
+  display: flex;
+  flex-direction: column;
+  width: 25%;
+}
+
+.task__body {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.body__description {
+  width: 85%;
+}
+
+.body__misc {
+  width: 15%;
+}
+
+.misc__information {
+  display: flex;
+  justify-content: space-between;
+}
+
+.misc__button {
+  display: flex;
+  justify-content: space-between;
 }

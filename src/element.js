@@ -4,7 +4,7 @@ const theElement = {
     let element = document.createElement(tagName);
 
     for (let key in attributes) {
-      element.setAttributes(key, attributes[key]);
+      element.setAttribute(key, attributes[key]);
     }
 
     children.forEach((child) => {
@@ -15,7 +15,7 @@ const theElement = {
       }
     });
 
-    return theElement;
+    return element;
   },
 };
 
