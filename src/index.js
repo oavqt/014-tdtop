@@ -1,5 +1,5 @@
 import './css/styles.css';
-import './list';
+import './theList';
 
 //Server HMR
 if (module.hot) {
