@@ -1,4 +1,4 @@
-const element = {
+const theElement = {
   //Create DOM Elements
   create: (tagName, attributes, ...children) => {
     let element = document.createElement(tagName);
@@ -15,8 +15,8 @@ const element = {
       }
     });
 
-    return element;
+    return theElement;
   },
 };
 
-export default element;
+export default theElement;
