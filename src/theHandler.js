@@ -28,4 +28,4 @@ const theEventHandler = (() => {
   return { subscribe, unsubscribe, publish };
 })();
 
-export default theEventHandler;
+export { theEventHandler };

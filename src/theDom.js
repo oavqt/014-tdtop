@@ -3,7 +3,6 @@ import theElement from './theElement';
 //Create DOM Elements
 const theCreateElement = {
   theTaskElement: (title, description, category, date) => {
-    console.log(this.title);
     const task = theElement.create(
       'div',
       { class: 'task' },
@@ -50,7 +49,7 @@ const theCreateElement = {
   },
 };
 
-//Append DOM Elements
+// Append DOM Elements
 const theAppendElement = {
   theContent: (element) => {
     const content = document.querySelector('.content');
@@ -58,4 +57,14 @@ const theAppendElement = {
   },
 };
 
-export { theCreateElement, theAppendElement };
+// // Get DOM Elements
+const theGetElements = {
+  theButtons: (className) => {
+    const buttons = document.querySelectorAll('button');
+    buttons.forEach((button) => {
+      if (button.className === className) {
+        return button;
+      }
+    });
+  },
+};

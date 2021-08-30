@@ -19,4 +19,4 @@ const theElement = {
   },
 };
 
-export default theElement;
+export { theElement };
