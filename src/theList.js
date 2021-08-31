@@ -46,9 +46,9 @@ const objectAdd = {
     object['#'] = theProjectArray.project.indexOf(object);
   },
 
-  to: (project, temp, object) => {
-    project[temp].push(object);
-    object['#'] = project[temp].indexOf(object);
+  to: (project, array, object) => {
+    project[array].push(object);
+    object['#'] = project[array].indexOf(object);
   },
 };
 

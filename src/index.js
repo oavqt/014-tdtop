@@ -1,5 +1,8 @@
 import './css/styles.css';
 import './theList';
+import { theApplication } from './theDom';
+
+theApplication();
 
 //Server HMR
 if (module.hot) {

@@ -1,8 +1,9 @@
-import theElement from './theElement';
+import { theElement } from './theElement';
 
+//DOM Tools
 //Create DOM Elements
-const theCreateElement = {
-  theTaskElement: (title, description, category, date) => {
+const theCreate = {
+  theTask: (title, description, category, date) => {
     const task = theElement.create(
       'div',
       { class: 'task' },
@@ -49,17 +50,31 @@ const theCreateElement = {
   },
 };
 
-// Append DOM Elements
-const theAppendElement = {
+//Append DOM Elements
+const theAppendTo = {
   theContent: (element) => {
-    const content = document.querySelector('.content');
-    content.appendChild(element);
+    theGet.theContent().appendChild(element);
+  },
+  theDemo: (element) => {
+    theGet.theDemo().appendChild(element);
+  },
+  theMisc: (element) => {
+    theGet.theMisc().appendChild(element);
   },
 };
 
-// // Get DOM Elements
-const theGetElements = {
-  theButtons: (className) => {
+//Get DOM Elements
+const theGet = {
+  theContent: () => {
+    return document.querySelector('.content');
+  },
+  theDemo: () => {
+    return document.querySelector('.application__demo');
+  },
+  theMisc: () => {
+    return document.querySelector('.application__misc');
+  },
+  theButton: (className) => {
     const buttons = document.querySelectorAll('button');
     buttons.forEach((button) => {
       if (button.className === className) {
@@ -68,3 +83,99 @@ const theGetElements = {
     });
   },
 };
+
+//Application
+//Create Application
+const theApplication = () => {
+  theAppendTo.theContent(theSkeleton());
+  theAppendTo.theDemo(theSidebar());
+  theAppendTo.theDemo(theDisplay());
+  theAppendTo.theMisc(theInformation());
+};
+
+//Create Application Skeleton
+const theSkeleton = () => {
+  const skeleton = theElement.create(
+    'div',
+    { class: 'content__application' },
+    theElement.create('div', { class: 'application__demo' }),
+    theElement.create('div', { class: 'application__misc' })
+  );
+  return skeleton;
+};
+
+//Create Application Sidebar
+const theSidebar = () => {
+  const sidebar = theElement.create(
+    'div',
+    { class: 'demo__sidebar' },
+    theElement.create(
+      'div',
+      { class: 'sidebar__inbox' },
+      theElement.create('button', { class: 'btn--inbox' })
+    ),
+    theElement.create(
+      'div',
+      { class: 'sidebar__today' },
+      theElement.create('button', { class: 'btn--today' })
+    ),
+    theElement.create(
+      'div',
+      { class: 'sidebar__upcoming' },
+      theElement.create('button', { class: 'btn--upcoming' })
+    ),
+    theElement.create(
+      'div',
+      { class: 'sidebar__someday' },
+      theElement.create('button', { class: 'btn--someday' })
+    ),
+    theElement.create(
+      'div',
+      { class: 'sidebar__never' },
+      theElement.create('button', { class: 'btn--never' })
+    ),
+    theElement.create(
+      'div',
+      { class: 'sidebar__logbook' },
+      theElement.create('button', { class: 'btn--logbook' })
+    ),
+    theElement.create('div', { class: 'sidebar__project' })
+  );
+  return sidebar;
+};
+
+//Create Application Display
+const theDisplay = () => {
+  const display = theElement.create('div', { class: 'demo__display' });
+  return display;
+};
+
+//Create Application Information
+const theInformation = () => {
+  const information = theElement.create(
+    'div',
+    { class: 'misc__information' },
+    theElement.create(
+      'div',
+      { class: 'information__title' },
+      theElement.create('h1', { class: 'title__text' })
+    ),
+    theElement.create(
+      'div',
+      { class: 'information__description' },
+      theElement.create('p', { class: 'description__text' })
+    ),
+    theElement.create(
+      'div',
+      { class: 'information__tags' },
+      theElement.create(
+        'a',
+        { class: 'a--github' },
+        theElement.create('img', { class: 'img--github' })
+      )
+    )
+  );
+  return information;
+};
+
+export { theApplication };
