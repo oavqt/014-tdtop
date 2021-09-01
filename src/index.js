@@ -8,9 +8,11 @@ theApplication();
 if (module.hot) {
   module.hot.accept();
 
-  // const content = document.querySelector('.content');
+  const content = document.querySelector('.content');
 
-  // while (content.firstChild) {
-  //   content.removeChild(content.lastChild);
-  // }
+  while (content.firstChild) {
+    content.removeChild(content.lastChild);
+  }
+
+  theApplication();
 }

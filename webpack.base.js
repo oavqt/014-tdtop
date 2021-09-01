@@ -24,7 +24,7 @@ const config = {
   plugins: [
     new HTMLWebpackPlugin({
       template: './src/index.html',
-      title: 'Le tudoui',
+      title: 'Tudoui Le Daq',
     }),
   ],
 };
