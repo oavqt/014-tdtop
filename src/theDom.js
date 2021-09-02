@@ -8,6 +8,17 @@ const theDOMTemplate = {
   automaticProject: (title) => {
     theDOMAppendTo.theSidebarAutomatic(theDOMCreate.automaticProject(title));
   },
+  list: (title, description) => {
+    theDOMAppendTo.theDisplayBody(theDOMCreate.list(title, description));
+  },
+  task: (title, description, category, date = '') => {
+    theDOMAppendTo.theDisplayBody(
+      theDOMCreate.task(title, description, category, date)
+    );
+  },
+  note: (title, description) => {
+    theDOMAppendTo.theDisplayBody(theDOMCreate.note(title, description));
+  },
 };
 
 //Create DOM Element
@@ -30,10 +41,19 @@ const theDOMCreate = {
     return element;
   },
   customProject: () => {},
+  list: (title, description) => {
+    const element = theElement.create(
+      'div',
+      { class: 'body__list' },
+      theElement.create('h1', { class: 'list__title' }, title),
+      theElement.create('p', { class: 'list__description' }, description)
+    );
+    return element;
+  },
   task: (title, description, category, date) => {
     const element = theElement.create(
       'div',
-      { class: 'display__task' },
+      { class: 'list__task' },
       theElement.create(
         'div',
         { class: 'task__title' },
@@ -75,6 +95,15 @@ const theDOMCreate = {
     );
     return element;
   },
+  note: (title, description) => {
+    const element = theElement.create(
+      'div',
+      { class: 'task__note' },
+      theElement.create('h1', { class: 'note__title' }, title),
+      theElement.create('p', { class: 'note__description' }, description)
+    );
+    return element;
+  },
 };
 
 //Append DOM Elements
@@ -97,6 +126,9 @@ const theDOMAppendTo = {
   theSidebarCustom: (element) => {
     theDOMGet.theSidebarCustom().appendChild(element);
   },
+  theDisplayBody: (element) => {
+    theDOMGet.theDisplayBody().appendChild(element);
+  },
 };
 
 //Get DOM Elements
@@ -118,6 +150,9 @@ const theDOMGet = {
   },
   theSidebarCustom: () => {
     return document.querySelector('.sidebar__custom');
+  },
+  theDisplayBody: () => {
+    return document.querySelector('.display__body');
   },
   theButton: (className) => {
     const buttons = document.querySelectorAll('button');
@@ -166,7 +201,9 @@ const theDisplay = () => {
         theElement.create('img', { class: 'img--logo', src: logo })
       ),
       theElement.create('h1', { class: 'title__text' }, 'Tudoui Le Daq')
-    )
+    ),
+    theElement.create('div', { class: 'display__body' }),
+    theElement.create('div', { class: 'display__misc' })
   );
   return display;
 };

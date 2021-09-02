@@ -24,15 +24,14 @@ const objectCreate = {
       description,
       category,
       date,
-      notes: [],
+      note: [],
     };
   },
 
-  note: (title, description, tag) => {
+  note: (title, description) => {
     return {
       title,
       description,
-      tag,
     };
   },
 };
@@ -44,39 +43,57 @@ const objectAdd = (project, object) => {
 
 const objectTemplate = {
   project: (project, title, description) => {
-    const tProject = Object.assign(
-      {},
-      {
-        addList: objectTemplate.list,
-        addTask: objectTemplate.task,
-        addNote: objectTemplate.note,
-        addDOMAutomaticProject: theDOMTemplate.automaticProject,
-        addDOMTask: theDOMTemplate.task,
-      }
-    );
+    const proto = {
+      addList: objectTemplate.list,
+      addDOMAutomaticProject: theDOMTemplate.automaticProject,
+      addDOMTask: theDOMTemplate.task,
+    };
 
     objectAdd(
       project,
       Object.assign(
-        Object.create(tProject),
+        Object.create(proto),
         objectCreate.project(title, description)
       )
     );
   },
 
   list: (project, title, description) => {
-    let list = objectCreate.list(title, description);
-    objectAdd(project, list);
+    const proto = {
+      addDOMList: theDOMTemplate.list,
+      addTask: objectTemplate.task,
+    };
+
+    objectAdd(
+      project,
+      Object.assign(Object.create(proto), objectCreate.list(title, description))
+    );
   },
 
   task: (project, title, description, category, date) => {
-    let task = objectCreate.task(title, description, category, date);
-    objectAdd(project, task);
+    const proto = {
+      addDOMTask: theDOMTemplate.task,
+      addNote: objectTemplate.note,
+    };
+
+    objectAdd(
+      project,
+      Object.assign(
+        Object.create(proto),
+        objectCreate.task(title, description, category, date)
+      )
+    );
   },
 
   note: (project, title, description) => {
-    let note = objectCreate.note(title, description);
-    objectAdd(project, note);
+    const proto = {
+      addDOMNote: theDOMTemplate.note,
+    };
+
+    objectAdd(
+      project,
+      Object.assign(Object.create(proto), objectCreate.note(title, description))
+    );
   },
 };
 
@@ -121,15 +138,78 @@ const theAutomaticProject = () => {
   objectTemplate.project(automatic, 'Logbook', 'Logbook');
 };
 
-const theAutomaticProjectDOM = () => {
-  theProjectData.automaticProject.forEach((project) => {
+const theAutomaticListDemo = () => {
+  theProjectData.automaticProject[1].addList(
+    theProjectData.automaticProject[1].list,
+    'title',
+    'description'
+  );
+};
+
+const theAutomaticTaskDemo = () => {
+  theProjectData.automaticProject[1].list[0].addTask(
+    theProjectData.automaticProject[1].list[0].task,
+    'title',
+    'description',
+    'category',
+    'date'
+  );
+};
+
+const theAutomaticNoteDemo = () => {
+  console.log(theProjectData.automaticProject[1].list[0].task[0]);
+  theProjectData.automaticProject[1].list[0].task[0].addNote(
+    theProjectData.automaticProject[1].list[0].task[0].note,
+    'title',
+    'description'
+  );
+};
+
+const theProjectDOM = (projectData) => {
+  theProjectData[projectData].forEach((project) => {
     project.addDOMAutomaticProject(project.title.toLowerCase());
+  });
+};
+
+const theListDOM = (projectData) => {
+  theProjectData[projectData].forEach((project) => {
+    project.list.forEach((list) => {
+      list.addDOMList(list.title, list.description);
+    });
+  });
+};
+
+const theTaskDOM = (projectData) => {
+  theProjectData[projectData].forEach((project) => {
+    project.list.forEach((list) => {
+      list.task.forEach((task) => {
+        task.addDOMTask(task.title, task.description, task.category, task.date);
+      });
+    });
+  });
+};
+
+const theNoteDOM = (projectData) => {
+  theProjectData[projectData].forEach((project) => {
+    project.list.forEach((list) => {
+      list.task.forEach((task) => {
+        task.note.forEach((note) => {
+          note.addDOMNote(note.title, note.description);
+        });
+      });
+    });
   });
 };
 
 const theAutomaticApplication = () => {
   theAutomaticProject();
-  theAutomaticProjectDOM();
+  theProjectDOM('automaticProject');
+  theAutomaticListDemo();
+  theListDOM('automaticProject');
+  theAutomaticTaskDemo();
+  theTaskDOM('automaticProject');
+  theAutomaticNoteDemo();
+  theNoteDOM('automaticProject');
 };
 
 export { theAutomaticApplication };
