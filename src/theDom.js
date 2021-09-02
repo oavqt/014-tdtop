@@ -3,12 +3,37 @@ import logo from './images/myLogo.png';
 import github from './images/myGithub.png';
 
 //DOM Tools
-//Create DOM Elements
-const theCreate = {
-  theTask: (title, description, category, date) => {
-    const task = theElement.create(
+//Create DOM Template
+const theDOMTemplate = {
+  automaticProject: (title) => {
+    theDOMAppendTo.theSidebarAutomatic(theDOMCreate.automaticProject(title));
+  },
+};
+
+//Create DOM Element
+const theDOMCreate = {
+  automaticProject: (title, count = '') => {
+    const element = theElement.create(
       'div',
-      { class: 'task' },
+      { class: `automatic__${title}` },
+      theElement.create(
+        'button',
+        { class: `btn--${title}` },
+        theElement.create(
+          'span',
+          { class: `${title}__title` },
+          `${title[0].toUpperCase() + title.slice(1)}`
+        ),
+        theElement.create('span', { class: `${title}__count` }, count)
+      )
+    );
+    return element;
+  },
+  customProject: () => {},
+  task: (title, description, category, date) => {
+    const element = theElement.create(
+      'div',
+      { class: 'display__task' },
       theElement.create(
         'div',
         { class: 'task__title' },
@@ -48,25 +73,34 @@ const theCreate = {
         )
       )
     );
-    return task;
+    return element;
   },
 };
 
 //Append DOM Elements
-const theAppendTo = {
+const theDOMAppendTo = {
   theContent: (element) => {
-    theGet.theContent().appendChild(element);
+    theDOMGet.theContent().appendChild(element);
   },
   theDemo: (element) => {
-    theGet.theDemo().appendChild(element);
+    theDOMGet.theDemo().appendChild(element);
   },
   theMisc: (element) => {
-    theGet.theMisc().appendChild(element);
+    theDOMGet.theMisc().appendChild(element);
+  },
+  theSidebar: (element) => {
+    theDOMGet.theSidebar().appendChild(element);
+  },
+  theSidebarAutomatic: (element) => {
+    theDOMGet.theSidebarAutomatic().appendChild(element);
+  },
+  theSidebarCustom: (element) => {
+    theDOMGet.theSidebarCustom().appendChild(element);
   },
 };
 
 //Get DOM Elements
-const theGet = {
+const theDOMGet = {
   theContent: () => {
     return document.querySelector('.content');
   },
@@ -75,6 +109,15 @@ const theGet = {
   },
   theMisc: () => {
     return document.querySelector('.application__misc');
+  },
+  theSidebar: () => {
+    return document.querySelector('.demo__sidebar');
+  },
+  theSidebarAutomatic: () => {
+    return document.querySelector('.sidebar__automatic');
+  },
+  theSidebarCustom: () => {
+    return document.querySelector('.sidebar__custom');
   },
   theButton: (className) => {
     const buttons = document.querySelectorAll('button');
@@ -87,14 +130,6 @@ const theGet = {
 };
 
 //Application
-//Create Application
-const theApplication = () => {
-  theAppendTo.theContent(theSkeleton());
-  theAppendTo.theDemo(theSidebar());
-  theAppendTo.theDemo(theDisplay());
-  theAppendTo.theMisc(theInformation());
-};
-
 //Create Application Skeleton
 const theSkeleton = () => {
   const skeleton = theElement.create(
@@ -111,62 +146,8 @@ const theSidebar = () => {
   const sidebar = theElement.create(
     'div',
     { class: 'demo__sidebar' },
-    theElement.create(
-      'div',
-      { class: 'sidebar__inbox' },
-      theElement.create(
-        'button',
-        { class: 'btn--inbox' },
-        theElement.create('span', { class: 'inbox__text' }, 'Inbox')
-      )
-    ),
-    theElement.create(
-      'div',
-      { class: 'sidebar__today' },
-      theElement.create(
-        'button',
-        { class: 'btn--today' },
-        theElement.create('span', { class: 'today__text' }, 'Today'),
-        theElement.create('span', { class: 'today__count' }, '3')
-      )
-    ),
-    theElement.create(
-      'div',
-      { class: 'sidebar__upcoming' },
-      theElement.create(
-        'button',
-        { class: 'btn--upcoming' },
-        theElement.create('span', { class: 'upcoming__text' }, 'Upcoming')
-      )
-    ),
-    theElement.create(
-      'div',
-      { class: 'sidebar__someday' },
-      theElement.create(
-        'button',
-        { class: 'btn--someday' },
-        theElement.create('span', { class: 'someday__text' }, 'Someday')
-      )
-    ),
-    theElement.create(
-      'div',
-      { class: 'sidebar__never' },
-      theElement.create(
-        'button',
-        { class: 'btn--never' },
-        theElement.create('span', { class: 'never__text' }, 'Never')
-      )
-    ),
-    theElement.create(
-      'div',
-      { class: 'sidebar__logbook' },
-      theElement.create(
-        'button',
-        { class: 'btn--logbook' },
-        theElement.create('span', { class: 'logbook__text' }, 'Logbook')
-      )
-    ),
-    theElement.create('div', { class: 'sidebar__project' })
+    theElement.create('div', { class: 'sidebar__automatic' }),
+    theElement.create('div', { class: 'sidebar__custom' })
   );
   return sidebar;
 };
@@ -227,4 +208,12 @@ const theInformation = () => {
   return information;
 };
 
-export { theApplication };
+//Create Application
+const theDOMApplication = () => {
+  theDOMAppendTo.theContent(theSkeleton());
+  theDOMAppendTo.theDemo(theSidebar());
+  theDOMAppendTo.theDemo(theDisplay());
+  theDOMAppendTo.theMisc(theInformation());
+};
+
+export { theDOMApplication, theDOMTemplate };

@@ -1,4 +1,4 @@
-const ImageMinimizerPlugin = require('image-minimizer-webpack-plugin/types/');
+const ImageMinimizerPlugin = require('image-minimizer-webpack-plugin');
 const { merge } = require('webpack-merge');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const theBaseConfig = require('./webpack.base');

@@ -1,9 +1,6 @@
-const theProjectArray = (() => {
-  let project = [];
+import { theDOMTemplate } from './theDom';
 
-  return { project };
-})();
-
+//Application Tools
 const objectCreate = {
   project: (title, description) => {
     return {
@@ -40,32 +37,28 @@ const objectCreate = {
   },
 };
 
-const objectAdd = {
-  project: (object) => {
-    theProjectArray.project.push(object);
-    object['#'] = theProjectArray.project.indexOf(object);
-  },
-
-  to: (project, array, object) => {
-    project[array].push(object);
-    object['#'] = project[array].indexOf(object);
-  },
+const objectAdd = (project, object) => {
+  project.push(object);
+  object['#'] = project.indexOf(object);
 };
 
 const objectTemplate = {
-  project: (title, description) => {
-    const project = Object.assign(
+  project: (project, title, description) => {
+    const tProject = Object.assign(
       {},
       {
         addList: objectTemplate.list,
         addTask: objectTemplate.task,
         addNote: objectTemplate.note,
+        addDOMAutomaticProject: theDOMTemplate.automaticProject,
+        addDOMTask: theDOMTemplate.task,
       }
     );
 
-    objectAdd.project(
+    objectAdd(
+      project,
       Object.assign(
-        Object.create(project),
+        Object.create(tProject),
         objectCreate.project(title, description)
       )
     );
@@ -73,17 +66,17 @@ const objectTemplate = {
 
   list: (project, title, description) => {
     let list = objectCreate.list(title, description);
-    objectAdd.to(project, 'list', list);
+    objectAdd(project, list);
   },
 
   task: (project, title, description, category, date) => {
     let task = objectCreate.task(title, description, category, date);
-    objectAdd.to(project, 'task', task);
+    objectAdd(project, task);
   },
 
   note: (project, title, description) => {
     let note = objectCreate.note(title, description);
-    objectAdd.to(project, 'note', note);
+    objectAdd(project, note);
   },
 };
 
@@ -107,3 +100,36 @@ project
       -notes
       -note
 */
+
+//Create Application
+const theProjectData = (() => {
+  let automaticProject = [];
+  let customProject = [];
+
+  return { automaticProject, customProject };
+})();
+
+const theAutomaticProject = () => {
+  theProjectData.automaticProject = []; //Temporary Server HMR
+
+  const automatic = theProjectData.automaticProject;
+  objectTemplate.project(automatic, 'Inbox', 'Inbox');
+  objectTemplate.project(automatic, 'Today', 'Today');
+  objectTemplate.project(automatic, 'Upcoming ', 'Upcoming ');
+  objectTemplate.project(automatic, 'Someday', 'Someday ');
+  objectTemplate.project(automatic, 'Never', 'Never');
+  objectTemplate.project(automatic, 'Logbook', 'Logbook');
+};
+
+const theAutomaticProjectDOM = () => {
+  theProjectData.automaticProject.forEach((project) => {
+    project.addDOMAutomaticProject(project.title.toLowerCase());
+  });
+};
+
+const theAutomaticApplication = () => {
+  theAutomaticProject();
+  theAutomaticProjectDOM();
+};
+
+export { theAutomaticApplication };
