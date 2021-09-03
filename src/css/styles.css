@@ -115,6 +115,10 @@ button:hover {
   font-size: 1.5rem;
 }
 
+.display__body {
+  padding: 1em;
+}
+
 /*Application Misc*/
 .application__misc {
   width: 29%;
@@ -149,6 +153,8 @@ button:hover {
 }
 
 .body__description {
+  align-items: center;
+  display: flex;
   width: 85%;
 }
 

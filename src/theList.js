@@ -38,7 +38,7 @@ const objectCreate = {
 
 const objectAdd = (project, object) => {
   project.push(object);
-  object['#'] = project.indexOf(object);
+  object.id = project.indexOf(object);
 };
 
 const objectTemplate = {
@@ -46,6 +46,7 @@ const objectTemplate = {
     const proto = {
       addList: objectTemplate.list,
       addDOMAutomaticProject: theDOMTemplate.automaticProject,
+      addDOMProject: theDOMTemplate.project,
       addDOMTask: theDOMTemplate.task,
     };
 
@@ -97,10 +98,6 @@ const objectTemplate = {
   },
 };
 
-// const theInheritProto = (proto, object) => {
-//   return Object.assign(Object.create({ proto }), object);
-// };
-
 /* 
 project
   -list track its task 
@@ -119,6 +116,7 @@ project
 */
 
 //Create Application
+//Application Data
 const theProjectData = (() => {
   let automaticProject = [];
   let customProject = [];
@@ -126,6 +124,7 @@ const theProjectData = (() => {
   return { automaticProject, customProject };
 })();
 
+//Automatic Projects
 const theAutomaticProject = () => {
   theProjectData.automaticProject = []; //Temporary Server HMR
 
@@ -138,9 +137,20 @@ const theAutomaticProject = () => {
   objectTemplate.project(automatic, 'Logbook', 'Logbook');
 };
 
+//Temporary Demos
 const theAutomaticListDemo = () => {
   theProjectData.automaticProject[1].addList(
     theProjectData.automaticProject[1].list,
+    'title',
+    'description'
+  );
+  theProjectData.automaticProject[1].addList(
+    theProjectData.automaticProject[1].list,
+    'title2',
+    'description2'
+  );
+  theProjectData.automaticProject[4].addList(
+    theProjectData.automaticProject[4].list,
     'title',
     'description'
   );
@@ -157,7 +167,6 @@ const theAutomaticTaskDemo = () => {
 };
 
 const theAutomaticNoteDemo = () => {
-  console.log(theProjectData.automaticProject[1].list[0].task[0]);
   theProjectData.automaticProject[1].list[0].task[0].addNote(
     theProjectData.automaticProject[1].list[0].task[0].note,
     'title',
@@ -165,36 +174,70 @@ const theAutomaticNoteDemo = () => {
   );
 };
 
-const theProjectDOM = (projectData) => {
-  theProjectData[projectData].forEach((project) => {
-    project.addDOMAutomaticProject(project.title.toLowerCase());
-  });
-};
-
-const theListDOM = (projectData) => {
+//Application DOM Data
+const theUpdateIDData = (projectData) => {
   theProjectData[projectData].forEach((project) => {
     project.list.forEach((list) => {
-      list.addDOMList(list.title, list.description);
-    });
-  });
-};
-
-const theTaskDOM = (projectData) => {
-  theProjectData[projectData].forEach((project) => {
-    project.list.forEach((list) => {
+      list.project = project.id;
       list.task.forEach((task) => {
-        task.addDOMTask(task.title, task.description, task.category, task.date);
+        task.project = project.id;
+        task.list = list.id;
+        task.note.forEach((note) => {
+          note.project = project.id;
+          note.list = list.id;
+          note.task = task.id;
+        });
       });
     });
   });
 };
 
-const theNoteDOM = (projectData) => {
+const theDOMProjectData = (projectData) => {
+  theProjectData[projectData].forEach((project) => {
+    project.addDOMAutomaticProject(project.title.toLowerCase());
+    project.addDOMProject(project.title, project.description, project.id);
+  });
+};
+
+const theDOMListData = (projectData) => {
+  theProjectData[projectData].forEach((project) => {
+    project.list.forEach((list) => {
+      list.addDOMList(project.id, list.title, list.description, list.id);
+    });
+  });
+};
+
+const theDOMTaskData = (projectData) => {
+  theProjectData[projectData].forEach((project) => {
+    project.list.forEach((list) => {
+      list.task.forEach((task) => {
+        task.addDOMTask(
+          list.id,
+          task.title,
+          task.description,
+          task.category,
+          task.date,
+          task.id,
+          project.id
+        );
+      });
+    });
+  });
+};
+
+const theDOMNoteData = (projectData) => {
   theProjectData[projectData].forEach((project) => {
     project.list.forEach((list) => {
       list.task.forEach((task) => {
         task.note.forEach((note) => {
-          note.addDOMNote(note.title, note.description);
+          note.addDOMNote(
+            task.id,
+            note.title,
+            note.description,
+            note.id,
+            project.id,
+            list.id
+          );
         });
       });
     });
@@ -203,13 +246,17 @@ const theNoteDOM = (projectData) => {
 
 const theAutomaticApplication = () => {
   theAutomaticProject();
-  theProjectDOM('automaticProject');
+  theUpdateIDData('automaticProject');
+  theDOMProjectData('automaticProject');
   theAutomaticListDemo();
-  theListDOM('automaticProject');
+  theUpdateIDData('automaticProject');
+  theDOMListData('automaticProject');
   theAutomaticTaskDemo();
-  theTaskDOM('automaticProject');
+  theUpdateIDData('automaticProject');
+  theDOMTaskData('automaticProject');
   theAutomaticNoteDemo();
-  theNoteDOM('automaticProject');
+  theUpdateIDData('automaticProject');
+  theDOMNoteData('automaticProject');
 };
 
 export { theAutomaticApplication };

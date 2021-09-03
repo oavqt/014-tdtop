@@ -8,16 +8,37 @@ const theDOMTemplate = {
   automaticProject: (title) => {
     theDOMAppendTo.theSidebarAutomatic(theDOMCreate.automaticProject(title));
   },
-  list: (title, description) => {
-    theDOMAppendTo.theDisplayBody(theDOMCreate.list(title, description));
+  project: (title, description, id) => {
+    theDOMAppendTo.theDisplayBody(theDOMCreate.project(title, description, id));
   },
-  task: (title, description, category, date = '') => {
-    theDOMAppendTo.theDisplayBody(
-      theDOMCreate.task(title, description, category, date)
+  list: (idProject, title, description, id) => {
+    theDOMAppendTo.theProject(
+      idProject,
+      theDOMCreate.list(title, description, id, idProject)
     );
   },
-  note: (title, description) => {
-    theDOMAppendTo.theDisplayBody(theDOMCreate.note(title, description));
+  task: (idList, title, description, category, date = '', id, idProject) => {
+    theDOMAppendTo.theList(
+      idList,
+      idProject,
+      theDOMCreate.task(
+        title,
+        description,
+        category,
+        date,
+        id,
+        idProject,
+        idList
+      )
+    );
+  },
+  note: (idTask, title, description, id, idProject, idList) => {
+    theDOMAppendTo.theTask(
+      idTask,
+      idProject,
+      idList,
+      theDOMCreate.note(title, description, id, idProject, idList, idTask)
+    );
   },
 };
 
@@ -41,23 +62,54 @@ const theDOMCreate = {
     return element;
   },
   customProject: () => {},
-  list: (title, description) => {
+  project: (title, description, id) => {
     const element = theElement.create(
       'div',
-      { class: 'body__list' },
-      theElement.create('h1', { class: 'list__title' }, title),
-      theElement.create('p', { class: 'list__description' }, description)
+      { class: 'body__project', ['data-id']: id },
+      theElement.create(
+        'div',
+        { class: 'project__title' },
+        theElement.create('h1', { class: 'title__text' }, title)
+      ),
+      theElement.create(
+        'div',
+        { class: 'project__description' },
+        theElement.create('p', { class: 'description__text' }, description)
+      )
     );
     return element;
   },
-  task: (title, description, category, date) => {
+
+  list: (title, description, id, idProject) => {
     const element = theElement.create(
       'div',
-      { class: 'list__task' },
+      { class: 'project__list', ['data-id']: id, ['data-project']: idProject },
+      theElement.create(
+        'div',
+        { class: 'list__title' },
+        theElement.create('h1', { class: 'title__text' }, title)
+      ),
+      theElement.create(
+        'div',
+        { class: 'list__description' },
+        theElement.create('p', { class: 'description__text' }, description)
+      )
+    );
+    return element;
+  },
+  task: (title, description, category, date, id, idProject, idList) => {
+    const element = theElement.create(
+      'div',
+      {
+        class: 'list__task',
+        ['data-id']: id,
+        ['data-project']: idProject,
+        ['data-list']: idList,
+      },
       theElement.create(
         'div',
         { class: 'task__title' },
-        theElement.create('h3', { class: 'title__text' }, title)
+        theElement.create('h2', { class: 'title__text' }, title)
       ),
       theElement.create(
         'div',
@@ -95,12 +147,26 @@ const theDOMCreate = {
     );
     return element;
   },
-  note: (title, description) => {
+  note: (title, description, id, idProject, idList, idTask) => {
     const element = theElement.create(
       'div',
-      { class: 'task__note' },
-      theElement.create('h1', { class: 'note__title' }, title),
-      theElement.create('p', { class: 'note__description' }, description)
+      {
+        class: 'task__note',
+        ['data-id']: id,
+        ['data-project']: idProject,
+        ['data-list']: idList,
+        ['data-task']: idTask,
+      },
+      theElement.create(
+        'div',
+        { class: 'note__title' },
+        theElement.create('h3', { class: 'title__text' }, title)
+      ),
+      theElement.create(
+        'div',
+        { class: 'note__description' },
+        theElement.create('p', { class: 'description__text' }, description)
+      )
     );
     return element;
   },
@@ -129,6 +195,15 @@ const theDOMAppendTo = {
   theDisplayBody: (element) => {
     theDOMGet.theDisplayBody().appendChild(element);
   },
+  theProject: (idProject, element) => {
+    theDOMGet.theProject(idProject).appendChild(element);
+  },
+  theList: (idList, idProject, element) => {
+    theDOMGet.theList(idList, idProject).appendChild(element);
+  },
+  theTask: (idTask, idProject, idList, element) => {
+    theDOMGet.theTask(idTask, idProject, idList).appendChild(element);
+  },
 };
 
 //Get DOM Elements
@@ -153,6 +228,29 @@ const theDOMGet = {
   },
   theDisplayBody: () => {
     return document.querySelector('.display__body');
+  },
+  theProject: (idProject) => {
+    const projects = [...document.querySelectorAll('.body__project')];
+    return projects.filter(
+      (project) => project.dataset.id === idProject.toString()
+    )[0];
+  },
+  theList: (idList, idProject) => {
+    const lists = [...document.querySelectorAll('.project__list')];
+    return lists.filter(
+      (list) =>
+        list.dataset.id === idList.toString() &&
+        list.dataset.project === idProject.toString()
+    )[0];
+  },
+  theTask: (idTask, idProject, idList) => {
+    const tasks = [...document.querySelectorAll('.list__task')];
+    return tasks.filter(
+      (task) =>
+        task.dataset.id === idTask.toString() &&
+        task.dataset.project === idProject.toString() &&
+        task.dataset.list === idList.toString()
+    )[0];
   },
   theButton: (className) => {
     const buttons = document.querySelectorAll('button');
