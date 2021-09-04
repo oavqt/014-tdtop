@@ -1,4 +1,4 @@
-import { theDOMApplication } from './theDom';
+import { theDOMApplication } from './theDOMApp';
 import { theAutomaticApplication } from './theList';
 
 const theBuild = () => {

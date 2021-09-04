@@ -1,38 +1,69 @@
-import { theDOMTemplate } from './theDom';
+import { theDOMTemplate } from './theDOMTools';
 
 //Application Tools
-const objectCreate = {
-  project: (title, description) => {
-    return {
-      title,
-      description,
-      list: [],
+const objectTemplate = {
+  project: (projectStorage, title, description) => {
+    const proto = {
+      addList: objectTemplate.list,
+      addDOMAutomaticProject: theDOMTemplate.sidebarAProject,
+      addDOMProject: theDOMTemplate.aProject,
+      addDOMTask: theDOMTemplate.task,
     };
+
+    objectAdd(
+      projectStorage,
+      Object.assign(
+        Object.create(proto),
+        objectCreate.projectListNote(title, description),
+        { list: [] }
+      )
+    );
   },
 
-  list: (title, description) => {
-    return {
-      title,
-      description,
-      task: [],
+  list: (projectStorage, title, description) => {
+    const proto = {
+      addDOMList: theDOMTemplate.list,
+      addTask: objectTemplate.task,
     };
+
+    objectAdd(
+      projectStorage,
+      Object.assign(
+        Object.create(proto),
+        objectCreate.projectListNote(title, description),
+        { task: [] }
+      )
+    );
   },
 
-  task: (title, description, category, date) => {
-    return {
-      title,
-      description,
-      category,
-      date,
-      note: [],
+  task: (projectStorage, title, description, category, date) => {
+    const proto = {
+      addDOMTask: theDOMTemplate.task,
+      addNote: objectTemplate.note,
     };
+
+    objectAdd(
+      projectStorage,
+      Object.assign(
+        Object.create(proto),
+        objectCreate.task(title, description, category, date),
+        { note: [] }
+      )
+    );
   },
 
-  note: (title, description) => {
-    return {
-      title,
-      description,
+  note: (projectStorage, title, description) => {
+    const proto = {
+      addDOMNote: theDOMTemplate.note,
     };
+
+    objectAdd(
+      projectStorage,
+      Object.assign(
+        Object.create(proto),
+        objectCreate.projectListNote(title, description)
+      )
+    );
   },
 };
 
@@ -41,60 +72,20 @@ const objectAdd = (project, object) => {
   object.id = project.indexOf(object);
 };
 
-const objectTemplate = {
-  project: (project, title, description) => {
-    const proto = {
-      addList: objectTemplate.list,
-      addDOMAutomaticProject: theDOMTemplate.automaticProject,
-      addDOMProject: theDOMTemplate.project,
-      addDOMTask: theDOMTemplate.task,
+const objectCreate = {
+  projectListNote: (title, description) => {
+    return {
+      title,
+      description,
     };
-
-    objectAdd(
-      project,
-      Object.assign(
-        Object.create(proto),
-        objectCreate.project(title, description)
-      )
-    );
   },
-
-  list: (project, title, description) => {
-    const proto = {
-      addDOMList: theDOMTemplate.list,
-      addTask: objectTemplate.task,
+  task: (title, description, category, date) => {
+    return {
+      title,
+      description,
+      category,
+      date,
     };
-
-    objectAdd(
-      project,
-      Object.assign(Object.create(proto), objectCreate.list(title, description))
-    );
-  },
-
-  task: (project, title, description, category, date) => {
-    const proto = {
-      addDOMTask: theDOMTemplate.task,
-      addNote: objectTemplate.note,
-    };
-
-    objectAdd(
-      project,
-      Object.assign(
-        Object.create(proto),
-        objectCreate.task(title, description, category, date)
-      )
-    );
-  },
-
-  note: (project, title, description) => {
-    const proto = {
-      addDOMNote: theDOMTemplate.note,
-    };
-
-    objectAdd(
-      project,
-      Object.assign(Object.create(proto), objectCreate.note(title, description))
-    );
   },
 };
 
@@ -117,7 +108,7 @@ project
 
 //Create Application
 //Application Data
-const theProjectData = (() => {
+const theProjectStorage = (() => {
   let automaticProject = [];
   let customProject = [];
 
@@ -126,9 +117,9 @@ const theProjectData = (() => {
 
 //Automatic Projects
 const theAutomaticProject = () => {
-  theProjectData.automaticProject = []; //Temporary Server HMR
+  theProjectStorage.automaticProject = []; //Temporary Server HMR
 
-  const automatic = theProjectData.automaticProject;
+  const automatic = theProjectStorage.automaticProject;
   objectTemplate.project(automatic, 'Inbox', 'Inbox');
   objectTemplate.project(automatic, 'Today', 'Today');
   objectTemplate.project(automatic, 'Upcoming ', 'Upcoming ');
@@ -139,26 +130,28 @@ const theAutomaticProject = () => {
 
 //Temporary Demos
 const theAutomaticListDemo = () => {
-  theProjectData.automaticProject[1].addList(
-    theProjectData.automaticProject[1].list,
+  theProjectStorage.automaticProject[1].addList(
+    theProjectStorage.automaticProject[1].list,
     'title',
     'description'
   );
-  theProjectData.automaticProject[1].addList(
-    theProjectData.automaticProject[1].list,
+  theProjectStorage.automaticProject[1].addList(
+    theProjectStorage.automaticProject[1].list,
     'title2',
     'description2'
   );
-  theProjectData.automaticProject[4].addList(
-    theProjectData.automaticProject[4].list,
+  theProjectStorage.automaticProject[4].addList(
+    theProjectStorage.automaticProject[4].list,
     'title',
     'description'
   );
+  theProjectStorage.automaticProject[5].history =
+    theProjectStorage.automaticProject;
 };
 
 const theAutomaticTaskDemo = () => {
-  theProjectData.automaticProject[1].list[0].addTask(
-    theProjectData.automaticProject[1].list[0].task,
+  theProjectStorage.automaticProject[1].list[0].addTask(
+    theProjectStorage.automaticProject[1].list[0].task,
     'title',
     'description',
     'category',
@@ -167,16 +160,16 @@ const theAutomaticTaskDemo = () => {
 };
 
 const theAutomaticNoteDemo = () => {
-  theProjectData.automaticProject[1].list[0].task[0].addNote(
-    theProjectData.automaticProject[1].list[0].task[0].note,
+  theProjectStorage.automaticProject[1].list[0].task[0].addNote(
+    theProjectStorage.automaticProject[1].list[0].task[0].note,
     'title',
     'description'
   );
 };
 
 //Application DOM Data
-const theUpdateIDData = (projectData) => {
-  theProjectData[projectData].forEach((project) => {
+const theUpdateIDData = (projectStorage) => {
+  theProjectStorage[projectStorage].forEach((project) => {
     project.list.forEach((list) => {
       list.project = project.id;
       list.task.forEach((task) => {
@@ -192,23 +185,23 @@ const theUpdateIDData = (projectData) => {
   });
 };
 
-const theDOMProjectData = (projectData) => {
-  theProjectData[projectData].forEach((project) => {
+const theDOMProjectData = (projectStorage) => {
+  theProjectStorage[projectStorage].forEach((project) => {
     project.addDOMAutomaticProject(project.title.toLowerCase(), project.id);
     project.addDOMProject(project.title, project.description, project.id);
   });
 };
 
-const theDOMListData = (projectData) => {
-  theProjectData[projectData].forEach((project) => {
+const theDOMListData = (projectStorage) => {
+  theProjectStorage[projectStorage].forEach((project) => {
     project.list.forEach((list) => {
       list.addDOMList(project.id, list.title, list.description, list.id);
     });
   });
 };
 
-const theDOMTaskData = (projectData) => {
-  theProjectData[projectData].forEach((project) => {
+const theDOMTaskData = (projectStorage) => {
+  theProjectStorage[projectStorage].forEach((project) => {
     project.list.forEach((list) => {
       list.task.forEach((task) => {
         task.addDOMTask(
@@ -225,8 +218,8 @@ const theDOMTaskData = (projectData) => {
   });
 };
 
-const theDOMNoteData = (projectData) => {
-  theProjectData[projectData].forEach((project) => {
+const theDOMNoteData = (projectStorage) => {
+  theProjectStorage[projectStorage].forEach((project) => {
     project.list.forEach((list) => {
       list.task.forEach((task) => {
         task.note.forEach((note) => {

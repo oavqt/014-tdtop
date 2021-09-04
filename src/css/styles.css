@@ -28,14 +28,58 @@ button:hover {
   cursor: pointer;
 }
 
-.btn--logo {
+.button--active {
+  background: white;
+}
+
+.button--custom {
+  align-items: center;
+  background: transparent;
+  display: flex;
+  height: 2.5em;
+  justify-content: center;
+  width: 100%;
+}
+
+.button--list {
+  align-items: center;
+  background: transparent;
+  display: flex;
+  justify-content: center;
+  width: 8em;
+}
+
+.button--logo {
   background: transparent;
   height: 100%;
   width: 5.5em;
 }
 
-.btn--logo:hover {
+.button--logo:hover {
   animation: rotate 0.1s alternate ease-out forwards;
+}
+
+.button--search {
+  background: transparent;
+  width: 100%;
+}
+
+.display__form {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: center;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.form__button {
+  display: flex;
+  justify-content: space-evenly;
+  width: 9em;
 }
 
 .img--github {
@@ -46,6 +90,19 @@ button:hover {
   width: 5em;
 }
 
+input {
+  border: 0.1em solid transparent;
+  box-shadow: inset 0 0 1rem 0 #31313133;
+  height: 2em;
+  width: 15em;
+  min-width: 100%;
+}
+
+input:focus {
+  border: 0.1em solid #1c87c9;
+  outline: none;
+}
+
 @keyframes rotate {
   from {
     transform: rotate(0deg);
@@ -53,6 +110,24 @@ button:hover {
   to {
     transform: rotate(45deg);
   }
+}
+
+textarea {
+  border: 0.1em solid transparent;
+  box-shadow: inset 0 0 1rem 0 #31313133;
+  height: 15em;
+  min-width: 100%;
+  resize: vertical;
+}
+
+textarea:focus {
+  border: 0.1em solid #1c87c9;
+  outline: none;
+}
+
+.title__misc {
+  align-items: center;
+  display: flex;
 }
 
 .title__text {
@@ -87,7 +162,7 @@ button:hover {
   width: 20%;
 }
 
-.demo__sidebar button {
+.sidebar__automatic button {
   align-items: center;
   display: flex;
   height: 2.5em;
@@ -96,27 +171,42 @@ button:hover {
   width: 100%;
 }
 
-.demo__sidebar button:hover {
+.sidebar__automatic button:hover {
   color: white;
   background: #58a6ff;
 }
 
 /*Display*/
 .demo__display {
+  display: flex;
+  flex-direction: column;
+  position: relative;
   width: 80%;
 }
 
 .display__title {
   align-items: center;
   display: flex;
+  justify-content: space-between;
 }
 
-.display__title .title__text {
+.title__logo {
+  align-items: center;
+  display: flex;
+}
+
+.logo__title .title__text {
   font-size: 1.5rem;
 }
 
 .display__body {
+  height: 100%;
+  overflow-y: scroll;
   padding: 1em;
+}
+
+.display__misc {
+  align-self: flex-end;
 }
 
 /*Application Misc*/
@@ -127,6 +217,7 @@ button:hover {
 /*Information*/
 .application__misc .misc__information {
   align-items: center;
+  display: flex;
   flex-direction: column;
   height: 100%;
   justify-content: center;
@@ -144,40 +235,55 @@ button:hover {
 .body__project--active {
   display: block;
 }
+
+.project__title {
+  display: flex;
+  justify-content: space-between;
+}
+
+.title__body {
+  align-items: center;
+  display: flex;
+}
+
 /*List*/
+.project__list {
+  margin-left: 2em;
+}
+
+.list__title {
+  display: flex;
+  justify-content: space-between;
+}
 
 /*Task*/
-.task {
-  background-color: #31313133;
+.list__task {
+  margin-left: 4em;
+}
+
+.task__title {
   display: flex;
-  flex-direction: column;
-  width: 25%;
+  justify-content: space-between;
 }
 
 .task__body {
+  align-items: center;
   display: flex;
   justify-content: space-between;
   width: 100%;
 }
 
-.body__description {
-  align-items: center;
-  display: flex;
-  width: 85%;
-}
-
 .body__misc {
-  width: 15%;
-}
-
-.misc__information {
-  display: flex;
-  justify-content: space-between;
-}
-
-.misc__button {
   display: flex;
   justify-content: space-between;
 }
 
 /*Note*/
+.task__note {
+  margin-left: 6em;
+}
+
+.note__title {
+  display: flex;
+  justify-content: space-between;
+}

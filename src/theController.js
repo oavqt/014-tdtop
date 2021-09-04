@@ -1,8 +1,29 @@
-import { theDOMGet } from './theDom';
+import { theDOMGet } from './theDOMTools';
+
+const theEvents = () => {
+  addEventSideBar();
+};
 
 const addEventSideBar = () => {
-  theDOMGet.theSidebarButtons().forEach((button) => {
+  theDOMGet.theSidebarAutomaticButtons().forEach((button) => {
     button.addEventListener('click', theDisplayProjectEvent);
+  });
+};
+
+const theDisplayProjectEvent = function () {
+  theButtonClear();
+  theDisplayClear();
+  theButtonActive(this);
+  theDisplayShow(this.dataset.id);
+};
+
+const theButtonActive = (button) => {
+  button.classList.add('button--active');
+};
+
+const theButtonClear = () => {
+  theDOMGet.theSidebarAutomaticButtons().forEach((button) => {
+    button.classList.remove('button--active');
   });
 };
 
@@ -14,15 +35,6 @@ const theDisplayClear = () => {
 
 const theDisplayShow = (idProject) => {
   theDOMGet.theProject(idProject).classList.add('body__project--active');
-};
-
-const theDisplayProjectEvent = function () {
-  theDisplayClear();
-  theDisplayShow(this.dataset.id);
-};
-
-const theEvents = () => {
-  addEventSideBar();
 };
 
 export { theEvents };
