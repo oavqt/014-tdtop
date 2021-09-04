@@ -1,7 +1,9 @@
 import './css/styles.css';
 import { theBuild } from './theBuild';
+import { theEvents } from './theController';
 
 theBuild();
+theEvents();
 
 //Server HMR
 if (module.hot) {
@@ -13,4 +15,5 @@ if (module.hot) {
   }
 
   theBuild();
+  theEvents();
 }

@@ -5,8 +5,10 @@ import github from './images/myGithub.png';
 //DOM Tools
 //Create DOM Template
 const theDOMTemplate = {
-  automaticProject: (title) => {
-    theDOMAppendTo.theSidebarAutomatic(theDOMCreate.automaticProject(title));
+  automaticProject: (title, id) => {
+    theDOMAppendTo.theSidebarAutomatic(
+      theDOMCreate.automaticProject(title, id)
+    );
   },
   project: (title, description, id) => {
     theDOMAppendTo.theDisplayBody(theDOMCreate.project(title, description, id));
@@ -44,13 +46,13 @@ const theDOMTemplate = {
 
 //Create DOM Element
 const theDOMCreate = {
-  automaticProject: (title, count = '') => {
+  automaticProject: (title, id, count = '') => {
     const element = theElement.create(
       'div',
-      { class: `automatic__${title}` },
+      { class: `automatic__${title}`, ['data-id']: id },
       theElement.create(
         'button',
-        { class: `btn--${title}` },
+        { class: `btn--${title}`, ['data-id']: id },
         theElement.create(
           'span',
           { class: `${title}__title` },
@@ -229,6 +231,9 @@ const theDOMGet = {
   theDisplayBody: () => {
     return document.querySelector('.display__body');
   },
+  theDisplayProject: () => {
+    return document.querySelectorAll('.body__project');
+  },
   theProject: (idProject) => {
     const projects = [...document.querySelectorAll('.body__project')];
     return projects.filter(
@@ -252,19 +257,18 @@ const theDOMGet = {
         task.dataset.list === idList.toString()
     )[0];
   },
-  theButton: (className) => {
-    const buttons = document.querySelectorAll('button');
-    buttons.forEach((button) => {
-      if (button.className === className) {
-        return button;
-      }
-    });
+  theSidebarButtons: () => {
+    return document.querySelectorAll('.demo__sidebar button');
+  },
+  theProjectButton: (idProject) => {
+    const buttons = document.querySelectorAll('.demo__sidebar button');
+    return buttons.filter((button) => button.id === idProject.toString())[0];
   },
 };
 
 //Application
 //Create Application Skeleton
-const theSkeleton = () => {
+const theApplicationSkeleton = () => {
   const skeleton = theElement.create(
     'div',
     { class: 'content__application' },
@@ -275,7 +279,7 @@ const theSkeleton = () => {
 };
 
 //Create Application Sidebar
-const theSidebar = () => {
+const theApplicationSidebar = () => {
   const sidebar = theElement.create(
     'div',
     { class: 'demo__sidebar' },
@@ -286,7 +290,7 @@ const theSidebar = () => {
 };
 
 //Create Application Display
-const theDisplay = () => {
+const theApplicationDisplay = () => {
   const display = theElement.create(
     'div',
     { class: 'demo__display' },
@@ -307,7 +311,7 @@ const theDisplay = () => {
 };
 
 //Create Application Information
-const theInformation = () => {
+const theApplicationInformation = () => {
   const information = theElement.create(
     'div',
     { class: 'misc__information' },
@@ -345,10 +349,10 @@ const theInformation = () => {
 
 //Create Application
 const theDOMApplication = () => {
-  theDOMAppendTo.theContent(theSkeleton());
-  theDOMAppendTo.theDemo(theSidebar());
-  theDOMAppendTo.theDemo(theDisplay());
-  theDOMAppendTo.theMisc(theInformation());
+  theDOMAppendTo.theContent(theApplicationSkeleton());
+  theDOMAppendTo.theDemo(theApplicationSidebar());
+  theDOMAppendTo.theDemo(theApplicationDisplay());
+  theDOMAppendTo.theMisc(theApplicationInformation());
 };
 
-export { theDOMApplication, theDOMTemplate };
+export { theDOMApplication, theDOMTemplate, theDOMGet };

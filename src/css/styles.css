@@ -35,7 +35,7 @@ button:hover {
 }
 
 .btn--logo:hover {
-  animation: rotate 1s alternate ease-out forwards;
+  animation: rotate 0.1s alternate ease-out forwards;
 }
 
 .img--github {
@@ -51,7 +51,7 @@ button:hover {
     transform: rotate(0deg);
   }
   to {
-    transform: rotate(42deg);
+    transform: rotate(45deg);
   }
 }
 
@@ -136,6 +136,14 @@ button:hover {
   align-self: flex-start;
 }
 
+/*Project*/
+.body__project {
+  display: none;
+}
+
+.body__project--active {
+  display: block;
+}
 /*List*/
 
 /*Task*/

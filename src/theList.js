@@ -194,7 +194,7 @@ const theUpdateIDData = (projectData) => {
 
 const theDOMProjectData = (projectData) => {
   theProjectData[projectData].forEach((project) => {
-    project.addDOMAutomaticProject(project.title.toLowerCase());
+    project.addDOMAutomaticProject(project.title.toLowerCase(), project.id);
     project.addDOMProject(project.title, project.description, project.id);
   });
 };
