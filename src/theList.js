@@ -1,6 +1,7 @@
 import { theDOMTemplate } from './theDOMTools';
 
 //Application Tools
+//Object Templates
 const objectTemplate = {
   project: (projectStorage, title, description) => {
     const proto = {
@@ -13,8 +14,11 @@ const objectTemplate = {
     objectAdd(
       projectStorage,
       Object.assign(
-        Object.create(proto),
+        Object.create(
+          Object.assign(objectOption.addProtoOption('proto', 'project'), proto)
+        ),
         objectCreate.projectListNote(title, description),
+        objectOption.addOption('object', 'project'),
         { list: [] }
       )
     );
@@ -29,8 +33,11 @@ const objectTemplate = {
     objectAdd(
       projectStorage,
       Object.assign(
-        Object.create(proto),
+        Object.create(
+          Object.assign(objectOption.addProtoOption('proto', 'list'), proto)
+        ),
         objectCreate.projectListNote(title, description),
+        objectOption.addOption('object', 'list'),
         { task: [] }
       )
     );
@@ -45,8 +52,11 @@ const objectTemplate = {
     objectAdd(
       projectStorage,
       Object.assign(
-        Object.create(proto),
+        Object.create(
+          Object.assign(objectOption.addProtoOption('proto', 'task'), proto)
+        ),
         objectCreate.task(title, description, category, date),
+        objectOption.addOption('object', 'task'),
         { note: [] }
       )
     );
@@ -60,18 +70,23 @@ const objectTemplate = {
     objectAdd(
       projectStorage,
       Object.assign(
-        Object.create(proto),
-        objectCreate.projectListNote(title, description)
+        Object.create(
+          Object.assign(objectOption.addProtoOption('proto', 'note'), proto)
+        ),
+        objectCreate.projectListNote(title, description),
+        objectOption.addOption('object', 'note')
       )
     );
   },
 };
 
+//Add Objects to Project Data
 const objectAdd = (project, object) => {
   project.push(object);
   object.id = project.indexOf(object);
 };
 
+//Create Objects
 const objectCreate = {
   projectListNote: (title, description) => {
     return {
@@ -88,6 +103,69 @@ const objectCreate = {
     };
   },
 };
+
+//Object Options
+const objectOption = (() => {
+  let objectStorage = {
+    project: { type: 'project', test: 'object' },
+    list: { type: 'list' },
+    task: { type: 'task' },
+    note: { type: 'note' },
+  };
+
+  let objectProtoStorage = {
+    project: { type: 'project', test: 'proto' },
+    list: { type: 'list' },
+    task: { type: 'task' },
+    note: { type: 'note' },
+  };
+
+  const objectType = (storage, type) => {
+    let tStorage;
+
+    if (storage === 'proto') tStorage = objectProtoStorage;
+    else tStorage = objectStorage;
+
+    if (type === 'project') return tStorage.project;
+    else if (type === 'list') return tStorage.list;
+    else if (type === 'task') return tStorage.task;
+    else return tStorage.note;
+  };
+
+  const addOption = (storage, type) => {
+    return JSON.parse(JSON.stringify(objectType(storage, type)));
+  };
+
+  const addProtoOption = (storage, type) => {
+    return objectType(storage, type);
+  };
+
+  const setOption = (storage, type, object) => {
+    for (let key in object) {
+      objectType(storage, type)[key] = object[key];
+    }
+  };
+
+  const getOption = (storage, type) => {
+    let object = objectType(storage, type);
+    let option = {};
+    for (let key in object) {
+      option[key] = key;
+    }
+    return option;
+  };
+
+  const deleteOption = (storage, type, property) => {
+    let object = objectType(storage, type);
+    for (let key in object) {
+      if (key.toString() === property) {
+        delete object[key];
+      }
+    }
+  };
+
+  return { addOption, addProtoOption, setOption, getOption, deleteOption };
+})();
 
 /* 
 project
@@ -145,8 +223,6 @@ const theAutomaticListDemo = () => {
     'title',
     'description'
   );
-  theProjectStorage.automaticProject[5].history =
-    theProjectStorage.automaticProject;
 };
 
 const theAutomaticTaskDemo = () => {
@@ -250,6 +326,9 @@ const theAutomaticApplication = () => {
   theAutomaticNoteDemo();
   theUpdateIDData('automaticProject');
   theDOMNoteData('automaticProject');
+  console.log(objectOption.getOption('proto', 'project'));
+  objectOption.deleteOption('proto', 'project', 'test');
+  console.log(objectOption.getOption('proto', 'project'));
 };
 
 export { theAutomaticApplication };

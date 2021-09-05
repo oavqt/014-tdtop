@@ -37,6 +37,14 @@ button:hover {
   background: transparent;
   display: flex;
   height: 2.5em;
+  width: 100%;
+}
+
+.button--delete,
+.button--edit {
+  align-items: center;
+  background: transparent;
+  display: flex;
   justify-content: center;
   width: 100%;
 }

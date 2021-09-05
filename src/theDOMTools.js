@@ -1,4 +1,6 @@
 import { theElement } from './theElement';
+import edit from './images/myEdit.png';
+import trash from './images/myTrash.png';
 
 //DOM Tools
 //Create DOM Template
@@ -178,8 +180,16 @@ const theDOMCreate = {
         theElement.create(
           'div',
           { class: 'title__misc' },
-          theElement.create('button', { class: 'button--edit' }),
-          theElement.create('button', { class: 'button--delete' })
+          theElement.create(
+            'button',
+            { class: 'button--edit' },
+            theElement.create('img', { class: 'img--edit', src: edit })
+          ),
+          theElement.create(
+            'button',
+            { class: 'button--delete' },
+            theElement.create('img', { class: 'img--delete', src: trash })
+          )
         )
       ),
       theElement.create(
@@ -215,8 +225,16 @@ const theDOMCreate = {
         theElement.create(
           'div',
           { class: 'title__misc' },
-          theElement.create('button', { class: 'button--edit' }),
-          theElement.create('button', { class: 'button--delete' })
+          theElement.create(
+            'button',
+            { class: 'button--edit' },
+            theElement.create('img', { class: 'img--edit', src: edit })
+          ),
+          theElement.create(
+            'button',
+            { class: 'button--delete' },
+            theElement.create('img', { class: 'img--delete', src: trash })
+          )
         )
       ),
       theElement.create(
@@ -256,8 +274,16 @@ const theDOMCreate = {
         theElement.create(
           'div',
           { class: 'title__misc' },
-          theElement.create('button', { class: 'button--edit' }),
-          theElement.create('button', { class: 'button--delete' })
+          theElement.create(
+            'button',
+            { class: 'button--edit' },
+            theElement.create('img', { class: 'img--edit', src: edit })
+          ),
+          theElement.create(
+            'button',
+            { class: 'button--delete' },
+            theElement.create('img', { class: 'img--delete', src: trash })
+          )
         )
       ),
       theElement.create(
@@ -316,8 +342,16 @@ const theDOMCreate = {
         theElement.create(
           'div',
           { class: 'title__misc' },
-          theElement.create('button', { class: 'button--edit' }),
-          theElement.create('button', { class: 'button--delete' })
+          theElement.create(
+            'button',
+            { class: 'button--edit' },
+            theElement.create('img', { class: 'img--edit', src: edit })
+          ),
+          theElement.create(
+            'button',
+            { class: 'button--delete' },
+            theElement.create('img', { class: 'img--delete', src: trash })
+          )
         )
       ),
       theElement.create(
