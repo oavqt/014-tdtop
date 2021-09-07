@@ -326,9 +326,6 @@ const theAutomaticApplication = () => {
   theAutomaticNoteDemo();
   theUpdateIDData('automaticProject');
   theDOMNoteData('automaticProject');
-  console.log(objectOption.getOption('proto', 'project'));
-  objectOption.deleteOption('proto', 'project', 'test');
-  console.log(objectOption.getOption('proto', 'project'));
 };
 
 export { theAutomaticApplication };

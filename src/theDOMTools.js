@@ -168,8 +168,16 @@ const theDOMCreate = {
           { class: 'title__body' },
           theElement.create(
             'div',
-            { class: 'body__button' },
-            theElement.create('button', { class: 'button--body' })
+            { class: 'body__checkbox' },
+            theElement.create(
+              'label',
+              { class: 'label--checkbox' },
+              theElement.create('input', {
+                class: 'input--checkbox',
+                type: 'checkbox',
+              }),
+              theElement.create('span', { class: 'checkbox__custom' })
+            )
           ),
           theElement.create(
             'div',
@@ -213,8 +221,16 @@ const theDOMCreate = {
           { class: 'title__body' },
           theElement.create(
             'div',
-            { class: 'body__button' },
-            theElement.create('button', { class: 'button--body' })
+            { class: 'body__checkbox' },
+            theElement.create(
+              'label',
+              { class: 'label--checkbox' },
+              theElement.create('input', {
+                class: 'input--checkbox',
+                type: 'checkbox',
+              }),
+              theElement.create('span', { class: 'checkbox__custom' })
+            )
           ),
           theElement.create(
             'div',
@@ -262,8 +278,16 @@ const theDOMCreate = {
           { class: 'title__body' },
           theElement.create(
             'div',
-            { class: 'body__button' },
-            theElement.create('button', { class: 'button--body' })
+            { class: 'body__checkbox' },
+            theElement.create(
+              'label',
+              { class: 'label--checkbox' },
+              theElement.create('input', {
+                class: 'input--checkbox',
+                type: 'checkbox',
+              }),
+              theElement.create('span', { class: 'checkbox__custom' })
+            )
           ),
           theElement.create(
             'div',
@@ -330,8 +354,16 @@ const theDOMCreate = {
           { class: 'title__body' },
           theElement.create(
             'div',
-            { class: 'body__button' },
-            theElement.create('button', { class: 'button--body' })
+            { class: 'body__checkbox' },
+            theElement.create(
+              'label',
+              { class: 'label--checkbox' },
+              theElement.create('input', {
+                class: 'input--checkbox',
+                type: 'checkbox',
+              }),
+              theElement.create('span', { class: 'checkbox__custom' })
+            )
           ),
           theElement.create(
             'div',
