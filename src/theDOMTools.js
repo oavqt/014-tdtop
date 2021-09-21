@@ -5,21 +5,37 @@ import trash from './images/myTrash.png';
 //DOM Tools
 //Create DOM Template
 const theDOMTemplate = {
-  sidebarAProject: (title, id) => {
-    theDOMAppendTo.theSidebarAutomatic(theDOMCreate.sidebarAProject(title, id));
-  },
-  aProject: (title, description, id) => {
-    theDOMAppendTo.theDisplayBody(
-      theDOMCreate.aProject(title, description, id)
+  sidebarAProject: (title, type, id) => {
+    theDOMAppendTo.theSidebarAutomatic(
+      theDOMCreate.sidebarAProject(title, type, id)
     );
   },
-  list: (idProject, title, description, id) => {
+  sidebarCProject: (title, type, id) => {
+    theDOMAppendTo.theSidebarCustom(
+      theDOMCreate.sidebarCProject(title, type, id)
+    );
+  },
+  project: (title, description, type, id) => {
+    theDOMAppendTo.theDisplayBody(
+      theDOMCreate.project(title, description, type, id)
+    );
+  },
+  list: (idProject, title, description, type, id) => {
     theDOMAppendTo.theProject(
       idProject,
-      theDOMCreate.list(title, description, id, idProject)
+      theDOMCreate.list(title, description, type, id, idProject)
     );
   },
-  task: (idList, title, description, category, date = '', id, idProject) => {
+  task: (
+    idList,
+    title,
+    description,
+    category,
+    date = '',
+    type,
+    id,
+    idProject
+  ) => {
     theDOMAppendTo.theList(
       idList,
       idProject,
@@ -28,18 +44,19 @@ const theDOMTemplate = {
         description,
         category,
         date,
+        type,
         id,
         idProject,
         idList
       )
     );
   },
-  note: (idTask, title, description, id, idProject, idList) => {
+  note: (idTask, title, description, type, id, idProject, idList) => {
     theDOMAppendTo.theTask(
       idTask,
       idProject,
       idList,
-      theDOMCreate.note(title, description, id, idProject, idList, idTask)
+      theDOMCreate.note(title, description, type, id, idProject, idList, idTask)
     );
   },
 };
@@ -138,13 +155,13 @@ const theDOMGet = {
 
 //Create DOM Element
 const theDOMCreate = {
-  sidebarAProject: (title, id, count = '') => {
+  sidebarAProject: (title, type, id, count = '') => {
     const element = theElement.create(
       'div',
-      { class: `automatic__${title}`, ['data-id']: id },
+      { class: `automatic__${title}`, ['data-type']: type, ['data-id']: id },
       theElement.create(
         'button',
-        { class: `button--${title}`, ['data-id']: id },
+        { class: `button--${title}`, ['data-type']: type, ['data-id']: id },
         theElement.create(
           'span',
           { class: `${title}__title` },
@@ -155,11 +172,27 @@ const theDOMCreate = {
     );
     return element;
   },
-  sidebarCProject: () => {},
-  aProject: (title, description, id) => {
+  sidebarCProject: (title, type, id, count = '') => {
     const element = theElement.create(
       'div',
-      { class: 'body__project', ['data-id']: id },
+      { class: `custom__${title}`, ['data-type']: type, ['data-id']: id },
+      theElement.create(
+        'button',
+        { class: `button--${title}`, ['data-type']: type, ['data-id']: id },
+        theElement.create(
+          'span',
+          { class: `${title}__title` },
+          `${title[0].toUpperCase() + title.slice(1)}`
+        ),
+        theElement.create('span', { class: `${title}__count` }, count)
+      )
+    );
+    return element;
+  },
+  project: (title, description, type, id) => {
+    const element = theElement.create(
+      'div',
+      { class: 'body__project', ['data-type']: type, ['data-id']: id },
       theElement.create(
         'div',
         { class: 'project__title' },
@@ -208,11 +241,15 @@ const theDOMCreate = {
     );
     return element;
   },
-  cProject: () => {},
-  list: (title, description, id, idProject) => {
+  list: (title, description, type, id, idProject) => {
     const element = theElement.create(
       'div',
-      { class: 'project__list', ['data-id']: id, ['data-project']: idProject },
+      {
+        class: 'project__list',
+        ['data-type']: type,
+        ['data-id']: id,
+        ['data-project']: idProject,
+      },
       theElement.create(
         'div',
         { class: 'list__title' },
@@ -261,11 +298,12 @@ const theDOMCreate = {
     );
     return element;
   },
-  task: (title, description, category, date, id, idProject, idList) => {
+  task: (title, description, category, date, type, id, idProject, idList) => {
     const element = theElement.create(
       'div',
       {
         class: 'list__task',
+        ['data-type']: type,
         ['data-id']: id,
         ['data-project']: idProject,
         ['data-list']: idList,
@@ -336,11 +374,12 @@ const theDOMCreate = {
     );
     return element;
   },
-  note: (title, description, id, idProject, idList, idTask) => {
+  note: (title, description, type, id, idProject, idList, idTask) => {
     const element = theElement.create(
       'div',
       {
         class: 'task__note',
+        ['data-type']: type,
         ['data-id']: id,
         ['data-project']: idProject,
         ['data-list']: idList,

@@ -19,10 +19,10 @@ body {
 }
 
 .body__checkbox {
-  height: 2em;
+  height: 1.2em;
   margin-right: 0.5em;
   position: relative;
-  width: 2em;
+  width: 1.2em;
 }
 
 button {
@@ -39,12 +39,10 @@ button:hover {
   background: white;
 }
 
-.button--custom {
-  align-items: center;
+.button--add {
   background: transparent;
-  display: flex;
   height: 2.5em;
-  justify-content: center;
+  justify-content: center !important;
   width: 100%;
 }
 
@@ -81,11 +79,11 @@ button:hover {
 }
 
 .checkbox__custom {
-  background: #31313133;
+  background: #31313111;
   border-radius: 50%;
-  height: 2em;
+  height: 1.2em;
   position: absolute;
-  width: 2em;
+  width: 1.2em;
 }
 
 .checkbox__custom:hover {
@@ -150,12 +148,12 @@ input:checked + .checkbox__custom::after {
   border: solid white;
   border-width: 0 0.2em 0.2em 0;
   content: '';
-  height: 1.3em;
-  left: 0.55em;
+  height: 0.8em;
+  left: 0.33em;
   position: absolute;
-  top: 0.2em;
+  top: 0.15em;
   transform: rotate(35deg);
-  width: 0.8em;
+  width: 0.5em;
 }
 
 @keyframes scale-in {
@@ -226,7 +224,7 @@ textarea:focus {
   width: 20%;
 }
 
-.sidebar__automatic button {
+.demo__sidebar button {
   align-items: center;
   display: flex;
   height: 2.5em;
@@ -235,9 +233,13 @@ textarea:focus {
   width: 100%;
 }
 
-.sidebar__automatic button:hover {
+.demo__sidebar button:hover {
   color: white;
   background: #58a6ff;
+}
+
+.sidebar__custom button {
+  background: transparent;
 }
 
 /*Display*/
@@ -292,14 +294,6 @@ textarea:focus {
 }
 
 /*Project*/
-.body__project {
-  display: none;
-}
-
-.body__project--active {
-  display: block;
-}
-
 .project__title {
   display: flex;
   justify-content: space-between;

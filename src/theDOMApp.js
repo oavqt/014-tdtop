@@ -42,7 +42,7 @@ const theApplicationSidebar = () => {
           { class: 'add__button' },
           theElement.create(
             'button',
-            { class: 'button--custom' },
+            { class: 'button--add' },
             theElement.create('span', { class: '' }, 'Add Project...'),
             theElement.create('img', { class: 'img--custom', src: add })
           )

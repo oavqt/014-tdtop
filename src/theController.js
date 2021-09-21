@@ -1,4 +1,5 @@
 import { theDOMGet } from './theDOMTools';
+import { theDOMDisplay } from './theList';
 
 const theEvents = () => {
   addEventSideBar();
@@ -14,7 +15,7 @@ const theDisplayProjectEvent = function () {
   theButtonClear();
   theDisplayClear();
   theButtonActive(this);
-  theDisplayShow(this.dataset.id);
+  theDisplayShow(this.dataset.type, this.dataset.id);
 };
 
 const theButtonActive = (button) => {
@@ -22,6 +23,12 @@ const theButtonActive = (button) => {
 };
 
 const theButtonClear = () => {
+  while (theDOMGet.theDisplayBody().firstChild) {
+    theDOMGet
+      .theDisplayBody()
+      .removeChild(theDOMGet.theDisplayBody().lastChild);
+  }
+
   theDOMGet.theSidebarAutomaticButtons().forEach((button) => {
     button.classList.remove('button--active');
   });
@@ -33,8 +40,8 @@ const theDisplayClear = () => {
   });
 };
 
-const theDisplayShow = (idProject) => {
-  theDOMGet.theProject(idProject).classList.add('body__project--active');
+const theDisplayShow = (type, id) => {
+  theDOMDisplay(type, id);
 };
 
 export { theEvents };

@@ -7,7 +7,8 @@ const objectTemplate = {
     const proto = {
       addList: objectTemplate.list,
       addDOMAutomaticProject: theDOMTemplate.sidebarAProject,
-      addDOMProject: theDOMTemplate.aProject,
+      addDOMCustomProject: theDOMTemplate.sidebarCProject,
+      addDOMProject: theDOMTemplate.project,
       addDOMTask: theDOMTemplate.task,
     };
 
@@ -120,10 +121,10 @@ const objectOption = (() => {
     note: { type: 'note' },
   };
 
-  const objectType = (storage, type) => {
+  const objectType = (proto, type) => {
     let tStorage;
 
-    if (storage === 'proto') tStorage = objectProtoStorage;
+    if (proto === 'proto') tStorage = objectProtoStorage;
     else tStorage = objectStorage;
 
     if (type === 'project') return tStorage.project;
@@ -132,22 +133,15 @@ const objectOption = (() => {
     else return tStorage.note;
   };
 
-  const addOption = (storage, type) => {
-    return JSON.parse(JSON.stringify(objectType(storage, type)));
-  };
-
-  const addProtoOption = (storage, type) => {
-    return objectType(storage, type);
-  };
-
-  const setOption = (storage, type, object) => {
+  //Manipulate the Storage Data
+  const setOption = (proto, type, object) => {
     for (let key in object) {
-      objectType(storage, type)[key] = object[key];
+      objectType(proto, type)[key] = object[key];
     }
   };
 
-  const getOption = (storage, type) => {
-    let object = objectType(storage, type);
+  const getOptionSet = (proto, type) => {
+    let object = objectType(proto, type);
     let option = {};
     for (let key in object) {
       option[key] = key;
@@ -155,8 +149,8 @@ const objectOption = (() => {
     return option;
   };
 
-  const deleteOption = (storage, type, property) => {
-    let object = objectType(storage, type);
+  const rmOption = (proto, type, property) => {
+    let object = objectType(proto, type);
     for (let key in object) {
       if (key.toString() === property) {
         delete object[key];
@@ -164,7 +158,16 @@ const objectOption = (() => {
     }
   };
 
-  return { addOption, addProtoOption, setOption, getOption, deleteOption };
+  //Add Options to an Object
+  const addOption = (proto, type) => {
+    return JSON.parse(JSON.stringify(objectType(proto, type)));
+  };
+
+  const addProtoOption = (proto, type) => {
+    return objectType(proto, type);
+  };
+
+  return { setOption, getOptionSet, rmOption, addOption, addProtoOption };
 })();
 
 /* 
@@ -190,7 +193,16 @@ const theProjectStorage = (() => {
   let automaticProject = [];
   let customProject = [];
 
-  return { automaticProject, customProject };
+  const addProject = (type, title, description) => {
+    objectTemplate.project(type, title, description);
+  };
+
+  const getProject = (type, index) => {
+    if (type === 'automatic') return automaticProject[index];
+    else return customProject[index];
+  };
+
+  return { automaticProject, customProject, addProject, getProject };
 })();
 
 //Automatic Projects
@@ -207,6 +219,12 @@ const theAutomaticProject = () => {
 };
 
 //Temporary Demos
+
+const theCustomProjectDemo = () => {
+  const custom = theProjectStorage.customProject;
+  objectTemplate.project(custom, 'test', 'test');
+};
+
 const theAutomaticListDemo = () => {
   theProjectStorage.automaticProject[1].addList(
     theProjectStorage.automaticProject[1].list,
@@ -246,6 +264,7 @@ const theAutomaticNoteDemo = () => {
 //Application DOM Data
 const theUpdateIDData = (projectStorage) => {
   theProjectStorage[projectStorage].forEach((project) => {
+    project.type = projectStorage;
     project.list.forEach((list) => {
       list.project = project.id;
       list.task.forEach((task) => {
@@ -261,53 +280,66 @@ const theUpdateIDData = (projectStorage) => {
   });
 };
 
-const theDOMProjectData = (projectStorage) => {
-  theProjectStorage[projectStorage].forEach((project) => {
-    project.addDOMAutomaticProject(project.title.toLowerCase(), project.id);
-    project.addDOMProject(project.title, project.description, project.id);
+const theUpdateIDAll = () => {
+  theUpdateIDData('automaticProject');
+  theUpdateIDData('customProject');
+};
+
+const theDOMSidebarProjectData = () => {
+  theProjectStorage.automaticProject.forEach((project) => {
+    project.addDOMAutomaticProject(
+      project.title.toLowerCase(),
+      project.type,
+      project.id
+    );
+  });
+  theProjectStorage.customProject.forEach((project) => {
+    project.addDOMCustomProject(
+      project.title.toLowerCase(),
+      project.type,
+      project.id
+    );
   });
 };
 
-const theDOMListData = (projectStorage) => {
-  theProjectStorage[projectStorage].forEach((project) => {
-    project.list.forEach((list) => {
-      list.addDOMList(project.id, list.title, list.description, list.id);
-    });
-  });
-};
+const theDOMDisplay = (type, id) => {
+  const tProject = theProjectStorage[type][id];
 
-const theDOMTaskData = (projectStorage) => {
-  theProjectStorage[projectStorage].forEach((project) => {
-    project.list.forEach((list) => {
-      list.task.forEach((task) => {
-        task.addDOMTask(
-          list.id,
-          task.title,
-          task.description,
-          task.category,
-          task.date,
+  tProject.addDOMProject(
+    tProject.title,
+    tProject.description,
+    tProject.type,
+    tProject.id
+  );
+  tProject.list.forEach((list) => {
+    list.addDOMList(
+      tProject.id,
+      list.title,
+      list.description,
+      list.type,
+      list.id
+    );
+    list.task.forEach((task) => {
+      task.addDOMTask(
+        list.id,
+        task.title,
+        task.description,
+        task.category,
+        task.date,
+        task.type,
+        task.id,
+        tProject.id
+      );
+      task.note.forEach((note) => {
+        note.addDOMNote(
           task.id,
-          project.id
+          note.title,
+          note.description,
+          note.type,
+          note.id,
+          tProject.id,
+          list.id
         );
-      });
-    });
-  });
-};
-
-const theDOMNoteData = (projectStorage) => {
-  theProjectStorage[projectStorage].forEach((project) => {
-    project.list.forEach((list) => {
-      list.task.forEach((task) => {
-        task.note.forEach((note) => {
-          note.addDOMNote(
-            task.id,
-            note.title,
-            note.description,
-            note.id,
-            project.id,
-            list.id
-          );
-        });
       });
     });
   });
@@ -315,17 +347,12 @@ const theDOMNoteData = (projectStorage) => {
 
 const theAutomaticApplication = () => {
   theAutomaticProject();
-  theUpdateIDData('automaticProject');
-  theDOMProjectData('automaticProject');
+  theCustomProjectDemo();
   theAutomaticListDemo();
-  theUpdateIDData('automaticProject');
-  theDOMListData('automaticProject');
   theAutomaticTaskDemo();
-  theUpdateIDData('automaticProject');
-  theDOMTaskData('automaticProject');
   theAutomaticNoteDemo();
-  theUpdateIDData('automaticProject');
-  theDOMNoteData('automaticProject');
+  theUpdateIDAll();
+  theDOMSidebarProjectData();
 };
 
-export { theAutomaticApplication };
+export { theAutomaticApplication, theDOMDisplay };
