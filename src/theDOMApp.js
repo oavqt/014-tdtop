@@ -33,22 +33,15 @@ const theApplicationSidebar = () => {
     theElement.create('div', { class: 'sidebar__automatic' }),
     theElement.create(
       'div',
-      { class: 'sidebar__custom' },
+      { class: 'sidebar__add' },
       theElement.create(
-        'div',
-        { class: 'custom__add' },
-        theElement.create(
-          'div',
-          { class: 'add__button' },
-          theElement.create(
-            'button',
-            { class: 'button--add' },
-            theElement.create('span', { class: '' }, 'Add Project...'),
-            theElement.create('img', { class: 'img--custom', src: add })
-          )
-        )
+        'button',
+        { class: 'button--add' },
+        theElement.create('span', { class: 'add__text' }, 'Add Project'),
+        theElement.create('img', { class: 'img--custom', src: add })
       )
-    )
+    ),
+    theElement.create('div', { class: 'sidebar__custom' })
   );
   return sidebar;
 };
@@ -119,9 +112,9 @@ const theApplicationDisplay = () => {
           { class: 'add__button' },
           theElement.create(
             'button',
-            { class: 'button--list' },
+            { class: 'button--add' },
             theElement.create('img', { class: 'img--add', src: add }),
-            theElement.create('span', { class: 'add__text' }, '... Add List')
+            theElement.create('span', { class: 'add__text' }, 'Add List')
           )
         )
       )

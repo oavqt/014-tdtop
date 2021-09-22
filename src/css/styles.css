@@ -31,19 +31,20 @@ button {
   width: 4em;
 }
 
+button:focus {
+  outline: none;
+}
+
 button:hover {
   cursor: pointer;
 }
 
 .button--active {
-  background: white;
+  background: white !important;
 }
 
-.button--add {
-  background: transparent;
-  height: 2.5em;
-  justify-content: center !important;
-  width: 100%;
+.button--active:hover {
+  background: #58a6ff !important;
 }
 
 .button--delete,
@@ -55,12 +56,18 @@ button:hover {
   width: 100%;
 }
 
-.button--list {
+.button--body {
+  font-size: 0.8rem;
+}
+
+.button--body,
+.button--add {
   align-items: center;
   background: transparent;
   display: flex;
-  justify-content: center;
-  width: 8em;
+  justify-content: flex-end;
+  padding: 0;
+  width: 7em;
 }
 
 .button--logo {
@@ -90,8 +97,13 @@ button:hover {
   cursor: pointer;
 }
 
+.description__text {
+  margin-left: 2em;
+}
+
 .display__form {
   align-items: center;
+  background: white;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -106,6 +118,16 @@ button:hover {
   display: flex;
   justify-content: space-evenly;
   width: 9em;
+}
+
+.form__button .button--cancel,
+.form__button .button--add {
+  height: 2em;
+  width: 4em;
+}
+
+.img--body {
+  width: 1.5em;
 }
 
 .img--github {
@@ -215,6 +237,7 @@ textarea:focus {
 /*Application Demo*/
 .application__demo {
   display: flex;
+  position: relative;
   width: 69%;
 }
 
@@ -224,7 +247,8 @@ textarea:focus {
   width: 20%;
 }
 
-.demo__sidebar button {
+.sidebar__automatic button,
+.sidebar__custom button {
   align-items: center;
   display: flex;
   height: 2.5em;
@@ -233,9 +257,18 @@ textarea:focus {
   width: 100%;
 }
 
-.demo__sidebar button:hover {
+.sidebar__automatic button:hover,
+.sidebar__custom button:hover {
   color: white;
   background: #58a6ff;
+}
+
+.sidebar__add .button--add {
+  background: transparent;
+  height: 2.5em;
+  justify-content: center !important;
+  margin: auto;
+  width: 100%;
 }
 
 .sidebar__custom button {
@@ -297,6 +330,16 @@ textarea:focus {
 .project__title {
   display: flex;
   justify-content: space-between;
+  margin-bottom: 1em;
+}
+
+.project__title .title__misc,
+.project__title .body__checkbox {
+  display: none;
+}
+
+.project__description .description__text {
+  display: none;
 }
 
 .title__body {

@@ -1,4 +1,5 @@
 import { theElement } from './theElement';
+import add from './images/myAdd.png';
 import edit from './images/myEdit.png';
 import trash from './images/myTrash.png';
 
@@ -58,6 +59,9 @@ const theDOMTemplate = {
       idList,
       theDOMCreate.note(title, description, type, id, idProject, idList, idTask)
     );
+  },
+  form: (projListNote) => {
+    theDOMAppendTo.theDemo(theDOMCreate.projectListNoteForm(projListNote));
   },
 };
 
@@ -147,9 +151,24 @@ const theDOMGet = {
   theSidebarAutomaticButtons: () => {
     return document.querySelectorAll('.sidebar__automatic button');
   },
+  theSidebarCustomButtons: () => {
+    return document.querySelectorAll('.sidebar__custom button');
+  },
   theProjectButton: (idProject) => {
     const buttons = document.querySelectorAll('.demo__sidebar button');
     return buttons.filter((button) => button.id === idProject.toString())[0];
+  },
+  theSidebarButtonAdd: () => {
+    return document.querySelector('.sidebar__add .button--add');
+  },
+  theForm: () => {
+    return document.querySelector('.display__form');
+  },
+  theFormButtonCancel: () => {
+    return document.querySelector('.form__button .button--cancel');
+  },
+  theFormButtonAdd: () => {
+    return document.querySelector('.form__button .button--add');
   },
 };
 
@@ -273,6 +292,16 @@ const theDOMCreate = {
             'div',
             { class: 'body__title' },
             theElement.create('h1', { class: 'title__text' }, title)
+          ),
+          theElement.create(
+            'div',
+            { class: 'body__button' },
+            theElement.create(
+              'button',
+              { class: 'button--body' },
+              theElement.create('img', { class: 'img--body', src: add }),
+              theElement.create('span', { class: 'body__text' }, 'Add Task')
+            )
           )
         ),
         theElement.create(
@@ -331,6 +360,16 @@ const theDOMCreate = {
             'div',
             { class: 'body__title' },
             theElement.create('h1', { class: 'title__text' }, title)
+          ),
+          theElement.create(
+            'div',
+            { class: 'body__button' },
+            theElement.create(
+              'button',
+              { class: 'button--body' },
+              theElement.create('img', { class: 'img--body', src: add }),
+              theElement.create('span', { class: 'body__text' }, 'Add Note')
+            )
           )
         ),
         theElement.create(
@@ -433,14 +472,14 @@ const theDOMCreate = {
     );
     return element;
   },
-  projectListNoteForm: () => {
+  projectListNoteForm: (projListNote) => {
     const element = theElement.create(
       'div',
       { class: 'display__form' },
       theElement.create(
         'div',
         { class: 'form__title' },
-        theElement.create('h1', { class: 'title__text' }, 'Add List...')
+        theElement.create('h1', { class: 'title__text' }, `Add ${projListNote}`)
       ),
       theElement.create(
         'div',

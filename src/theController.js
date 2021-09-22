@@ -1,14 +1,21 @@
-import { theDOMGet } from './theDOMTools';
+import { theDOMGet, theDOMTemplate } from './theDOMTools';
 import { theDOMDisplay } from './theList';
 
 const theEvents = () => {
   addEventSideBar();
 };
 
+//The Sidebar Events
 const addEventSideBar = () => {
   theDOMGet.theSidebarAutomaticButtons().forEach((button) => {
     button.addEventListener('click', theDisplayProjectEvent);
   });
+
+  theDOMGet.theSidebarCustomButtons().forEach((button) => {
+    button.addEventListener('click', theDisplayProjectEvent);
+  });
+
+  theDOMGet.theSidebarButtonAdd().addEventListener('click', addProject);
 };
 
 const theDisplayProjectEvent = function () {
@@ -32,6 +39,10 @@ const theButtonClear = () => {
   theDOMGet.theSidebarAutomaticButtons().forEach((button) => {
     button.classList.remove('button--active');
   });
+
+  theDOMGet.theSidebarCustomButtons().forEach((button) => {
+    button.classList.remove('button--active');
+  });
 };
 
 const theDisplayClear = () => {
@@ -42,6 +53,20 @@ const theDisplayClear = () => {
 
 const theDisplayShow = (type, id) => {
   theDOMDisplay(type, id);
+};
+
+const addProject = function () {
+  theDOMTemplate.form('Project');
+  theFormEvents();
+};
+
+//The Form Events
+const theFormEvents = () => {
+  theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
+};
+
+const theFormCancel = function () {
+  theDOMGet.theForm().remove();
 };
 
 export { theEvents };
