@@ -1,4 +1,5 @@
 import { theDOMTemplate } from './theDOMTools';
+import { theEventHandler } from './theHandler';
 
 //Application Tools
 //Object Templates
@@ -6,8 +7,8 @@ const objectTemplate = {
   project: (projectStorage, title, description) => {
     const proto = {
       addList: objectTemplate.list,
-      addDOMAutomaticProject: theDOMTemplate.sidebarAProject,
-      addDOMCustomProject: theDOMTemplate.sidebarCProject,
+      addDOMAutomaticProject: theDOMTemplate.sidebarAutomaticProject,
+      addDOMCustomProject: theDOMTemplate.sidebarCustomProject,
       addDOMProject: theDOMTemplate.project,
       addDOMTask: theDOMTemplate.task,
     };
@@ -149,7 +150,7 @@ const objectOption = (() => {
     return option;
   };
 
-  const rmOption = (proto, type, property) => {
+  const removeOption = (proto, type, property) => {
     let object = objectType(proto, type);
     for (let key in object) {
       if (key.toString() === property) {
@@ -167,7 +168,7 @@ const objectOption = (() => {
     return objectType(proto, type);
   };
 
-  return { setOption, getOptionSet, rmOption, addOption, addProtoOption };
+  return { setOption, getOptionSet, removeOption, addOption, addProtoOption };
 })();
 
 /* 
@@ -193,78 +194,76 @@ const theProjectStorage = (() => {
   let automaticProject = [];
   let customProject = [];
 
+  const getStorage = (type) => {
+    if (type === 'automaticProject') {
+      return automaticProject;
+    } else {
+      return customProject;
+    }
+  };
+
   const addProject = (type, title, description) => {
-    objectTemplate.project(type, title, description);
+    objectTemplate.project(getStorage(type), title, description);
+
+    //Events
+    theEventHandler.publish(type, [
+      getStorage(type),
+      type,
+      getStorage(type).at(-1),
+    ]);
   };
 
   const getProject = (type, index) => {
-    if (type === 'automatic') return automaticProject[index];
-    else return customProject[index];
+    return getStorage(type)[index];
   };
 
-  return { automaticProject, customProject, addProject, getProject };
+  const getProjects = (type) => {
+    return getStorage(type);
+  };
+
+  const removeProject = (type, index) => {
+    if (index) {
+      getStorage(type).splice(index, 1);
+    } else {
+      getStorage(type).splice(0);
+    }
+  };
+
+  const displayProject = (type, id) => {
+    const displayProject = getStorage(type)[id];
+
+    theEventHandler.publish('displayProject', [displayProject]);
+  };
+
+  const idUpdate = (projectStorage, type) => {
+    idUpdateData(getStorage(projectStorage), type);
+  };
+
+  return {
+    addProject,
+    getProject,
+    getProjects,
+    removeProject,
+    displayProject,
+    idUpdate,
+  };
 })();
 
 //Automatic Projects
 const theAutomaticProject = () => {
-  theProjectStorage.automaticProject = []; //Temporary Server HMR
-
-  const automatic = theProjectStorage.automaticProject;
-  objectTemplate.project(automatic, 'Inbox', 'Inbox');
-  objectTemplate.project(automatic, 'Today', 'Today');
-  objectTemplate.project(automatic, 'Upcoming ', 'Upcoming ');
-  objectTemplate.project(automatic, 'Someday', 'Someday ');
-  objectTemplate.project(automatic, 'Never', 'Never');
-  objectTemplate.project(automatic, 'Logbook', 'Logbook');
-};
-
-//Temporary Demos
-
-const theCustomProjectDemo = () => {
-  const custom = theProjectStorage.customProject;
-  objectTemplate.project(custom, 'test', 'test');
-};
-
-const theAutomaticListDemo = () => {
-  theProjectStorage.automaticProject[1].addList(
-    theProjectStorage.automaticProject[1].list,
-    'title',
-    'description'
-  );
-  theProjectStorage.automaticProject[1].addList(
-    theProjectStorage.automaticProject[1].list,
-    'title2',
-    'description2'
-  );
-  theProjectStorage.automaticProject[4].addList(
-    theProjectStorage.automaticProject[4].list,
-    'title',
-    'description'
-  );
-};
-
-const theAutomaticTaskDemo = () => {
-  theProjectStorage.automaticProject[1].list[0].addTask(
-    theProjectStorage.automaticProject[1].list[0].task,
-    'title',
-    'description',
-    'category',
-    'date'
-  );
-};
-
-const theAutomaticNoteDemo = () => {
-  theProjectStorage.automaticProject[1].list[0].task[0].addNote(
-    theProjectStorage.automaticProject[1].list[0].task[0].note,
-    'title',
-    'description'
-  );
+  const automatic = 'automaticProject';
+  theProjectStorage.addProject(automatic, 'Inbox', 'Inbox');
+  theProjectStorage.addProject(automatic, 'Today', 'Today');
+  theProjectStorage.addProject(automatic, 'Upcoming ', 'Upcoming ');
+  theProjectStorage.addProject(automatic, 'Someday', 'Someday ');
+  theProjectStorage.addProject(automatic, 'Never', 'Never');
+  theProjectStorage.addProject(automatic, 'Logbook', 'Logbook');
 };
 
 //Application DOM Data
-const theUpdateIDData = (projectStorage) => {
-  theProjectStorage[projectStorage].forEach((project) => {
-    project.type = projectStorage;
+const idUpdateData = ([projectStorage, type]) => {
+  projectStorage.forEach((project) => {
+    project.type = type;
     project.list.forEach((list) => {
       list.project = project.id;
       list.task.forEach((task) => {
@@ -280,40 +279,35 @@ const theUpdateIDData = (projectStorage) => {
   });
 };
 
-const theUpdateIDAll = () => {
-  theUpdateIDData('automaticProject');
-  theUpdateIDData('customProject');
+const theDOMDisplaySidebar = ([projectStorage, type, project]) => {
+  const tProjectStorage = projectStorage;
+  let addDOMAutoCutomProject;
+
+  if (type === 'automaticProject') {
+    addDOMAutoCutomProject = 'addDOMAutomaticProject';
+  } else {
+    addDOMAutoCutomProject = 'addDOMCustomProject';
+  }
+
+  if (project) {
+    project[addDOMAutoCutomProject](project.title, project.type, project.id);
+  } else {
+    tProjectStorage.forEach((project) => {
+      project[addDOMAutoCutomProject](project.title, project.type, project.id);
+    });
+  }
 };
 
-const theDOMSidebarProjectData = () => {
-  theProjectStorage.automaticProject.forEach((project) => {
-    project.addDOMAutomaticProject(
-      project.title.toLowerCase(),
-      project.type,
-      project.id
-    );
-  });
-  theProjectStorage.customProject.forEach((project) => {
-    project.addDOMCustomProject(
-      project.title.toLowerCase(),
-      project.type,
-      project.id
-    );
-  });
-};
-
-const theDOMDisplay = (type, id) => {
-  const tProject = theProjectStorage[type][id];
-
-  tProject.addDOMProject(
-    tProject.title,
-    tProject.description,
-    tProject.type,
-    tProject.id
+const theDOMDisplay = ([project]) => {
+  project.addDOMProject(
+    project.title,
+    project.description,
+    project.type,
+    project.id
   );
-  tProject.list.forEach((list) => {
+  project.list.forEach((list) => {
     list.addDOMList(
-      tProject.id,
+      project.id,
       list.title,
       list.description,
       list.type,
@@ -328,7 +322,7 @@ const theDOMDisplay = (type, id) => {
         task.date,
         task.type,
         task.id,
-        tProject.id
+        project.id
       );
       task.note.forEach((note) => {
         note.addDOMNote(
@@ -337,7 +331,7 @@ const theDOMDisplay = (type, id) => {
           note.description,
           note.type,
           note.id,
-          tProject.id,
+          project.id,
           list.id
         );
       });
@@ -346,13 +340,15 @@ const theDOMDisplay = (type, id) => {
 };
 
 const theAutomaticApplication = () => {
+  theProjectStorage.removeProject('automaticProject');
   theAutomaticProject();
-  theCustomProjectDemo();
-  theAutomaticListDemo();
-  theAutomaticTaskDemo();
-  theAutomaticNoteDemo();
-  theUpdateIDAll();
-  theDOMSidebarProjectData();
 };
 
-export { theAutomaticApplication, theDOMDisplay };
+//Events
+theEventHandler.subscribe('automaticProject', idUpdateData);
+theEventHandler.subscribe('automaticProject', theDOMDisplaySidebar);
+theEventHandler.subscribe('customProject', idUpdateData);
+theEventHandler.subscribe('customProject', theDOMDisplaySidebar);
+theEventHandler.subscribe('displayProject', theDOMDisplay);
+
+export { theAutomaticApplication, theProjectStorage };

@@ -6,14 +6,14 @@ import trash from './images/myTrash.png';
 //DOM Tools
 //Create DOM Template
 const theDOMTemplate = {
-  sidebarAProject: (title, type, id) => {
+  sidebarAutomaticProject: (title, type, id) => {
     theDOMAppendTo.theSidebarAutomatic(
-      theDOMCreate.sidebarAProject(title, type, id)
+      theDOMCreate.sidebarAutomaticProject(title, type, id)
     );
   },
-  sidebarCProject: (title, type, id) => {
+  sidebarCustomProject: (title, type, id) => {
     theDOMAppendTo.theSidebarCustom(
-      theDOMCreate.sidebarCProject(title, type, id)
+      theDOMCreate.sidebarCustomProject(title, type, id)
     );
   },
   project: (title, description, type, id) => {
@@ -125,6 +125,15 @@ const theDOMGet = {
   theDisplayProject: () => {
     return document.querySelectorAll('.body__project');
   },
+  theDisplayBodyCheckbox: () => {
+    return document.querySelector('.body__project .body__checkbox');
+  },
+  theDisplayBodyButtonEdit: () => {
+    return document.querySelector('.body__project .button--edit');
+  },
+  theDisplayBodyButtonDelete: () => {
+    return document.querySelector('.body__project .button--delete');
+  },
   theProject: (idProject) => {
     const projects = [...document.querySelectorAll('.body__project')];
     return projects.filter(
@@ -164,6 +173,12 @@ const theDOMGet = {
   theForm: () => {
     return document.querySelector('.display__form');
   },
+  theFormTitle: () => {
+    return document.querySelector('.input--title');
+  },
+  theFormDescription: () => {
+    return document.querySelector('.textarea--description');
+  },
   theFormButtonCancel: () => {
     return document.querySelector('.form__button .button--cancel');
   },
@@ -174,7 +189,7 @@ const theDOMGet = {
 
 //Create DOM Element
 const theDOMCreate = {
-  sidebarAProject: (title, type, id, count = '') => {
+  sidebarAutomaticProject: (title, type, id, count = '') => {
     const element = theElement.create(
       'div',
       { class: `automatic__${title}`, ['data-type']: type, ['data-id']: id },
@@ -191,18 +206,14 @@ const theDOMCreate = {
     );
     return element;
   },
-  sidebarCProject: (title, type, id, count = '') => {
+  sidebarCustomProject: (title, type, id, count = '') => {
     const element = theElement.create(
       'div',
       { class: `custom__${title}`, ['data-type']: type, ['data-id']: id },
       theElement.create(
         'button',
         { class: `button--${title}`, ['data-type']: type, ['data-id']: id },
-        theElement.create(
-          'span',
-          { class: `${title}__title` },
-          `${title[0].toUpperCase() + title.slice(1)}`
-        ),
+        theElement.create('span', { class: `${title}__title` }, title),
         theElement.create('span', { class: `${title}__count` }, count)
       )
     );
@@ -242,12 +253,12 @@ const theDOMCreate = {
           { class: 'title__misc' },
           theElement.create(
             'button',
-            { class: 'button--edit' },
+            { class: 'button--edit', ['data-type']: type, ['data-id']: id },
             theElement.create('img', { class: 'img--edit', src: edit })
           ),
           theElement.create(
             'button',
-            { class: 'button--delete' },
+            { class: 'button--delete', ['data-type']: type, ['data-id']: id },
             theElement.create('img', { class: 'img--delete', src: trash })
           )
         )

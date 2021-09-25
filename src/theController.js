@@ -1,11 +1,11 @@
 import { theDOMGet, theDOMTemplate } from './theDOMTools';
-import { theDOMDisplay } from './theList';
+import { theProjectStorage } from './theList';
 
 const theEvents = () => {
   addEventSideBar();
 };
 
-//The Sidebar Events
+//Sidebar Button Events
 const addEventSideBar = () => {
   theDOMGet.theSidebarAutomaticButtons().forEach((button) => {
     button.addEventListener('click', theDisplayProjectEvent);
@@ -52,7 +52,13 @@ const theDisplayClear = () => {
 };
 
 const theDisplayShow = (type, id) => {
-  theDOMDisplay(type, id);
+  theProjectStorage.displayProject(type, id);
+
+  if (type === 'customProject') {
+    addActiveClass.setDisplayFlex(theDOMGet.theDisplayBodyButtonEdit());
+    addActiveClass.setDisplayFlex(theDOMGet.theDisplayBodyButtonDelete());
+    addActiveClass.setDisplayBlock(theDOMGet.theDisplayBodyCheckbox());
+  }
 };
 
 const addProject = function () {
@@ -60,13 +66,34 @@ const addProject = function () {
   theFormEvents();
 };
 
-//The Form Events
+//Form Events
 const theFormEvents = () => {
   theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
+  theDOMGet.theFormButtonAdd().addEventListener('click', theFormProjectAdd);
 };
 
 const theFormCancel = function () {
   theDOMGet.theForm().remove();
+};
+
+const theFormProjectAdd = function () {
+  const type = 'customProject';
+  const title = theDOMGet.theFormTitle().value;
+  const description = theDOMGet.theFormDescription().value;
+
+  theProjectStorage.addProject(type, title, description);
+
+  addEventSideBar();
+  theFormCancel();
+};
+
+const addActiveClass = {
+  setDisplayFlex: (element) => {
+    element.classList.add('--flex');
+  },
+  setDisplayBlock: (element) => {
+    element.classList.add('--block');
+  },
 };
 
 export { theEvents };

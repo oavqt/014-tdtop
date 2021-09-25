@@ -1,5 +1,13 @@
 @import url(nreset.css);
 
+.--block {
+  display: block !important;
+}
+
+.--flex {
+  display: flex !important;
+}
+
 a {
   color: black;
   text-decoration: none;
@@ -333,7 +341,7 @@ textarea:focus {
   margin-bottom: 1em;
 }
 
-.project__title .title__misc,
+.project__title .title__misc button,
 .project__title .body__checkbox {
   display: none;
 }
