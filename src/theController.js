@@ -3,6 +3,7 @@ import { theProjectStorage } from './theList';
 
 const theEvents = () => {
   addEventSideBar();
+  addEventDisplay();
 };
 
 //Sidebar Button Events
@@ -15,12 +16,11 @@ const addEventSideBar = () => {
     button.addEventListener('click', theDisplayProjectEvent);
   });
 
-  theDOMGet.theSidebarButtonAdd().addEventListener('click', addProject);
+  theDOMGet.theAddProject().addEventListener('click', addProject);
 };
 
 const theDisplayProjectEvent = function () {
   theButtonClear();
-  theDisplayClear();
   theButtonActive(this);
   theDisplayShow(this.dataset.type, this.dataset.id);
 };
@@ -45,14 +45,8 @@ const theButtonClear = () => {
   });
 };
 
-const theDisplayClear = () => {
-  theDOMGet.theDisplayProject().forEach((project) => {
-    project.classList.remove('body__project--active');
-  });
-};
-
 const theDisplayShow = (type, id) => {
-  theProjectStorage.displayProject(type, id);
+  theProjectStorage.display.project(type, id);
 
   if (type === 'customProject') {
     addActiveClass.setDisplayFlex(theDOMGet.theDisplayBodyButtonEdit());
@@ -61,30 +55,71 @@ const theDisplayShow = (type, id) => {
   }
 };
 
-const addProject = function () {
-  theDOMTemplate.form('Project');
-  theFormEvents();
+//Display Button Events
+const addEventDisplay = () => {
+  theDOMGet.theAddList().addEventListener('click', addList);
 };
 
 //Form Events
-const theFormEvents = () => {
+const theProjectFormEvents = () => {
   theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
-  theDOMGet.theFormButtonAdd().addEventListener('click', theFormProjectAdd);
+  theDOMGet.theFormButtonAdd().addEventListener('click', theFormAdd.project);
+};
+
+const theListFormEvents = () => {
+  theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
+  theDOMGet.theFormButtonAdd().addEventListener('click', theFormAdd.list);
 };
 
 const theFormCancel = function () {
   theDOMGet.theForm().remove();
 };
 
-const theFormProjectAdd = function () {
-  const type = 'customProject';
-  const title = theDOMGet.theFormTitle().value;
-  const description = theDOMGet.theFormDescription().value;
+const theFormAdd = {
+  project: () => {
+    const type = 'customProject';
+    const title = theDOMGet.theFormTitle().value;
+    const description = theDOMGet.theFormDescription().value;
 
-  theProjectStorage.addProject(type, title, description);
+    theProjectStorage.add.project(type, title, description);
 
-  addEventSideBar();
-  theFormCancel();
+    addEventSideBar();
+    theFormCancel();
+  },
+  list: () => {
+    const type = theDOMGet.theDisplayProject().dataset.type;
+    const idProject = theDOMGet.theDisplayProject().dataset.id;
+    const title = theDOMGet.theFormTitle().value;
+    const description = theDOMGet.theFormDescription().value;
+
+    theProjectStorage.add.list([type, idProject], title, description);
+
+    dClear();
+    theDisplayShow(type, idProject);
+    addEventSideBar();
+    theFormCancel();
+  },
+  task: () => {},
+  note: () => {},
+};
+
+//Controller Tools
+const addProject = function () {
+  theDOMTemplate.form('Project');
+  theProjectFormEvents();
+};
+
+const addList = function () {
+  theDOMTemplate.form('List');
+  theListFormEvents();
+};
+
+const dClear = () => {
+  while (theDOMGet.theDisplayBody().firstChild) {
+    theDOMGet
+      .theDisplayBody()
+      .removeChild(theDOMGet.theDisplayBody().lastChild);
+  }
 };
 
 const addActiveClass = {

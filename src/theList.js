@@ -202,37 +202,62 @@ const theProjectStorage = (() => {
     }
   };
 
-  const addProject = (type, title, description) => {
-    objectTemplate.project(getStorage(type), title, description);
+  const add = {
+    project: (type, title, description) => {
+      objectTemplate.project(getStorage(type), title, description);
 
-    //Events
-    theEventHandler.publish(type, [
-      getStorage(type),
-      type,
-      getStorage(type).at(-1),
-    ]);
+      //Events
+      theEventHandler.publish(type, [
+        getStorage(type),
+        type,
+        getStorage(type).at(-1),
+      ]);
+    },
+    list: ([type, idProject], title, description) => {
+      const tProject = get.project(type, idProject);
+      tProject.addList(tProject.list, title, description);
+    },
+    task: ([type, idList, idProject], title, description, category, date) => {
+      get
+        .list(type, idList, idProject)
+        .addTask(title, description, category, date);
+    },
+    note: ([type, idTask, idList, idProject], title, description) => {
+      get.task(type, idTask, idList, idProject).addNote(title, description);
+    },
   };
 
-  const getProject = (type, index) => {
-    return getStorage(type)[index];
+  const get = {
+    project: (type, idProject) => {
+      return getStorage(type)[idProject];
+    },
+    list: (type, idList, idProject) => {
+      return getStorage(type)[idProject][idList];
+    },
+    task: (type, idTask, idList, idProject) => {
+      return getStorage(type)[idProject].list[idList].task[idTask];
+    },
+    note: (type, idNote, idList, idTask, idProject) => {
+      return getStorage(type)[idProject].list[idList].task[idTask].note[idNote];
+    },
   };
 
-  const getProjects = (type) => {
-    return getStorage(type);
+  const remove = {
+    project: (type, id) => {
+      if (id) {
+        getStorage(type).splice(id, 1);
+      } else {
+        getStorage(type).splice(0);
+      }
+    },
   };
 
-  const removeProject = (type, index) => {
-    if (index) {
-      getStorage(type).splice(index, 1);
-    } else {
-      getStorage(type).splice(0);
-    }
-  };
+  const display = {
+    project: (type, id) => {
+      const displayProject = getStorage(type)[id];
 
-  const displayProject = (type, id) => {
-    const displayProject = getStorage(type)[id];
-
-    theEventHandler.publish('displayProject', [displayProject]);
+      theEventHandler.publish('displayProject', [displayProject]);
+    },
   };
 
   const idUpdate = (projectStorage, type) => {
@@ -240,11 +265,9 @@ const theProjectStorage = (() => {
   };
 
   return {
-    addProject,
-    getProject,
-    getProjects,
-    removeProject,
-    displayProject,
+    add,
+    remove,
+    display,
     idUpdate,
   };
 })();
@@ -252,12 +275,12 @@ const theProjectStorage = (() => {
 //Automatic Projects
 const theAutomaticProject = () => {
   const automatic = 'automaticProject';
-  theProjectStorage.addProject(automatic, 'Inbox', 'Inbox');
-  theProjectStorage.addProject(automatic, 'Today', 'Today');
-  theProjectStorage.addProject(automatic, 'Upcoming ', 'Upcoming ');
-  theProjectStorage.addProject(automatic, 'Someday', 'Someday ');
-  theProjectStorage.addProject(automatic, 'Never', 'Never');
-  theProjectStorage.addProject(automatic, 'Logbook', 'Logbook');
+  theProjectStorage.add.project(automatic, 'Inbox', 'Inbox');
+  theProjectStorage.add.project(automatic, 'Today', 'Today');
+  theProjectStorage.add.project(automatic, 'Upcoming ', 'Upcoming ');
+  theProjectStorage.add.project(automatic, 'Someday', 'Someday ');
+  theProjectStorage.add.project(automatic, 'Never', 'Never');
+  theProjectStorage.add.project(automatic, 'Logbook', 'Logbook');
 };
 
 //Application DOM Data
@@ -340,7 +363,7 @@ const theDOMDisplay = ([project]) => {
 };
 
 const theAutomaticApplication = () => {
-  theProjectStorage.removeProject('automaticProject');
+  theProjectStorage.remove.project('automaticProject');
   theAutomaticProject();
 };
 

@@ -60,8 +60,8 @@ const theDOMTemplate = {
       theDOMCreate.note(title, description, type, id, idProject, idList, idTask)
     );
   },
-  form: (projListNote) => {
-    theDOMAppendTo.theDemo(theDOMCreate.projectListNoteForm(projListNote));
+  form: (projectListNote) => {
+    theDOMAppendTo.theDemo(theDOMCreate.projectListNoteForm(projectListNote));
   },
 };
 
@@ -123,7 +123,7 @@ const theDOMGet = {
     return document.querySelector('.display__body');
   },
   theDisplayProject: () => {
-    return document.querySelectorAll('.body__project');
+    return document.querySelector('.body__project');
   },
   theDisplayBodyCheckbox: () => {
     return document.querySelector('.body__project .body__checkbox');
@@ -133,6 +133,9 @@ const theDOMGet = {
   },
   theDisplayBodyButtonDelete: () => {
     return document.querySelector('.body__project .button--delete');
+  },
+  theAddList: () => {
+    return document.querySelector('.display__misc .button--add');
   },
   theProject: (idProject) => {
     const projects = [...document.querySelectorAll('.body__project')];
@@ -167,7 +170,7 @@ const theDOMGet = {
     const buttons = document.querySelectorAll('.demo__sidebar button');
     return buttons.filter((button) => button.id === idProject.toString())[0];
   },
-  theSidebarButtonAdd: () => {
+  theAddProject: () => {
     return document.querySelector('.sidebar__add .button--add');
   },
   theForm: () => {
@@ -483,14 +486,18 @@ const theDOMCreate = {
     );
     return element;
   },
-  projectListNoteForm: (projListNote) => {
+  projectListNoteForm: (projectListNote) => {
     const element = theElement.create(
       'div',
       { class: 'display__form' },
       theElement.create(
         'div',
         { class: 'form__title' },
-        theElement.create('h1', { class: 'title__text' }, `Add ${projListNote}`)
+        theElement.create(
+          'h1',
+          { class: 'title__text' },
+          `Add ${projectListNote}`
+        )
       ),
       theElement.create(
         'div',
@@ -527,7 +534,10 @@ const theDOMCreate = {
         theElement.create('button', { class: 'button--cancel' }, 'Cancel'),
         theElement.create(
           'button',
-          { class: 'button--add', ['data-type']: 'list' },
+          {
+            class: 'button--add',
+            ['data-type']: projectListNote.toLowerCase(),
+          },
           'Add'
         )
       )
