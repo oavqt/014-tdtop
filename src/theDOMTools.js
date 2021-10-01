@@ -156,10 +156,10 @@ const theDOMGet = {
     return document.querySelector('.display__misc .button--add');
   },
   theAddTask: () => {
-    return document.querySelectorAll('.project__list .button--add');
+    return document.querySelectorAll('.list__title .button--add');
   },
   theAddNote: () => {
-    return document.querySelectorAll('.list__task .button--add');
+    return document.querySelectorAll('.task__title .button--add');
   },
   theProject: (idProject) => {
     const projects = [...document.querySelectorAll('.body__project')];
@@ -255,11 +255,22 @@ const theDOMGetValue = {
         theDOMGetValue.cached.element.project,
       ];
     },
-    task: (idTask, idList, idProject) => {
-      return theDOMGet.theTask(idTask, idList, idProject);
+    task: () => {
+      return [
+        theDOMGetValue.cached.element.type,
+        theDOMGetValue.cached.element.id,
+        theDOMGetValue.cached.element.list,
+        theDOMGetValue.cached.element.project,
+      ];
     },
-    note: (idNote, idTask, idList, idProject) => {
-      return theDOMGet.theNote(idNote, idTask, idList, idProject);
+    note: () => {
+      return [
+        theDOMGetValue.cached.element.type,
+        theDOMGetValue.cached.element.id,
+        theDOMGetValue.cached.element.note,
+        theDOMGetValue.cached.element.list,
+        theDOMGetValue.cached.element.project,
+      ];
     },
   },
   input: {

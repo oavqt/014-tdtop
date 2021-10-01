@@ -22,6 +22,7 @@ const theDisplayProjectEvent = function () {
   theSidebarButtonStyleAdd(this);
   theDisplayRemove();
   theDisplayAdd(this.dataset.type, this.dataset.id);
+  theAddProjectListTaskNoteEvent();
 };
 
 //ProjectListTaskNote Button Events
@@ -29,6 +30,7 @@ const theAddProjectListTaskNoteEvent = () => {
   theProjectButtonEvent();
   theListButtonEvent();
   theTaskButtonEvent();
+  theNoteButtonEvent();
 };
 
 const theProjectButtonEvent = () => {
@@ -40,6 +42,7 @@ const theListButtonEvent = () => {
 };
 
 const theTaskButtonEvent = () => {
+  console.log(theDOMGet.theAddTask());
   theDOMGet.theAddTask().forEach((task) => {
     task.addEventListener('click', addTask);
     task.addEventListener('click', theDOMGetValue.cached.add);
@@ -49,6 +52,7 @@ const theTaskButtonEvent = () => {
 const theNoteButtonEvent = () => {
   theDOMGet.theAddNote().forEach((note) => {
     note.addEventListener('click', addNote);
+    note.addEventListener('click', theDOMGetValue.cached.add);
   });
 };
 
@@ -140,6 +144,7 @@ const theFormAdd = {
       theDOMGetValue.type.project(),
       theDOMGetValue.id.project()
     );
+
     theEvents();
     theFormCancel();
   },
@@ -151,10 +156,26 @@ const theFormAdd = {
       theDOMGetValue.input.date()
     );
 
+    theDisplayUpdate(
+      theDOMGetValue.type.project(),
+      theDOMGetValue.id.project()
+    );
+
     theEvents();
     theFormCancel();
   },
   note: () => {
+    theProjectStorage.add.note(
+      theDOMGetValue.id.task(),
+      theDOMGetValue.input.title(),
+      theDOMGetValue.input.description()
+    );
+
+    theDisplayUpdate(
+      theDOMGetValue.type.project(),
+      theDOMGetValue.id.project()
+    );
+
     theEvents();
     theFormCancel();
   },

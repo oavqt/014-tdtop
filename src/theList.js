@@ -227,7 +227,11 @@ const theProjectStorage = (() => {
       idTypeCategoryUpdateData([getStorage(type), type]);
     },
     note: ([type, idTask, idList, idProject], title, description) => {
-      get.task(type, idTask, idList, idProject).addNote(title, description);
+      const tProject = get.task(type, idTask, idList, idProject);
+      tProject.addNote(tProject.note, title, description);
+
+      //Events
+      idTypeCategoryUpdateData([getStorage(type), type]);
     },
   };
 
