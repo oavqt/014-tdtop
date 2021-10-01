@@ -1,13 +1,13 @@
-import { theDOMGet, theDOMTemplate } from './theDOMTools';
+import { theDOMGet, theDOMGetValue, theDOMTemplate } from './theDOMTools';
 import { theProjectStorage } from './theList';
 
 const theEvents = () => {
-  addEventSideBar();
-  addEventDisplay();
+  theSidebarButtonEvent();
+  theAddProjectListTaskNoteEvent();
 };
 
 //Sidebar Button Events
-const addEventSideBar = () => {
+const theSidebarButtonEvent = () => {
   theDOMGet.theSidebarAutomaticButtons().forEach((button) => {
     button.addEventListener('click', theDisplayProjectEvent);
   });
@@ -15,120 +15,179 @@ const addEventSideBar = () => {
   theDOMGet.theSidebarCustomButtons().forEach((button) => {
     button.addEventListener('click', theDisplayProjectEvent);
   });
-
-  theDOMGet.theAddProject().addEventListener('click', addProject);
 };
 
 const theDisplayProjectEvent = function () {
-  theButtonClear();
-  theButtonActive(this);
-  theDisplayShow(this.dataset.type, this.dataset.id);
+  theSidebarButtonStyleRemove();
+  theSidebarButtonStyleAdd(this);
+  theDisplayRemove();
+  theDisplayAdd(this.dataset.type, this.dataset.id);
 };
 
-const theButtonActive = (button) => {
-  button.classList.add('button--active');
+//ProjectListTaskNote Button Events
+const theAddProjectListTaskNoteEvent = () => {
+  theProjectButtonEvent();
+  theListButtonEvent();
 };
 
-const theButtonClear = () => {
+const theProjectButtonEvent = () => {
+  theDOMGet.theAddProject().addEventListener('click', addProject);
+};
+
+const theListButtonEvent = () => {
+  theDOMGet.theAddList().addEventListener('click', addList);
+};
+
+const theTaskButtonEvent = () => {
+  theDOMGet.theAddTask().forEach((task) => {
+    task.addEventListener('click', addTask);
+  });
+};
+
+const theNoteButtonEvent = () => {
+  theDOMGet.theAddNote().forEach((note) => {
+    note.addEventListener('click', addNote);
+  });
+};
+
+//Form Events
+const theProjectFormEvent = () => {
+  theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
+  theDOMGet.theFormButtonAdd().addEventListener('click', theFormAdd.project);
+};
+
+const theListFormEvent = () => {
+  theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
+  theDOMGet.theFormButtonAdd().addEventListener('click', theFormAdd.list);
+};
+
+//Controller Tools
+//Controller Event Functions
+const addProject = function () {
+  theDOMTemplate.form('Project');
+  theProjectFormEvent();
+};
+
+const addList = function () {
+  theDOMTemplate.form('List');
+  theListFormEvent();
+};
+
+const addTask = function () {
+  theDOMTemplate.form('Task');
+  theTaskFormEvent();
+};
+
+const addNote = function () {
+  theDOMTemplate.form('Note');
+  theNoteFormEvent();
+};
+
+const theDisplayAdd = (type, idProject) => {
+  theProjectStorage.display.project(type, idProject);
+
+  if (type === 'customProject') {
+    TheCustomProjectStyleAdd();
+  }
+};
+
+const theDisplayUpdate = (type, idProject) => {
+  theDisplayRemove();
+  theDisplayAdd(type, idProject);
+};
+
+const theDisplayRemove = () => {
   while (theDOMGet.theDisplayBody().firstChild) {
     theDOMGet
       .theDisplayBody()
       .removeChild(theDOMGet.theDisplayBody().lastChild);
   }
-
-  theDOMGet.theSidebarAutomaticButtons().forEach((button) => {
-    button.classList.remove('button--active');
-  });
-
-  theDOMGet.theSidebarCustomButtons().forEach((button) => {
-    button.classList.remove('button--active');
-  });
-};
-
-const theDisplayShow = (type, id) => {
-  theProjectStorage.display.project(type, id);
-
-  if (type === 'customProject') {
-    addActiveClass.setDisplayFlex(theDOMGet.theDisplayBodyButtonEdit());
-    addActiveClass.setDisplayFlex(theDOMGet.theDisplayBodyButtonDelete());
-    addActiveClass.setDisplayBlock(theDOMGet.theDisplayBodyCheckbox());
-  }
-};
-
-//Display Button Events
-const addEventDisplay = () => {
-  theDOMGet.theAddList().addEventListener('click', addList);
-};
-
-//Form Events
-const theProjectFormEvents = () => {
-  theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
-  theDOMGet.theFormButtonAdd().addEventListener('click', theFormAdd.project);
-};
-
-const theListFormEvents = () => {
-  theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
-  theDOMGet.theFormButtonAdd().addEventListener('click', theFormAdd.list);
-};
-
-const theFormCancel = function () {
-  theDOMGet.theForm().remove();
 };
 
 const theFormAdd = {
   project: () => {
     const type = 'customProject';
-    const title = theDOMGet.theFormTitle().value;
-    const description = theDOMGet.theFormDescription().value;
 
-    theProjectStorage.add.project(type, title, description);
+    theProjectStorage.add.project(
+      type,
+      theDOMGetValue.input.title(),
+      theDOMGetValue.input.description()
+    );
 
-    addEventSideBar();
+    theSidebarButtonEvent();
     theFormCancel();
   },
   list: () => {
-    const type = theDOMGet.theDisplayProject().dataset.type;
-    const idProject = theDOMGet.theDisplayProject().dataset.id;
-    const title = theDOMGet.theFormTitle().value;
-    const description = theDOMGet.theFormDescription().value;
+    theProjectStorage.add.list(
+      [theDOMGetValue.type.project(), theDOMGetValue.id.project()],
+      theDOMGetValue.input.title(),
+      theDOMGetValue.input.description()
+    );
 
-    theProjectStorage.add.list([type, idProject], title, description);
-
-    dClear();
-    theDisplayShow(type, idProject);
-    addEventSideBar();
+    theDisplayUpdate(
+      theDOMGetValue.type.project(),
+      theDOMGetValue.id.project()
+    );
+    theSidebarButtonEvent();
     theFormCancel();
   },
   task: () => {},
   note: () => {},
 };
 
-//Controller Tools
-const addProject = function () {
-  theDOMTemplate.form('Project');
-  theProjectFormEvents();
+const theFormCancel = function () {
+  theDOMGet.theForm().remove();
 };
 
-const addList = function () {
-  theDOMTemplate.form('List');
-  theListFormEvents();
-};
-
-const dClear = () => {
-  while (theDOMGet.theDisplayBody().firstChild) {
-    theDOMGet
-      .theDisplayBody()
-      .removeChild(theDOMGet.theDisplayBody().lastChild);
-  }
-};
-
-const addActiveClass = {
-  setDisplayFlex: (element) => {
-    element.classList.add('--flex');
+//Add HTMLCSS Classes
+//CSS Options
+const theHTMLClass = {
+  add: {
+    displayFlex: (element) => {
+      element.classList.add('--flex');
+    },
+    displayBlock: (element) => {
+      element.classList.add('--block');
+    },
+    backgroundWhite: (element) => {
+      element.classList.add('--background-white');
+    },
+    backgroundHoverBlue: (element) => {
+      element.classList.add('--background-hover-blue');
+    },
   },
-  setDisplayBlock: (element) => {
-    element.classList.add('--block');
+  remove: {
+    backgroundWhite: (element) => {
+      element.classList.remove('--background-white');
+    },
+    backgroundHoverBlue: (element) => {
+      element.classList.remove('--background-hover-blue');
+    },
   },
+};
+
+//Add CSS
+const theSidebarButtonStyleAdd = (button) => {
+  theHTMLClass.add.backgroundWhite(button);
+  theHTMLClass.add.backgroundHoverBlue(button);
+};
+
+const theSidebarButtonStyleRemove = () => {
+  theDOMGet.theSidebarAutomaticButtons().forEach((button) => {
+    theHTMLClass.remove.backgroundWhite(button);
+    theHTMLClass.remove.backgroundHoverBlue(button);
+  });
+
+  theDOMGet.theSidebarCustomButtons().forEach((button) => {
+    theHTMLClass.remove.backgroundWhite(button);
+    theHTMLClass.remove.backgroundHoverBlue(button);
+  });
+};
+
+const TheCustomProjectStyleAdd = () => {
+  theHTMLClass.add.displayFlex(theDOMGet.theDisplayProjectEdit());
+  theHTMLClass.add.displayFlex(theDOMGet.theDisplayProjectDelete());
+  theHTMLClass.add.displayBlock(theDOMGet.theDisplayProjectCheckbox());
 };
 
 export { theEvents };

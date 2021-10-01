@@ -216,6 +216,9 @@ const theProjectStorage = (() => {
     list: ([type, idProject], title, description) => {
       const tProject = get.project(type, idProject);
       tProject.addList(tProject.list, title, description);
+
+      //Events
+      idTypeUpdateData([getStorage(type), type]);
     },
     task: ([type, idList, idProject], title, description, category, date) => {
       get
@@ -260,15 +263,10 @@ const theProjectStorage = (() => {
     },
   };
 
-  const idUpdate = (projectStorage, type) => {
-    idUpdateData(getStorage(projectStorage), type);
-  };
-
   return {
     add,
     remove,
     display,
-    idUpdate,
   };
 })();
 
@@ -284,15 +282,18 @@ const theAutomaticProject = () => {
 };
 
 //Application DOM Data
-const idUpdateData = ([projectStorage, type]) => {
+const idTypeUpdateData = ([projectStorage, type]) => {
   projectStorage.forEach((project) => {
     project.type = type;
     project.list.forEach((list) => {
+      list.type = type;
       list.project = project.id;
       list.task.forEach((task) => {
+        task.type = type;
         task.project = project.id;
         task.list = list.id;
         task.note.forEach((note) => {
+          note.type = type;
           note.project = project.id;
           note.list = list.id;
           note.task = task.id;
@@ -368,9 +369,9 @@ const theAutomaticApplication = () => {
 };
 
 //Events
-theEventHandler.subscribe('automaticProject', idUpdateData);
+theEventHandler.subscribe('automaticProject', idTypeUpdateData);
 theEventHandler.subscribe('automaticProject', theDOMDisplaySidebar);
-theEventHandler.subscribe('customProject', idUpdateData);
+theEventHandler.subscribe('customProject', idTypeUpdateData);
 theEventHandler.subscribe('customProject', theDOMDisplaySidebar);
 theEventHandler.subscribe('displayProject', theDOMDisplay);
 
