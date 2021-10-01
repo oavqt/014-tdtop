@@ -45,7 +45,7 @@ const objectTemplate = {
     );
   },
 
-  task: (projectStorage, title, description, category, date) => {
+  task: (projectStorage, title, description, date) => {
     const proto = {
       addDOMTask: theDOMTemplate.task,
       addNote: objectTemplate.note,
@@ -57,7 +57,7 @@ const objectTemplate = {
         Object.create(
           Object.assign(objectOption.addProtoOption('proto', 'task'), proto)
         ),
-        objectCreate.task(title, description, category, date),
+        objectCreate.task(title, description, date),
         objectOption.addOption('object', 'task'),
         { note: [] }
       )
@@ -96,11 +96,10 @@ const objectCreate = {
       description,
     };
   },
-  task: (title, description, category, date) => {
+  task: (title, description, date) => {
     return {
       title,
       description,
-      category,
       date,
     };
   },
@@ -218,12 +217,14 @@ const theProjectStorage = (() => {
       tProject.addList(tProject.list, title, description);
 
       //Events
-      idTypeUpdateData([getStorage(type), type]);
+      idTypeCategoryUpdateData([getStorage(type), type]);
     },
-    task: ([type, idList, idProject], title, description, category, date) => {
-      get
-        .list(type, idList, idProject)
-        .addTask(title, description, category, date);
+    task: ([type, idList, idProject], title, description, date) => {
+      const tProject = get.list(type, idList, idProject);
+      tProject.addTask(tProject.task, title, description, date);
+
+      //Events
+      idTypeCategoryUpdateData([getStorage(type), type]);
     },
     note: ([type, idTask, idList, idProject], title, description) => {
       get.task(type, idTask, idList, idProject).addNote(title, description);
@@ -235,7 +236,7 @@ const theProjectStorage = (() => {
       return getStorage(type)[idProject];
     },
     list: (type, idList, idProject) => {
-      return getStorage(type)[idProject][idList];
+      return getStorage(type)[idProject].list[idList];
     },
     task: (type, idTask, idList, idProject) => {
       return getStorage(type)[idProject].list[idList].task[idTask];
@@ -282,21 +283,52 @@ const theAutomaticProject = () => {
 };
 
 //Application DOM Data
-const idTypeUpdateData = ([projectStorage, type]) => {
+const idTypeCategoryUpdateData = ([projectStorage, type]) => {
+  typeUpdateData(projectStorage, type);
+  categoryUpdateData(projectStorage);
+  idUpdateData(projectStorage);
+};
+
+const idUpdateData = (projectStorage) => {
+  projectStorage.forEach((project) => {
+    project.list.forEach((list) => {
+      list.project = project.id;
+      list.task.forEach((task) => {
+        task.project = project.id;
+        task.list = list.id;
+        task.note.forEach((note) => {
+          note.project = project.id;
+          note.list = list.id;
+          note.task = task.id;
+        });
+      });
+    });
+  });
+};
+
+const typeUpdateData = (projectStorage, type) => {
   projectStorage.forEach((project) => {
     project.type = type;
     project.list.forEach((list) => {
       list.type = type;
-      list.project = project.id;
       list.task.forEach((task) => {
         task.type = type;
-        task.project = project.id;
-        task.list = list.id;
         task.note.forEach((note) => {
           note.type = type;
-          note.project = project.id;
-          note.list = list.id;
-          note.task = task.id;
+        });
+      });
+    });
+  });
+};
+
+const categoryUpdateData = (projectStorage) => {
+  projectStorage.forEach((project) => {
+    project.list.forEach((list) => {
+      list.category = project.title.toLowerCase();
+      list.task.forEach((task) => {
+        task.category = list.title.toLowerCase();
+        task.note.forEach((note) => {
+          note.category = task.title.toLowerCase();
         });
       });
     });
@@ -335,6 +367,7 @@ const theDOMDisplay = ([project]) => {
       list.title,
       list.description,
       list.type,
+      list.category,
       list.id
     );
     list.task.forEach((task) => {
@@ -342,9 +375,9 @@ const theDOMDisplay = ([project]) => {
         list.id,
         task.title,
         task.description,
-        task.category,
         task.date,
         task.type,
+        task.category,
         task.id,
         project.id
       );
@@ -354,6 +387,7 @@ const theDOMDisplay = ([project]) => {
           note.title,
           note.description,
           note.type,
+          note.category,
           note.id,
           project.id,
           list.id
@@ -369,9 +403,9 @@ const theAutomaticApplication = () => {
 };
 
 //Events
-theEventHandler.subscribe('automaticProject', idTypeUpdateData);
+theEventHandler.subscribe('automaticProject', idTypeCategoryUpdateData);
 theEventHandler.subscribe('automaticProject', theDOMDisplaySidebar);
-theEventHandler.subscribe('customProject', idTypeUpdateData);
+theEventHandler.subscribe('customProject', idTypeCategoryUpdateData);
 theEventHandler.subscribe('customProject', theDOMDisplaySidebar);
 theEventHandler.subscribe('displayProject', theDOMDisplay);
 

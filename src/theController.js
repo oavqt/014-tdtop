@@ -28,6 +28,7 @@ const theDisplayProjectEvent = function () {
 const theAddProjectListTaskNoteEvent = () => {
   theProjectButtonEvent();
   theListButtonEvent();
+  theTaskButtonEvent();
 };
 
 const theProjectButtonEvent = () => {
@@ -41,6 +42,7 @@ const theListButtonEvent = () => {
 const theTaskButtonEvent = () => {
   theDOMGet.theAddTask().forEach((task) => {
     task.addEventListener('click', addTask);
+    task.addEventListener('click', theDOMGetValue.cached.add);
   });
 };
 
@@ -59,6 +61,16 @@ const theProjectFormEvent = () => {
 const theListFormEvent = () => {
   theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
   theDOMGet.theFormButtonAdd().addEventListener('click', theFormAdd.list);
+};
+
+const theTaskFormEvent = () => {
+  theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
+  theDOMGet.theFormButtonAdd().addEventListener('click', theFormAdd.task);
+};
+
+const theNoteFormEvent = () => {
+  theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
+  theDOMGet.theFormButtonAdd().addEventListener('click', theFormAdd.note);
 };
 
 //Controller Tools
@@ -114,7 +126,7 @@ const theFormAdd = {
       theDOMGetValue.input.description()
     );
 
-    theSidebarButtonEvent();
+    theEvents();
     theFormCancel();
   },
   list: () => {
@@ -128,11 +140,24 @@ const theFormAdd = {
       theDOMGetValue.type.project(),
       theDOMGetValue.id.project()
     );
-    theSidebarButtonEvent();
+    theEvents();
     theFormCancel();
   },
-  task: () => {},
-  note: () => {},
+  task: () => {
+    theProjectStorage.add.task(
+      theDOMGetValue.id.list(),
+      theDOMGetValue.input.title(),
+      theDOMGetValue.input.description(),
+      theDOMGetValue.input.date()
+    );
+
+    theEvents();
+    theFormCancel();
+  },
+  note: () => {
+    theEvents();
+    theFormCancel();
+  },
 };
 
 const theFormCancel = function () {

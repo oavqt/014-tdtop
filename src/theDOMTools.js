@@ -21,19 +21,19 @@ const theDOMTemplate = {
       theDOMCreate.project(title, description, type, id)
     );
   },
-  list: (idProject, title, description, type, id) => {
+  list: (idProject, title, description, type, category, id) => {
     theDOMAppendTo.theProject(
       idProject,
-      theDOMCreate.list(title, description, type, id, idProject)
+      theDOMCreate.list(title, description, type, category, id, idProject)
     );
   },
   task: (
     idList,
     title,
     description,
-    category,
     date = '',
     type,
+    category,
     id,
     idProject
   ) => {
@@ -43,21 +43,30 @@ const theDOMTemplate = {
       theDOMCreate.task(
         title,
         description,
-        category,
         date,
         type,
+        category,
         id,
         idProject,
         idList
       )
     );
   },
-  note: (idTask, title, description, type, id, idProject, idList) => {
+  note: (idTask, title, description, type, category, id, idProject, idList) => {
     theDOMAppendTo.theTask(
       idTask,
       idProject,
       idList,
-      theDOMCreate.note(title, description, type, id, idProject, idList, idTask)
+      theDOMCreate.note(
+        title,
+        description,
+        type,
+        category,
+        id,
+        idProject,
+        idList,
+        idTask
+      )
     );
   },
   form: (projectListTaskNote) => {
@@ -204,6 +213,9 @@ const theDOMGet = {
   theFormDescription: () => {
     return document.querySelector('.textarea--description');
   },
+  theFormDate: () => {
+    return document.querySelector('.input--date');
+  },
   theFormButtonCancel: () => {
     return document.querySelector('.form__button .button--cancel');
   },
@@ -213,12 +225,35 @@ const theDOMGet = {
 };
 
 const theDOMGetValue = {
+  cached: (() => {
+    let element = {};
+
+    const add = function () {
+      Object.assign(element, this.dataset);
+    };
+
+    return { element, add };
+  })(),
+  type: {
+    project: () => {
+      return theDOMGet.theDisplayProject().dataset.type;
+    },
+  },
+  category: {
+    task: () => {
+      return theDOMGetValue.cached.element.category;
+    },
+  },
   id: {
     project: () => {
       return theDOMGet.theDisplayProject().dataset.id;
     },
-    list: (idList, idProject) => {
-      return theDOMGet.theList(idList, idProject);
+    list: () => {
+      return [
+        theDOMGetValue.cached.element.type,
+        theDOMGetValue.cached.element.id,
+        theDOMGetValue.cached.element.project,
+      ];
     },
     task: (idTask, idList, idProject) => {
       return theDOMGet.theTask(idTask, idList, idProject);
@@ -227,17 +262,15 @@ const theDOMGetValue = {
       return theDOMGet.theNote(idNote, idTask, idList, idProject);
     },
   },
-  type: {
-    project: () => {
-      return theDOMGet.theDisplayProject().dataset.type;
-    },
-  },
   input: {
     title: () => {
       return theDOMGet.theFormTitle().value;
     },
     description: () => {
       return theDOMGet.theFormDescription().value;
+    },
+    date: () => {
+      return theDOMGet.theFormDate().value;
     },
   },
 };
@@ -344,12 +377,13 @@ const theDOMCreate = {
     );
     return element;
   },
-  list: (title, description, type, id, idProject) => {
+  list: (title, description, type, category, id, idProject) => {
     const element = theElement.create(
       'div',
       {
         class: 'project__list',
         ['data-type']: type,
+        ['data-category']: category,
         ['data-id']: id,
         ['data-project']: idProject,
       },
@@ -369,6 +403,7 @@ const theDOMCreate = {
                 class: 'input--checkbox',
                 type: 'checkbox',
                 ['data-type']: type,
+                ['data-category']: category,
                 ['data-id']: id,
                 ['data-project']: idProject,
               }),
@@ -388,6 +423,7 @@ const theDOMCreate = {
               {
                 class: 'button--add',
                 ['data-type']: type,
+                ['data-category']: category,
                 ['data-id']: id,
                 ['data-project']: idProject,
               },
@@ -404,6 +440,7 @@ const theDOMCreate = {
             {
               class: 'button--edit',
               ['data-type']: type,
+              ['data-category']: category,
               ['data-id']: id,
               ['data-project']: idProject,
             },
@@ -414,6 +451,7 @@ const theDOMCreate = {
             {
               class: 'button--delete',
               ['data-type']: type,
+              ['data-category']: category,
               ['data-id']: id,
               ['data-project']: idProject,
             },
@@ -429,12 +467,13 @@ const theDOMCreate = {
     );
     return element;
   },
-  task: (title, description, category, date, type, id, idProject, idList) => {
+  task: (title, description, date, type, category, id, idProject, idList) => {
     const element = theElement.create(
       'div',
       {
         class: 'list__task',
         ['data-type']: type,
+        ['data-category']: category,
         ['data-id']: id,
         ['data-project']: idProject,
         ['data-list']: idList,
@@ -455,6 +494,7 @@ const theDOMCreate = {
                 class: 'input--checkbox',
                 type: 'checkbox',
                 ['data-type']: type,
+                ['data-category']: category,
                 ['data-id']: id,
                 ['data-project']: idProject,
                 ['data-list']: idList,
@@ -475,6 +515,7 @@ const theDOMCreate = {
               {
                 class: 'button--add',
                 ['data-type']: type,
+                ['data-category']: category,
                 ['data-id']: id,
                 ['data-project']: idProject,
                 ['data-list']: idList,
@@ -492,6 +533,7 @@ const theDOMCreate = {
             {
               class: 'button--edit',
               ['data-type']: type,
+              ['data-category']: category,
               ['data-id']: id,
               ['data-project']: idProject,
               ['data-list']: idList,
@@ -503,6 +545,7 @@ const theDOMCreate = {
             {
               class: 'button--delete',
               ['data-type']: type,
+              ['data-category']: category,
               ['data-id']: id,
               ['data-project']: idProject,
               ['data-list']: idList,
@@ -537,12 +580,13 @@ const theDOMCreate = {
     );
     return element;
   },
-  note: (title, description, type, id, idProject, idList, idTask) => {
+  note: (title, description, type, category, id, idProject, idList, idTask) => {
     const element = theElement.create(
       'div',
       {
         class: 'task__note',
         ['data-type']: type,
+        ['data-category']: category,
         ['data-id']: id,
         ['data-project']: idProject,
         ['data-list']: idList,
@@ -564,6 +608,7 @@ const theDOMCreate = {
                 class: 'input--checkbox',
                 type: 'checkbox',
                 ['data-type']: type,
+                ['data-category']: category,
                 ['data-id']: id,
                 ['data-project']: idProject,
                 ['data-list']: idList,
@@ -586,6 +631,7 @@ const theDOMCreate = {
             {
               class: 'button--edit',
               ['data-type']: type,
+              ['data-category']: category,
               ['data-id']: id,
               ['data-project']: idProject,
               ['data-list']: idList,
@@ -598,6 +644,7 @@ const theDOMCreate = {
             {
               class: 'button--delete',
               ['data-type']: type,
+              ['data-category']: category,
               ['data-id']: id,
               ['data-project']: idProject,
               ['data-list']: idList,
@@ -673,7 +720,82 @@ const theDOMCreate = {
     );
     return element;
   },
-  taskForm: () => {},
+  taskForm: (projectListNote) => {
+    const element = theElement.create(
+      'div',
+      { class: 'display__form' },
+      theElement.create(
+        'div',
+        { class: 'form__title' },
+        theElement.create(
+          'h1',
+          { class: 'title__text' },
+          `Add ${projectListNote}`
+        )
+      ),
+      theElement.create(
+        'div',
+        { class: 'form__body' },
+        theElement.create(
+          'form',
+          { class: 'form--body' },
+          theElement.create(
+            'div',
+            { class: 'body__misc' },
+            theElement.create(
+              'div',
+              { class: 'misc__project' },
+              theElement.create('span', { class: 'project__text' }, 'YEPYEPYEP')
+            ),
+            theElement.create(
+              'lable',
+              { class: 'label--date' },
+              'Date',
+              theElement.create('input', {
+                class: 'input--date',
+                type: 'date',
+              })
+            )
+          ),
+          theElement.create(
+            'label',
+            { class: 'label--title' },
+            theElement.create('span', { class: 'body__title' }, 'Title'),
+            theElement.create('input', {
+              class: 'input--title',
+              type: 'text',
+            })
+          ),
+          theElement.create(
+            'label',
+            { class: 'label--description' },
+            theElement.create(
+              'span',
+              { class: 'body__description' },
+              'Description'
+            ),
+            theElement.create('textarea', {
+              class: 'textarea--description',
+            })
+          )
+        )
+      ),
+      theElement.create(
+        'div',
+        { class: 'form__button' },
+        theElement.create('button', { class: 'button--cancel' }, 'Cancel'),
+        theElement.create(
+          'button',
+          {
+            class: 'button--add',
+            ['data-type']: projectListNote.toLowerCase(),
+          },
+          'Add'
+        )
+      )
+    );
+    return element;
+  },
 };
 
 export { theDOMTemplate, theDOMAppendTo, theDOMGet, theDOMGetValue };
