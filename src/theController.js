@@ -54,14 +54,16 @@ const removeProjectButtonEvent = () => {
 const removeListButtonEvent = () => {
   theDOMGet.theRemoveList().forEach((list) => {
     list.addEventListener('click', removeList);
+    list.addEventListener('click', theDOMGetValue.cached.add);
   });
 };
 
-// const removeTaskButtonEvent = () => {
-//   theDOMGet.theRemoveTask().forEach((task) => {
-//     task.addEventListener('click', removeTask);
-//   });
-// };
+const removeTaskButtonEvent = () => {
+  theDOMGet.theRemoveTask().forEach((task) => {
+    task.addEventListener('click', removeTask);
+    task.addEventListener('click', theDOMGetValue.cached.add);
+  });
+};
 
 // const removeNoteButtonEvent = () => {
 //   theDOMGet.theRemoveNote().forEach((note) => {
@@ -113,12 +115,12 @@ const removeListFormEvent = () => {
     .addEventListener('click', removeProjectListTaskNote.list);
 };
 
-// const removeTaskFormEvent = () => {
-//   theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
-//   theDOMGet
-//     .theFormButtonRemove()
-//     .addEventListener('click', removeProjectListTaskNote.task);
-// };
+const removeTaskFormEvent = () => {
+  theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
+  theDOMGet
+    .theFormButtonRemove()
+    .addEventListener('click', removeProjectListTaskNote.task);
+};
 
 // const removeNoteFormEvent = () => {
 //   theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
@@ -152,7 +154,7 @@ const addProjectListTaskNoteEvent = () => {
 const removeProjectListTaskNoteEvent = () => {
   removeProjectButtonEvent();
   removeListButtonEvent();
-  //   // removeTaskButtonEvent();
+  removeTaskButtonEvent();
   //   // removeNoteButtonEvent();
 };
 
@@ -287,10 +289,10 @@ const removeList = function () {
   removeListFormEvent();
 };
 
-// const removeTask = function () {
-//   theDOMTemplate.form('Task');
-//   theTaskFormEvent();
-// };
+const removeTask = function () {
+  theDOMTemplate.removeForm('Task');
+  removeTaskFormEvent();
+};
 
 // const removeNote = function () {
 //   theDOMTemplate.form('Note');
@@ -310,19 +312,17 @@ const removeProjectListTaskNote = {
     theFormCancel();
   },
   list: () => {
-    theProjectStorage.remove.list(
-      theDOMGetValue.type.project(),
-      theDOMGetValue.type.project(),
-      theDOMGetValue.id.project()
-    );
+    theProjectStorage.remove.list(theDOMGetValue.id.list());
 
     theEvents();
     theFormCancel();
   },
-  // task: () => {
-  //   theEvents();
-  //   theFormCancel();
-  // },
+  task: () => {
+    theProjectStorage.remove.task(theDOMGetValue.id.task());
+
+    theEvents();
+    theFormCancel();
+  },
   // note: () => {
   //   theEvents();
   //   theFormCancel();

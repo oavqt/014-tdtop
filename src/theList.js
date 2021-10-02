@@ -262,8 +262,15 @@ const theProjectStorage = (() => {
       idUpdateDataIndex(getStorage(type));
       theEventHandler.publish(type, [getStorage(type), type]);
     },
-    list: (type, id, idProject) => {
+    list: ([type, id, idProject]) => {
       getStorage(type)[idProject].list.splice(id, 1);
+
+      //Events
+      idUpdateDataIndex(getStorage(type));
+      theEventHandler.publish('theDisplayUpdate', [type, idProject]);
+    },
+    task: ([type, id, idList, idProject]) => {
+      getStorage(type)[idProject].list[idList].task.splice(id, 1);
 
       //Events
       idUpdateDataIndex(getStorage(type));
