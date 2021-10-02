@@ -602,12 +602,16 @@ const theDOMCreate = {
           theElement.create(
             'div',
             { class: 'misc__category' },
-            theElement.create('span', { class: 'category__text' }, category)
+            theElement.create(
+              'span',
+              { class: 'category__text' },
+              `Category: ${category}`
+            )
           ),
           theElement.create(
             'div',
             { class: 'misc__date' },
-            theElement.create('span', { class: 'date__text' }, date)
+            theElement.create('span', { class: 'date__text' }, `Date: ${date}`)
           )
         )
       )
@@ -774,31 +778,26 @@ const theDOMCreate = {
           'form',
           { class: 'form--body' },
           theElement.create(
-            'div',
-            { class: 'body__misc' },
+            'label',
+            { class: '--flex' },
             theElement.create(
-              'div',
-              { class: 'misc__project' },
-              theElement.create('span', { class: 'project__text' }, 'YEPYEPYEP')
+              'label',
+              { class: 'label--title' },
+              theElement.create('span', { class: 'body__title' }, 'Title'),
+              theElement.create('input', {
+                class: 'input--title',
+                type: 'text',
+              })
             ),
             theElement.create(
               'lable',
               { class: 'label--date' },
-              'Date',
+              theElement.create('span', { class: 'body__date' }, 'Date'),
               theElement.create('input', {
                 class: 'input--date',
                 type: 'date',
               })
             )
-          ),
-          theElement.create(
-            'label',
-            { class: 'label--title' },
-            theElement.create('span', { class: 'body__title' }, 'Title'),
-            theElement.create('input', {
-              class: 'input--title',
-              type: 'text',
-            })
           ),
           theElement.create(
             'label',

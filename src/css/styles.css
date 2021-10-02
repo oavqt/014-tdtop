@@ -104,6 +104,13 @@ button:hover {
   margin-left: 2em;
 }
 
+form {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .display__form {
   align-items: center;
   background: white;
@@ -117,16 +124,39 @@ button:hover {
   width: 100%;
 }
 
+.form__body {
+  width: 75%;
+}
+
 .form__button {
+  align-items: center;
   display: flex;
   justify-content: space-evenly;
-  width: 9em;
+  margin-top: 1em;
+  width: 10em;
+}
+
+.form__button .button--add {
+  background: #58a6ff;
+  color: white;
 }
 
 .form__button .button--cancel,
 .form__button .button--add {
-  height: 2em;
-  width: 4em;
+  height: 2.5em;
+  justify-content: center;
+  width: 6em;
+}
+
+.form__button .button--remove {
+  color: white;
+  background: #db2b39;
+  height: 2.5em;
+  width: 6em;
+}
+
+.form__title {
+  margin-bottom: 1em;
 }
 
 .img--body {
@@ -197,6 +227,10 @@ input:checked + .checkbox__custom::after {
   to {
     transform: rotate(45deg);
   }
+}
+
+label {
+  width: 100%;
 }
 
 textarea {
@@ -376,6 +410,10 @@ textarea:focus {
 .body__misc {
   display: flex;
   justify-content: space-between;
+}
+
+.misc__date {
+  margin-left: 1em;
 }
 
 /*Note*/

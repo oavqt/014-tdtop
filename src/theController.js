@@ -31,44 +31,44 @@ const addListButtonEvent = () => {
 
 const addTaskButtonEvent = () => {
   theDOMGet.theAddTask().forEach((task) => {
-    task.addEventListener('click', addTask);
     task.addEventListener('click', theDOMGetValue.cached.add);
+    task.addEventListener('click', addTask);
   });
 };
 
 const addNoteButtonEvent = () => {
   theDOMGet.theAddNote().forEach((note) => {
-    note.addEventListener('click', addNote);
     note.addEventListener('click', theDOMGetValue.cached.add);
+    note.addEventListener('click', addNote);
   });
 };
 
 // Remove Events
 const removeProjectButtonEvent = () => {
-  theDOMGet.theCurrentProjectRemove().addEventListener('click', removeProject);
   theDOMGet
     .theCurrentProjectRemove()
     .addEventListener('click', theDOMGetValue.cached.add);
+  theDOMGet.theCurrentProjectRemove().addEventListener('click', removeProject);
 };
 
 const removeListButtonEvent = () => {
   theDOMGet.theRemoveList().forEach((list) => {
-    list.addEventListener('click', removeList);
     list.addEventListener('click', theDOMGetValue.cached.add);
+    list.addEventListener('click', removeList);
   });
 };
 
 const removeTaskButtonEvent = () => {
   theDOMGet.theRemoveTask().forEach((task) => {
-    task.addEventListener('click', removeTask);
     task.addEventListener('click', theDOMGetValue.cached.add);
+    task.addEventListener('click', removeTask);
   });
 };
 
 const removeNoteButtonEvent = () => {
   theDOMGet.theRemoveNote().forEach((note) => {
-    note.addEventListener('click', removeNote);
     note.addEventListener('click', theDOMGetValue.cached.add);
+    note.addEventListener('click', removeNote);
   });
 };
 
