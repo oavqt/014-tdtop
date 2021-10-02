@@ -64,7 +64,7 @@ button:hover {
   width: 7em;
 }
 
-.button--delete,
+.button--remove,
 .button--edit {
   align-items: center;
   background: transparent;

@@ -1,104 +1,163 @@
 import { theDOMGet, theDOMGetValue, theDOMTemplate } from './theDOMTools';
+import { theEventHandler } from './theHandler';
 import { theProjectStorage } from './theList';
 
 const theEvents = () => {
   theSidebarButtonEvent();
-  theAddProjectListTaskNoteEvent();
+  addProjectListTaskNoteEvent();
+  removeProjectListTaskNoteEvent();
 };
 
 //Sidebar Button Events
 const theSidebarButtonEvent = () => {
   theDOMGet.theSidebarAutomaticButtons().forEach((button) => {
-    button.addEventListener('click', theDisplayProjectEvent);
+    button.addEventListener('click', theCurrentProjectEvent);
   });
 
   theDOMGet.theSidebarCustomButtons().forEach((button) => {
-    button.addEventListener('click', theDisplayProjectEvent);
+    button.addEventListener('click', theCurrentProjectEvent);
   });
 };
 
-const theDisplayProjectEvent = function () {
-  theSidebarButtonStyleRemove();
-  theSidebarButtonStyleAdd(this);
-  theDisplayRemove();
-  theDisplayAdd(this.dataset.type, this.dataset.id);
-  theAddProjectListTaskNoteEvent();
-};
-
-//ProjectListTaskNote Button Events
-const theAddProjectListTaskNoteEvent = () => {
-  theProjectButtonEvent();
-  theListButtonEvent();
-  theTaskButtonEvent();
-  theNoteButtonEvent();
-};
-
-const theProjectButtonEvent = () => {
+//Project-List-Task-Note Button Events
+//Add Events
+const addProjectButtonEvent = () => {
   theDOMGet.theAddProject().addEventListener('click', addProject);
 };
 
-const theListButtonEvent = () => {
+const addListButtonEvent = () => {
   theDOMGet.theAddList().addEventListener('click', addList);
 };
 
-const theTaskButtonEvent = () => {
-  console.log(theDOMGet.theAddTask());
+const addTaskButtonEvent = () => {
   theDOMGet.theAddTask().forEach((task) => {
     task.addEventListener('click', addTask);
     task.addEventListener('click', theDOMGetValue.cached.add);
   });
 };
 
-const theNoteButtonEvent = () => {
+const addNoteButtonEvent = () => {
   theDOMGet.theAddNote().forEach((note) => {
     note.addEventListener('click', addNote);
     note.addEventListener('click', theDOMGetValue.cached.add);
   });
 };
 
+// Remove Events
+const removeProjectButtonEvent = () => {
+  theDOMGet.theCurrentProjectRemove().addEventListener('click', removeProject);
+  theDOMGet
+    .theCurrentProjectRemove()
+    .addEventListener('click', theDOMGetValue.cached.add);
+};
+
+// const removeListButtonEvent = () => {
+//   theDOMGet.theRemoveList().forEach((list) => {
+//     list.addEventListener('click', removeList);
+//   });
+// };
+
+// const removeTaskButtonEvent = () => {
+//   theDOMGet.theRemoveTask().forEach((task) => {
+//     task.addEventListener('click', removeTask);
+//   });
+// };
+
+// const removeNoteButtonEvent = () => {
+//   theDOMGet.theRemoveNote().forEach((note) => {
+//     note.addEventListener('click', removeNote);
+//   });
+// };
+
 //Form Events
-const theProjectFormEvent = () => {
+//Add Events
+const addProjectFormEvent = () => {
   theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
-  theDOMGet.theFormButtonAdd().addEventListener('click', theFormAdd.project);
+  theDOMGet
+    .theFormButtonAdd()
+    .addEventListener('click', addProjectListTaskNote.project);
 };
 
-const theListFormEvent = () => {
+const addListFormEvent = () => {
   theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
-  theDOMGet.theFormButtonAdd().addEventListener('click', theFormAdd.list);
+  theDOMGet
+    .theFormButtonAdd()
+    .addEventListener('click', addProjectListTaskNote.list);
 };
 
-const theTaskFormEvent = () => {
+const addTaskFormEvent = () => {
   theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
-  theDOMGet.theFormButtonAdd().addEventListener('click', theFormAdd.task);
+  theDOMGet
+    .theFormButtonAdd()
+    .addEventListener('click', addProjectListTaskNote.task);
 };
 
-const theNoteFormEvent = () => {
+const addNoteFormEvent = () => {
   theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
-  theDOMGet.theFormButtonAdd().addEventListener('click', theFormAdd.note);
+  theDOMGet
+    .theFormButtonAdd()
+    .addEventListener('click', addProjectListTaskNote.note);
 };
+//Remove Events
+const removeProjectFormEvent = () => {
+  theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
+  theDOMGet
+    .theFormButtonRemove()
+    .addEventListener('click', removeProjectListTaskNote.project);
+};
+
+// const removeListFormEvent = () => {
+//   theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
+//   theDOMGet
+//     .theFormButtonRemove()
+//     .addEventListener('click', removeProjectListTaskNote.list);
+// };
+
+// const removeTaskFormEvent = () => {
+//   theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
+//   theDOMGet
+//     .theFormButtonRemove()
+//     .addEventListener('click', removeProjectListTaskNote.task);
+// };
+
+// const removeNoteFormEvent = () => {
+//   theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
+//   theDOMGet
+//     .theFormButtonRemove()
+//     .addEventListener('click', removeProjectListTaskNote.note);
+// };
 
 //Controller Tools
+//Default Project
+const theDefaultProject = () => {
+  theSidebarButtonStyleAdd(theDOMGet.theSidebarDefaultProject());
+};
+
+theEventHandler.subscribe('theDefaultProject', theDefaultProject);
 //Controller Event Functions
-const addProject = function () {
-  theDOMTemplate.form('Project');
-  theProjectFormEvent();
+const theCurrentProjectEvent = function () {
+  theSidebarButtonStyleRemove();
+  theSidebarButtonStyleAdd(this);
+  theDisplayRemove();
+  theDisplayAdd(this.dataset.type, this.dataset.id);
+  theEvents();
 };
 
-const addList = function () {
-  theDOMTemplate.form('List');
-  theListFormEvent();
+const addProjectListTaskNoteEvent = () => {
+  addProjectButtonEvent();
+  addListButtonEvent();
+  addTaskButtonEvent();
+  addNoteButtonEvent();
 };
 
-const addTask = function () {
-  theDOMTemplate.form('Task');
-  theTaskFormEvent();
+const removeProjectListTaskNoteEvent = () => {
+  removeProjectButtonEvent();
+  //   // removeListButtonEvent();
+  //   // removeTaskButtonEvent();
+  //   // removeNoteButtonEvent();
 };
 
-const addNote = function () {
-  theDOMTemplate.form('Note');
-  theNoteFormEvent();
-};
-
+//Display Functions
 const theDisplayAdd = (type, idProject) => {
   theProjectStorage.display.project(type, idProject);
 
@@ -120,7 +179,36 @@ const theDisplayRemove = () => {
   }
 };
 
-const theFormAdd = {
+const theDisplaySidebarRemove = () => {
+  while (theDOMGet.theSidebarCustom().firstChild) {
+    theDOMGet
+      .theSidebarCustom()
+      .removeChild(theDOMGet.theSidebarCustom().lastChild);
+  }
+};
+
+//Add Functions
+const addProject = function () {
+  theDOMTemplate.addForm('Project');
+  addProjectFormEvent();
+};
+
+const addList = function () {
+  theDOMTemplate.addForm('List');
+  addListFormEvent();
+};
+
+const addTask = function () {
+  theDOMTemplate.addForm('Task');
+  addTaskFormEvent();
+};
+
+const addNote = function () {
+  theDOMTemplate.addForm('Note');
+  addNoteFormEvent();
+};
+
+const addProjectListTaskNote = {
   project: () => {
     const type = 'customProject';
 
@@ -185,6 +273,57 @@ const theFormCancel = function () {
   theDOMGet.theForm().remove();
 };
 
+//Remove Functions
+const removeProject = function () {
+  theDOMTemplate.removeForm('Project');
+  removeProjectFormEvent();
+
+  //Events
+  theDisplayRemove();
+  theEventHandler.publish('theDefaultProject', true);
+};
+
+// const removeList = function () {
+//   theDOMTemplate.form('List');
+//   theListFormEvent();
+// };
+
+// const removeTask = function () {
+//   theDOMTemplate.form('Task');
+//   theTaskFormEvent();
+// };
+
+// const removeNote = function () {
+//   theDOMTemplate.form('Note');
+//   theNoteFormEvent();
+// };
+
+const removeProjectListTaskNote = {
+  project: () => {
+    theDisplaySidebarRemove();
+
+    theProjectStorage.remove.project(
+      theDOMGetValue.type.project(),
+      theDOMGetValue.id.project()
+    );
+
+    theEvents();
+    theFormCancel();
+  },
+  // list: () => {
+  //   theEvents();
+  //   theFormCancel();
+  // },
+  // task: () => {
+  //   theEvents();
+  //   theFormCancel();
+  // },
+  // note: () => {
+  //   theEvents();
+  //   theFormCancel();
+  // },
+};
+
 //Add HTMLCSS Classes
 //CSS Options
 const theHTMLClass = {
@@ -231,9 +370,9 @@ const theSidebarButtonStyleRemove = () => {
 };
 
 const TheCustomProjectStyleAdd = () => {
-  theHTMLClass.add.displayFlex(theDOMGet.theDisplayProjectEdit());
-  theHTMLClass.add.displayFlex(theDOMGet.theDisplayProjectDelete());
-  theHTMLClass.add.displayBlock(theDOMGet.theDisplayProjectCheckbox());
+  theHTMLClass.add.displayFlex(theDOMGet.theCurrentProjectEdit());
+  theHTMLClass.add.displayFlex(theDOMGet.theCurrentProjectRemove());
+  theHTMLClass.add.displayBlock(theDOMGet.theCurrentProjectCheckbox());
 };
 
 export { theEvents };

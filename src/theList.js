@@ -257,6 +257,10 @@ const theProjectStorage = (() => {
       } else {
         getStorage(type).splice(0);
       }
+
+      //Events
+      idProjectUpdateData(getStorage(type));
+      theEventHandler.publish(type, [getStorage(type), type]);
     },
   };
 
@@ -284,6 +288,15 @@ const theAutomaticProject = () => {
   theProjectStorage.add.project(automatic, 'Someday', 'Someday ');
   theProjectStorage.add.project(automatic, 'Never', 'Never');
   theProjectStorage.add.project(automatic, 'Logbook', 'Logbook');
+  theDefaultProject();
+};
+
+//Default Project
+const theDefaultProject = () => {
+  theProjectStorage.display.project('automaticProject', '1');
+
+  //Events
+  theEventHandler.publish('theDefaultProjectStyle', true);
 };
 
 //Application DOM Data
@@ -291,6 +304,12 @@ const idTypeCategoryUpdateData = ([projectStorage, type]) => {
   typeUpdateData(projectStorage, type);
   categoryUpdateData(projectStorage);
   idUpdateData(projectStorage);
+};
+
+const idProjectUpdateData = (projectStorage) => {
+  projectStorage.forEach((project) => {
+    project.id = projectStorage.indexOf(project);
+  });
 };
 
 const idUpdateData = (projectStorage) => {
@@ -340,7 +359,6 @@ const categoryUpdateData = (projectStorage) => {
 };
 
 const theDOMDisplaySidebar = ([projectStorage, type, project]) => {
-  const tProjectStorage = projectStorage;
   let addDOMAutoCutomProject;
 
   if (type === 'automaticProject') {
@@ -352,7 +370,8 @@ const theDOMDisplaySidebar = ([projectStorage, type, project]) => {
   if (project) {
     project[addDOMAutoCutomProject](project.title, project.type, project.id);
   } else {
-    tProjectStorage.forEach((project) => {
+    projectStorage.forEach((project) => {
+      console.log(project);
       project[addDOMAutoCutomProject](project.title, project.type, project.id);
     });
   }
@@ -412,5 +431,6 @@ theEventHandler.subscribe('automaticProject', theDOMDisplaySidebar);
 theEventHandler.subscribe('customProject', idTypeCategoryUpdateData);
 theEventHandler.subscribe('customProject', theDOMDisplaySidebar);
 theEventHandler.subscribe('displayProject', theDOMDisplay);
+theEventHandler.subscribe('theDefaultProject', theDefaultProject);
 
 export { theAutomaticApplication, theProjectStorage };

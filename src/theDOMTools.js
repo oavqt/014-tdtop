@@ -69,7 +69,7 @@ const theDOMTemplate = {
       )
     );
   },
-  form: (projectListTaskNote) => {
+  addForm: (projectListTaskNote) => {
     if (projectListTaskNote === 'Task') {
       theDOMAppendTo.theDemo(theDOMCreate.taskForm(projectListTaskNote));
     } else {
@@ -77,6 +77,9 @@ const theDOMTemplate = {
         theDOMCreate.projectListNoteForm(projectListTaskNote)
       );
     }
+  },
+  removeForm: (projectListTaskNote) => {
+    theDOMAppendTo.theDemo(theDOMCreate.removeForm(projectListTaskNote));
   },
 };
 
@@ -134,20 +137,23 @@ const theDOMGet = {
   theSidebarCustom: () => {
     return document.querySelector('.sidebar__custom');
   },
+  theSidebarDefaultProject: () => {
+    return document.querySelector('.button--today');
+  },
   theDisplayBody: () => {
     return document.querySelector('.display__body');
   },
-  theDisplayProject: () => {
+  theCurrentProject: () => {
     return document.querySelector('.body__project');
   },
-  theDisplayProjectCheckbox: () => {
+  theCurrentProjectCheckbox: () => {
     return document.querySelector('.body__project .body__checkbox');
   },
-  theDisplayProjectEdit: () => {
+  theCurrentProjectEdit: () => {
     return document.querySelector('.body__project .button--edit');
   },
-  theDisplayProjectDelete: () => {
-    return document.querySelector('.body__project .button--delete');
+  theCurrentProjectRemove: () => {
+    return document.querySelector('.body__project .button--remove');
   },
   theAddProject: () => {
     return document.querySelector('.sidebar__add .button--add');
@@ -160,6 +166,24 @@ const theDOMGet = {
   },
   theAddNote: () => {
     return document.querySelectorAll('.task__title .button--add');
+  },
+  theRemoveProject: () => {
+    return document.querySelectorAll('.project__title .button--remove');
+  },
+  theRemoveList: () => {
+    return document.querySelectorAll('.list__title .button--remove');
+  },
+  theRemoveTask: () => {
+    return document.querySelectorAll('.task__title .button--remove');
+  },
+  theRemoveNote: () => {
+    return document.querySelectorAll('.note__title .button--remove');
+  },
+  theSidebarProject: (idProject) => {
+    const projects = [...document.querySelectorAll('.sidebar__custom div')];
+    return projects.filter(
+      (project) => project.dataset.id === idProject.toString()
+    )[0];
   },
   theProject: (idProject) => {
     const projects = [...document.querySelectorAll('.body__project')];
@@ -200,10 +224,6 @@ const theDOMGet = {
   theSidebarCustomButtons: () => {
     return document.querySelectorAll('.sidebar__custom button');
   },
-  theProjectButton: (idProject) => {
-    const buttons = document.querySelectorAll('.demo__sidebar button');
-    return buttons.filter((button) => button.id === idProject.toString())[0];
-  },
   theForm: () => {
     return document.querySelector('.display__form');
   },
@@ -222,6 +242,9 @@ const theDOMGet = {
   theFormButtonAdd: () => {
     return document.querySelector('.form__button .button--add');
   },
+  theFormButtonRemove: () => {
+    return document.querySelector('.form__button .button--remove');
+  },
 };
 
 const theDOMGetValue = {
@@ -236,7 +259,7 @@ const theDOMGetValue = {
   })(),
   type: {
     project: () => {
-      return theDOMGet.theDisplayProject().dataset.type;
+      return theDOMGet.theCurrentProject().dataset.type;
     },
   },
   category: {
@@ -246,7 +269,7 @@ const theDOMGetValue = {
   },
   id: {
     project: () => {
-      return theDOMGet.theDisplayProject().dataset.id;
+      return theDOMGet.theCurrentProject().dataset.id;
     },
     list: () => {
       return [
@@ -375,8 +398,8 @@ const theDOMCreate = {
           ),
           theElement.create(
             'button',
-            { class: 'button--delete', ['data-type']: type, ['data-id']: id },
-            theElement.create('img', { class: 'img--delete', src: trash })
+            { class: 'button--remove', ['data-type']: type, ['data-id']: id },
+            theElement.create('img', { class: 'img--remove', src: trash })
           )
         )
       ),
@@ -460,13 +483,13 @@ const theDOMCreate = {
           theElement.create(
             'button',
             {
-              class: 'button--delete',
+              class: 'button--remove',
               ['data-type']: type,
               ['data-category']: category,
               ['data-id']: id,
               ['data-project']: idProject,
             },
-            theElement.create('img', { class: 'img--delete', src: trash })
+            theElement.create('img', { class: 'img--remove', src: trash })
           )
         )
       ),
@@ -554,14 +577,14 @@ const theDOMCreate = {
           theElement.create(
             'button',
             {
-              class: 'button--delete',
+              class: 'button--remove',
               ['data-type']: type,
               ['data-category']: category,
               ['data-id']: id,
               ['data-project']: idProject,
               ['data-list']: idList,
             },
-            theElement.create('img', { class: 'img--delete', src: trash })
+            theElement.create('img', { class: 'img--remove', src: trash })
           )
         )
       ),
@@ -653,7 +676,7 @@ const theDOMCreate = {
           theElement.create(
             'button',
             {
-              class: 'button--delete',
+              class: 'button--remove',
               ['data-type']: type,
               ['data-category']: category,
               ['data-id']: id,
@@ -661,7 +684,7 @@ const theDOMCreate = {
               ['data-list']: idList,
               ['data-task']: idTask,
             },
-            theElement.create('img', { class: 'img--delete', src: trash })
+            theElement.create('img', { class: 'img--remove', src: trash })
           )
         )
       ),
@@ -803,6 +826,28 @@ const theDOMCreate = {
           },
           'Add'
         )
+      )
+    );
+    return element;
+  },
+  removeForm: (projectListNoteTask) => {
+    const element = theElement.create(
+      'div',
+      { class: 'display__form' },
+      theElement.create(
+        'div',
+        { class: 'form__title' },
+        theElement.create(
+          'h1',
+          { class: 'title__text' },
+          `Are you sure you want to remove this ${projectListNoteTask}?`
+        )
+      ),
+      theElement.create(
+        'div',
+        { class: 'form__button' },
+        theElement.create('button', { class: 'button--cancel' }, 'Cancel'),
+        theElement.create('button', { class: 'button--remove' }, 'Remove')
       )
     );
     return element;
