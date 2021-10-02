@@ -217,21 +217,21 @@ const theProjectStorage = (() => {
       tProject.addList(tProject.list, title, description);
 
       //Events
-      idTypeCategoryUpdateData([getStorage(type), type]);
+      idTypeCategoryIndexUpdateData([getStorage(type), type]);
     },
     task: ([type, idList, idProject], title, description, date) => {
       const tProject = get.list(type, idList, idProject);
       tProject.addTask(tProject.task, title, description, date);
 
       //Events
-      idTypeCategoryUpdateData([getStorage(type), type]);
+      idTypeCategoryIndexUpdateData([getStorage(type), type]);
     },
     note: ([type, idTask, idList, idProject], title, description) => {
       const tProject = get.task(type, idTask, idList, idProject);
       tProject.addNote(tProject.note, title, description);
 
       //Events
-      idTypeCategoryUpdateData([getStorage(type), type]);
+      idTypeCategoryIndexUpdateData([getStorage(type), type]);
     },
   };
 
@@ -259,8 +259,15 @@ const theProjectStorage = (() => {
       }
 
       //Events
-      idProjectUpdateData(getStorage(type));
+      idUpdateDataIndex(getStorage(type));
       theEventHandler.publish(type, [getStorage(type), type]);
+    },
+    list: (type, id, idProject) => {
+      getStorage(type)[idProject].list.splice(id, 1);
+
+      //Events
+      idUpdateDataIndex(getStorage(type));
+      theEventHandler.publish('theDisplayUpdate', [type, idProject]);
     },
   };
 
@@ -300,16 +307,11 @@ const theDefaultProject = () => {
 };
 
 //Application DOM Data
-const idTypeCategoryUpdateData = ([projectStorage, type]) => {
+const idTypeCategoryIndexUpdateData = ([projectStorage, type]) => {
   typeUpdateData(projectStorage, type);
   categoryUpdateData(projectStorage);
+  idUpdateDataIndex(projectStorage);
   idUpdateData(projectStorage);
-};
-
-const idProjectUpdateData = (projectStorage) => {
-  projectStorage.forEach((project) => {
-    project.id = projectStorage.indexOf(project);
-  });
 };
 
 const idUpdateData = (projectStorage) => {
@@ -323,6 +325,21 @@ const idUpdateData = (projectStorage) => {
           note.project = project.id;
           note.list = list.id;
           note.task = task.id;
+        });
+      });
+    });
+  });
+};
+
+const idUpdateDataIndex = (projectStorage) => {
+  projectStorage.forEach((project) => {
+    project.id = projectStorage.indexOf(project);
+    project.list.forEach((list) => {
+      list.id = project.list.indexOf(list);
+      list.task.forEach((task) => {
+        task.id = list.task.indexOf(task);
+        task.note.forEach((note) => {
+          note.id = task.note.indexOf(note);
         });
       });
     });
@@ -426,9 +443,9 @@ const theAutomaticApplication = () => {
 };
 
 //Events
-theEventHandler.subscribe('automaticProject', idTypeCategoryUpdateData);
+theEventHandler.subscribe('automaticProject', idTypeCategoryIndexUpdateData);
 theEventHandler.subscribe('automaticProject', theDOMDisplaySidebar);
-theEventHandler.subscribe('customProject', idTypeCategoryUpdateData);
+theEventHandler.subscribe('customProject', idTypeCategoryIndexUpdateData);
 theEventHandler.subscribe('customProject', theDOMDisplaySidebar);
 theEventHandler.subscribe('displayProject', theDOMDisplay);
 theEventHandler.subscribe('theDefaultProject', theDefaultProject);

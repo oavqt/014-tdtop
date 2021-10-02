@@ -51,11 +51,11 @@ const removeProjectButtonEvent = () => {
     .addEventListener('click', theDOMGetValue.cached.add);
 };
 
-// const removeListButtonEvent = () => {
-//   theDOMGet.theRemoveList().forEach((list) => {
-//     list.addEventListener('click', removeList);
-//   });
-// };
+const removeListButtonEvent = () => {
+  theDOMGet.theRemoveList().forEach((list) => {
+    list.addEventListener('click', removeList);
+  });
+};
 
 // const removeTaskButtonEvent = () => {
 //   theDOMGet.theRemoveTask().forEach((task) => {
@@ -106,12 +106,12 @@ const removeProjectFormEvent = () => {
     .addEventListener('click', removeProjectListTaskNote.project);
 };
 
-// const removeListFormEvent = () => {
-//   theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
-//   theDOMGet
-//     .theFormButtonRemove()
-//     .addEventListener('click', removeProjectListTaskNote.list);
-// };
+const removeListFormEvent = () => {
+  theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
+  theDOMGet
+    .theFormButtonRemove()
+    .addEventListener('click', removeProjectListTaskNote.list);
+};
 
 // const removeTaskFormEvent = () => {
 //   theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
@@ -129,11 +129,10 @@ const removeProjectFormEvent = () => {
 
 //Controller Tools
 //Default Project
-const theDefaultProject = () => {
+const theDefaultProjectStyle = () => {
   theSidebarButtonStyleAdd(theDOMGet.theSidebarDefaultProject());
 };
 
-theEventHandler.subscribe('theDefaultProject', theDefaultProject);
 //Controller Event Functions
 const theCurrentProjectEvent = function () {
   theSidebarButtonStyleRemove();
@@ -152,7 +151,7 @@ const addProjectListTaskNoteEvent = () => {
 
 const removeProjectListTaskNoteEvent = () => {
   removeProjectButtonEvent();
-  //   // removeListButtonEvent();
+  removeListButtonEvent();
   //   // removeTaskButtonEvent();
   //   // removeNoteButtonEvent();
 };
@@ -166,7 +165,7 @@ const theDisplayAdd = (type, idProject) => {
   }
 };
 
-const theDisplayUpdate = (type, idProject) => {
+const theDisplayUpdate = ([type, idProject]) => {
   theDisplayRemove();
   theDisplayAdd(type, idProject);
 };
@@ -228,10 +227,10 @@ const addProjectListTaskNote = {
       theDOMGetValue.input.description()
     );
 
-    theDisplayUpdate(
+    theDisplayUpdate([
       theDOMGetValue.type.project(),
-      theDOMGetValue.id.project()
-    );
+      theDOMGetValue.id.project(),
+    ]);
 
     theEvents();
     theFormCancel();
@@ -244,10 +243,10 @@ const addProjectListTaskNote = {
       theDOMGetValue.input.date()
     );
 
-    theDisplayUpdate(
+    theDisplayUpdate([
       theDOMGetValue.type.project(),
-      theDOMGetValue.id.project()
-    );
+      theDOMGetValue.id.project(),
+    ]);
 
     theEvents();
     theFormCancel();
@@ -259,10 +258,10 @@ const addProjectListTaskNote = {
       theDOMGetValue.input.description()
     );
 
-    theDisplayUpdate(
+    theDisplayUpdate([
       theDOMGetValue.type.project(),
-      theDOMGetValue.id.project()
-    );
+      theDOMGetValue.id.project(),
+    ]);
 
     theEvents();
     theFormCancel();
@@ -283,10 +282,10 @@ const removeProject = function () {
   theEventHandler.publish('theDefaultProject', true);
 };
 
-// const removeList = function () {
-//   theDOMTemplate.form('List');
-//   theListFormEvent();
-// };
+const removeList = function () {
+  theDOMTemplate.removeForm('List');
+  removeListFormEvent();
+};
 
 // const removeTask = function () {
 //   theDOMTemplate.form('Task');
@@ -310,10 +309,16 @@ const removeProjectListTaskNote = {
     theEvents();
     theFormCancel();
   },
-  // list: () => {
-  //   theEvents();
-  //   theFormCancel();
-  // },
+  list: () => {
+    theProjectStorage.remove.list(
+      theDOMGetValue.type.project(),
+      theDOMGetValue.type.project(),
+      theDOMGetValue.id.project()
+    );
+
+    theEvents();
+    theFormCancel();
+  },
   // task: () => {
   //   theEvents();
   //   theFormCancel();
@@ -374,5 +379,9 @@ const TheCustomProjectStyleAdd = () => {
   theHTMLClass.add.displayFlex(theDOMGet.theCurrentProjectRemove());
   theHTMLClass.add.displayBlock(theDOMGet.theCurrentProjectCheckbox());
 };
+
+//Events
+theEventHandler.subscribe('theDefaultProjectStyle', theDefaultProjectStyle);
+theEventHandler.subscribe('theDisplayUpdate', theDisplayUpdate);
 
 export { theEvents };
