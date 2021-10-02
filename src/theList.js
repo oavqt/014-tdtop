@@ -276,6 +276,13 @@ const theProjectStorage = (() => {
       idUpdateDataIndex(getStorage(type));
       theEventHandler.publish('theDisplayUpdate', [type, idProject]);
     },
+    note: ([type, id, idTask, idList, idProject]) => {
+      getStorage(type)[idProject].list[idList].task[idTask].note.splice(id, 1);
+
+      //Events
+      idUpdateDataIndex(getStorage(type));
+      theEventHandler.publish('theDisplayUpdate', [type, idProject]);
+    },
   };
 
   const display = {

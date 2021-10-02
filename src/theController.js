@@ -65,11 +65,12 @@ const removeTaskButtonEvent = () => {
   });
 };
 
-// const removeNoteButtonEvent = () => {
-//   theDOMGet.theRemoveNote().forEach((note) => {
-//     note.addEventListener('click', removeNote);
-//   });
-// };
+const removeNoteButtonEvent = () => {
+  theDOMGet.theRemoveNote().forEach((note) => {
+    note.addEventListener('click', removeNote);
+    note.addEventListener('click', theDOMGetValue.cached.add);
+  });
+};
 
 //Form Events
 //Add Events
@@ -122,12 +123,12 @@ const removeTaskFormEvent = () => {
     .addEventListener('click', removeProjectListTaskNote.task);
 };
 
-// const removeNoteFormEvent = () => {
-//   theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
-//   theDOMGet
-//     .theFormButtonRemove()
-//     .addEventListener('click', removeProjectListTaskNote.note);
-// };
+const removeNoteFormEvent = () => {
+  theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
+  theDOMGet
+    .theFormButtonRemove()
+    .addEventListener('click', removeProjectListTaskNote.note);
+};
 
 //Controller Tools
 //Default Project
@@ -155,7 +156,7 @@ const removeProjectListTaskNoteEvent = () => {
   removeProjectButtonEvent();
   removeListButtonEvent();
   removeTaskButtonEvent();
-  //   // removeNoteButtonEvent();
+  removeNoteButtonEvent();
 };
 
 //Display Functions
@@ -294,10 +295,10 @@ const removeTask = function () {
   removeTaskFormEvent();
 };
 
-// const removeNote = function () {
-//   theDOMTemplate.form('Note');
-//   theNoteFormEvent();
-// };
+const removeNote = function () {
+  theDOMTemplate.removeForm('Note');
+  removeNoteFormEvent();
+};
 
 const removeProjectListTaskNote = {
   project: () => {
@@ -323,10 +324,12 @@ const removeProjectListTaskNote = {
     theEvents();
     theFormCancel();
   },
-  // note: () => {
-  //   theEvents();
-  //   theFormCancel();
-  // },
+  note: () => {
+    theProjectStorage.remove.note(theDOMGetValue.id.note());
+
+    theEvents();
+    theFormCancel();
+  },
 };
 
 //Add HTMLCSS Classes

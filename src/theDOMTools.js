@@ -290,7 +290,7 @@ const theDOMGetValue = {
       return [
         theDOMGetValue.cached.element.type,
         theDOMGetValue.cached.element.id,
-        theDOMGetValue.cached.element.note,
+        theDOMGetValue.cached.element.task,
         theDOMGetValue.cached.element.list,
         theDOMGetValue.cached.element.project,
       ];
