@@ -279,10 +279,6 @@ const theFormCancel = function () {
 const removeProject = function () {
   theDOMTemplate.removeForm('Project');
   removeProjectFormEvent();
-
-  //Events
-  theDisplayRemove();
-  theEventHandler.publish('theDefaultProject', true);
 };
 
 const removeList = function () {
@@ -304,29 +300,37 @@ const removeProjectListTaskNote = {
   project: () => {
     theDisplaySidebarRemove();
 
+    console.log(theDOMGetValue.type.project(), theDOMGetValue.id.project());
+
     theProjectStorage.remove.project(
       theDOMGetValue.type.project(),
       theDOMGetValue.id.project()
     );
 
+    //Events
+    theDisplayRemove();
+    theEventHandler.publish('theDefaultProject', true);
     theEvents();
     theFormCancel();
   },
   list: () => {
     theProjectStorage.remove.list(theDOMGetValue.id.list());
 
+    //Events
     theEvents();
     theFormCancel();
   },
   task: () => {
     theProjectStorage.remove.task(theDOMGetValue.id.task());
 
+    //Events
     theEvents();
     theFormCancel();
   },
   note: () => {
     theProjectStorage.remove.note(theDOMGetValue.id.note());
 
+    //Events
     theEvents();
     theFormCancel();
   },
