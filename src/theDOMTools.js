@@ -179,6 +179,18 @@ const theDOMGet = {
   theAddNote: () => {
     return document.querySelectorAll('.task__title .button--add');
   },
+  theEditProject: () => {
+    return document.querySelectorAll('.project__title .button-edit');
+  },
+  theEditList: () => {
+    return document.querySelectorAll('.list__title .button--edit');
+  },
+  theEditTask: () => {
+    return document.querySelectorAll('.task__title .button--edit');
+  },
+  theEditNote: () => {
+    return document.querySelectorAll('.note__title .button--edit');
+  },
   theRemoveProject: () => {
     return document.querySelectorAll('.project__title .button--remove');
   },

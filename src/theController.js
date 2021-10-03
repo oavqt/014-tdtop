@@ -48,8 +48,15 @@ const addNoteButtonEvent = () => {
 const editProjectButtonEvent = () => {
   theDOMGet
     .theCurrentProjectEdit()
-    .addEventListener('click', theDOMGetValue.add);
+    .addEventListener('click', theDOMGetValue.cached.add);
   theDOMGet.theCurrentProjectEdit().addEventListener('click', editProject);
+};
+
+const editListButtonEvent = () => {
+  theDOMGet.theEditList().forEach((button) => {
+    button.addEventListener('click', theDOMGetValue.cached.add);
+    button.addEventListener('click', editList);
+  });
 };
 
 // Remove Events
@@ -119,6 +126,13 @@ const editProjectFormEvent = () => {
     .addEventListener('click', editProjectListTaskNote.project);
 };
 
+const editListFormEvent = () => {
+  theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
+  theDOMGet
+    .theFormButtonEdit()
+    .addEventListener('click', editProjectListTaskNote.list);
+};
+
 //Remove Events
 const removeProjectFormEvent = () => {
   theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
@@ -172,6 +186,7 @@ const addProjectListTaskNoteEvent = () => {
 
 const editProjectListTaskNoteEvent = () => {
   editProjectButtonEvent();
+  editListButtonEvent();
 };
 
 const removeProjectListTaskNoteEvent = () => {
@@ -313,6 +328,7 @@ const theFormCancel = function () {
 //Edit Functions
 const editProject = function () {
   theDOMTemplate.editForm('Project');
+
   theFormSetValue(
     theProjectStorage.display.formValue.project(
       theDOMGetValue.type.project(),
@@ -320,6 +336,16 @@ const editProject = function () {
     )
   );
   editProjectFormEvent();
+};
+
+const editList = function () {
+  theDOMTemplate.editForm('List');
+
+  theFormSetValue(
+    theProjectStorage.display.formValue.list(theDOMGetValue.id.list())
+  );
+
+  editListFormEvent();
 };
 
 const editProjectListTaskNote = {
@@ -332,6 +358,27 @@ const editProjectListTaskNote = {
       theDOMGetValue.input.description()
     );
 
+    //Events
+    theEvents();
+    theFormCancel();
+  },
+  list: () => {
+    theProjectStorage.edit.list(
+      theDOMGetValue.id.list(),
+      theDOMGetValue.input.title(),
+      theDOMGetValue.input.description()
+    );
+
+    //Events
+    theEvents();
+    theFormCancel();
+  },
+  task: () => {
+    //Events
+    theEvents();
+    theFormCancel();
+  },
+  note: () => {
     //Events
     theEvents();
     theFormCancel();
