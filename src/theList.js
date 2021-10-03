@@ -270,7 +270,16 @@ const theProjectStorage = (() => {
       //Events
       theEventHandler.publish('theDisplayUpdate', [type, idProject]);
     },
-    task: () => {},
+    task: ([type, id, idList, idProject], title, description, date) => {
+      const tTask = getStorage(type)[idProject].list[idList].task[id];
+
+      tTask.title = title;
+      tTask.description = description;
+      tTask.date = date;
+
+      //Events
+      theEventHandler.publish('theDisplayUpdate', [type, idProject]);
+    },
     note: () => {},
   };
 
@@ -327,7 +336,10 @@ const theProjectStorage = (() => {
         const tList = getStorage(type)[idProject].list[id];
         return [tList.title, tList.description];
       },
-      task: () => {},
+      task: ([type, id, idList, idProject]) => {
+        const tTask = getStorage(type)[idProject].list[idList].task[id];
+        return [tTask.title, tTask.description, tTask.date];
+      },
       note: () => {},
     },
   };

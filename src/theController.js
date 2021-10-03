@@ -59,6 +59,13 @@ const editListButtonEvent = () => {
   });
 };
 
+const editTaskButtonEvent = () => {
+  theDOMGet.theEditTask().forEach((button) => {
+    button.addEventListener('click', theDOMGetValue.cached.add);
+    button.addEventListener('click', editTask);
+  });
+};
+
 // Remove Events
 const removeProjectButtonEvent = () => {
   theDOMGet
@@ -133,6 +140,13 @@ const editListFormEvent = () => {
     .addEventListener('click', editProjectListTaskNote.list);
 };
 
+const editTaskFormEvent = () => {
+  theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
+  theDOMGet
+    .theFormButtonEdit()
+    .addEventListener('click', editProjectListTaskNote.task);
+};
+
 //Remove Events
 const removeProjectFormEvent = () => {
   theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
@@ -187,6 +201,7 @@ const addProjectListTaskNoteEvent = () => {
 const editProjectListTaskNoteEvent = () => {
   editProjectButtonEvent();
   editListButtonEvent();
+  editTaskButtonEvent();
 };
 
 const removeProjectListTaskNoteEvent = () => {
@@ -348,6 +363,16 @@ const editList = function () {
   editListFormEvent();
 };
 
+const editTask = function () {
+  theDOMTemplate.editForm('Task');
+
+  theFormSetValue(
+    theProjectStorage.display.formValue.task(theDOMGetValue.id.task())
+  );
+
+  editTaskFormEvent();
+};
+
 const editProjectListTaskNote = {
   project: () => {
     theDisplaySidebarRemove();
@@ -374,6 +399,13 @@ const editProjectListTaskNote = {
     theFormCancel();
   },
   task: () => {
+    theProjectStorage.edit.task(
+      theDOMGetValue.id.task(),
+      theDOMGetValue.input.title(),
+      theDOMGetValue.input.description(),
+      theDOMGetValue.input.date()
+    );
+
     //Events
     theEvents();
     theFormCancel();
