@@ -214,6 +214,7 @@ const theProjectStorage = (() => {
     },
     list: ([type, idProject], title, description) => {
       const tProject = get.project(type, idProject);
+
       tProject.addList(tProject.list, title, description);
 
       //Events
@@ -221,6 +222,7 @@ const theProjectStorage = (() => {
     },
     task: ([type, idList, idProject], title, description, date) => {
       const tProject = get.list(type, idList, idProject);
+
       tProject.addTask(tProject.task, title, description, date);
 
       //Events
@@ -228,6 +230,7 @@ const theProjectStorage = (() => {
     },
     note: ([type, idTask, idList, idProject], title, description) => {
       const tProject = get.task(type, idTask, idList, idProject);
+
       tProject.addNote(tProject.note, title, description);
 
       //Events
@@ -245,14 +248,14 @@ const theProjectStorage = (() => {
     task: (type, idTask, idList, idProject) => {
       return getStorage(type)[idProject].list[idList].task[idTask];
     },
-    note: (type, idNote, idList, idTask, idProject) => {
+    note: (type, idNote, idTask, idList, idProject) => {
       return getStorage(type)[idProject].list[idList].task[idTask].note[idNote];
     },
   };
 
   const edit = {
     project: ([type, id], title, description) => {
-      const tProject = getStorage(type)[id];
+      const tProject = get.project(type, id);
 
       tProject.title = title;
       tProject.description = description;
@@ -262,7 +265,7 @@ const theProjectStorage = (() => {
       theEventHandler.publish(type, [getStorage(type), type]);
     },
     list: ([type, id, idProject], title, description) => {
-      const tList = getStorage(type)[idProject].list[id];
+      const tList = get.list(type, id, idProject);
 
       tList.title = title;
       tList.description = description;
@@ -271,7 +274,7 @@ const theProjectStorage = (() => {
       theEventHandler.publish('theDisplayUpdate', [type, idProject]);
     },
     task: ([type, id, idList, idProject], title, description, date) => {
-      const tTask = getStorage(type)[idProject].list[idList].task[id];
+      const tTask = get.task(type, id, idList, idProject);
 
       tTask.title = title;
       tTask.description = description;
@@ -280,7 +283,15 @@ const theProjectStorage = (() => {
       //Events
       theEventHandler.publish('theDisplayUpdate', [type, idProject]);
     },
-    note: () => {},
+    note: ([type, id, idTask, idList, idProject], title, description) => {
+      const tNote = get.note(type, id, idTask, idList, idProject);
+
+      tNote.title = title;
+      tNote.description = description;
+
+      //Events
+      theEventHandler.publish('theDisplayUpdate', [type, idProject]);
+    },
   };
 
   const remove = {
@@ -296,21 +307,21 @@ const theProjectStorage = (() => {
       theEventHandler.publish(type, [getStorage(type), type]);
     },
     list: ([type, id, idProject]) => {
-      getStorage(type)[idProject].list.splice(id, 1);
+      get.project(type, idProject).list.splice(id, 1);
 
       //Events
       idUpdateDataIndex(getStorage(type));
       theEventHandler.publish('theDisplayUpdate', [type, idProject]);
     },
     task: ([type, id, idList, idProject]) => {
-      getStorage(type)[idProject].list[idList].task.splice(id, 1);
+      get.list(type, idList, idProject).task.splice(id, 1);
 
       //Events
       idUpdateDataIndex(getStorage(type));
       theEventHandler.publish('theDisplayUpdate', [type, idProject]);
     },
     note: ([type, id, idTask, idList, idProject]) => {
-      getStorage(type)[idProject].list[idList].task[idTask].note.splice(id, 1);
+      get.task(type, idTask, idList, idProject).note.splice(id, 1);
 
       //Events
       idUpdateDataIndex(getStorage(type));
@@ -329,18 +340,25 @@ const theProjectStorage = (() => {
     },
     formValue: {
       project: (type, id) => {
-        const tProject = getStorage(type)[id];
+        const tProject = get.project(type, id);
+
         return [tProject.title, tProject.description];
       },
       list: ([type, id, idProject]) => {
-        const tList = getStorage(type)[idProject].list[id];
+        const tList = get.list(type, id, idProject);
+
         return [tList.title, tList.description];
       },
       task: ([type, id, idList, idProject]) => {
-        const tTask = getStorage(type)[idProject].list[idList].task[id];
+        const tTask = get.task(type, id, idList, idProject);
+
         return [tTask.title, tTask.description, tTask.date];
       },
-      note: () => {},
+      note: ([type, id, idTask, idList, idProject]) => {
+        const tNote = get.note(type, id, idTask, idList, idProject);
+
+        return [tNote.title, tNote.description];
+      },
     },
   };
 
