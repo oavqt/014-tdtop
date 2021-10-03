@@ -71,13 +71,25 @@ const theDOMTemplate = {
   },
   addForm: (projectListTaskNote) => {
     if (projectListTaskNote === 'Task') {
-      theDOMAppendTo.theDemo(theDOMCreate.taskForm(projectListTaskNote));
+      theDOMAppendTo.theDemo(theDOMCreate.taskForm(projectListTaskNote, 'Add'));
     } else {
       theDOMAppendTo.theDemo(
-        theDOMCreate.projectListNoteForm(projectListTaskNote)
+        theDOMCreate.projectListNoteForm(projectListTaskNote, 'Add')
       );
     }
   },
+  editForm: (projectListTaskNote) => {
+    if (projectListTaskNote === 'Task') {
+      theDOMAppendTo.theDemo(
+        theDOMCreate.taskForm(projectListTaskNote, 'Edit')
+      );
+    } else {
+      theDOMAppendTo.theDemo(
+        theDOMCreate.projectListNoteForm(projectListTaskNote, 'Edit')
+      );
+    }
+  },
+
   removeForm: (projectListTaskNote) => {
     theDOMAppendTo.theDemo(theDOMCreate.removeForm(projectListTaskNote));
   },
@@ -221,6 +233,13 @@ const theDOMGet = {
   theSidebarAutomaticButtons: () => {
     return document.querySelectorAll('.sidebar__automatic button');
   },
+  theSidebarCustomButton: (idProject) => {
+    const button = [...document.querySelectorAll('.sidebar__custom button')];
+
+    return button.filter(
+      (button) => button.dataset.id === idProject.toString()
+    )[0];
+  },
   theSidebarCustomButtons: () => {
     return document.querySelectorAll('.sidebar__custom button');
   },
@@ -241,6 +260,9 @@ const theDOMGet = {
   },
   theFormButtonAdd: () => {
     return document.querySelector('.form__button .button--add');
+  },
+  theFormButtonEdit: () => {
+    return document.querySelector('.form__button .button--edit');
   },
   theFormButtonRemove: () => {
     return document.querySelector('.form__button .button--remove');
@@ -700,7 +722,7 @@ const theDOMCreate = {
     );
     return element;
   },
-  projectListNoteForm: (projectListNote) => {
+  projectListNoteForm: (projectListNote, form) => {
     const element = theElement.create(
       'div',
       { class: 'display__form' },
@@ -710,7 +732,7 @@ const theDOMCreate = {
         theElement.create(
           'h1',
           { class: 'title__text' },
-          `Add ${projectListNote}`
+          `${form} ${projectListNote}`
         )
       ),
       theElement.create(
@@ -749,16 +771,16 @@ const theDOMCreate = {
         theElement.create(
           'button',
           {
-            class: 'button--add',
+            class: `button--${form.toLowerCase()}`,
             ['data-type']: projectListNote.toLowerCase(),
           },
-          'Add'
+          `${form}`
         )
       )
     );
     return element;
   },
-  taskForm: (projectListNote) => {
+  taskForm: (projectListNote, form) => {
     const element = theElement.create(
       'div',
       { class: 'display__form' },
@@ -768,7 +790,7 @@ const theDOMCreate = {
         theElement.create(
           'h1',
           { class: 'title__text' },
-          `Add ${projectListNote}`
+          `${form} ${projectListNote}`
         )
       ),
       theElement.create(
@@ -820,10 +842,10 @@ const theDOMCreate = {
         theElement.create(
           'button',
           {
-            class: 'button--add',
+            class: `button--${form.toLowerCase()}`,
             ['data-type']: projectListNote.toLowerCase(),
           },
-          'Add'
+          `${form}`
         )
       )
     );

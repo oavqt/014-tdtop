@@ -250,6 +250,22 @@ const theProjectStorage = (() => {
     },
   };
 
+  const edit = {
+    project: ([type, id], title, description) => {
+      const tProject = getStorage(type)[id];
+
+      tProject.title = title;
+      tProject.description = description;
+
+      //Events
+      theEventHandler.publish('theDisplayUpdate', [type, id]);
+      theEventHandler.publish(type, [getStorage(type), type]);
+    },
+    list: () => {},
+    task: () => {},
+    note: () => {},
+  };
+
   const remove = {
     project: (type, id) => {
       if (id) {
@@ -287,14 +303,27 @@ const theProjectStorage = (() => {
 
   const display = {
     project: (type, id) => {
+      if (!id) {
+        id = getStorage(type).length - 1;
+      }
       const displayProject = getStorage(type)[id];
 
       theEventHandler.publish('displayProject', [displayProject]);
+    },
+    formValue: {
+      project: (type, id) => {
+        const tProject = getStorage(type)[id];
+        return [tProject.title, tProject.description];
+      },
+      list: () => {},
+      task: () => {},
+      note: () => {},
     },
   };
 
   return {
     add,
+    edit,
     remove,
     display,
   };
@@ -402,7 +431,6 @@ const theDOMDisplaySidebar = ([projectStorage, type, project]) => {
     project[addDOMAutoCutomProject](project.title, project.type, project.id);
   } else {
     projectStorage.forEach((project) => {
-      console.log(project);
       project[addDOMAutoCutomProject](project.title, project.type, project.id);
     });
   }

@@ -64,8 +64,8 @@ button:hover {
   width: 7em;
 }
 
-.button--remove,
-.button--edit {
+.button--edit,
+.button--remove {
   align-items: center;
   background: transparent;
   display: flex;
@@ -136,13 +136,15 @@ form {
   width: 10em;
 }
 
-.form__button .button--add {
+.form__button .button--add,
+.form__button .button--edit {
   background: #58a6ff;
   color: white;
 }
 
+.form__button .button--add,
 .form__button .button--cancel,
-.form__button .button--add {
+.form__button .button--edit {
   height: 2.5em;
   justify-content: center;
   width: 6em;
@@ -280,7 +282,7 @@ textarea:focus {
 
 /*Sidebar*/
 .demo__sidebar {
-  background: #31313133;
+  background: #31313111;
   width: 20%;
 }
 
@@ -366,8 +368,8 @@ textarea:focus {
   margin-bottom: 1em;
 }
 
-.project__title .title__misc button,
-.project__title .body__checkbox {
+.project__title .body__checkbox,
+.project__title .title__misc button {
   display: none;
 }
 

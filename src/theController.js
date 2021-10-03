@@ -5,6 +5,7 @@ import { theProjectStorage } from './theList';
 const theEvents = () => {
   theSidebarButtonEvent();
   addProjectListTaskNoteEvent();
+  editProjectListTaskNoteEvent();
   removeProjectListTaskNoteEvent();
 };
 
@@ -41,6 +42,14 @@ const addNoteButtonEvent = () => {
     note.addEventListener('click', theDOMGetValue.cached.add);
     note.addEventListener('click', addNote);
   });
+};
+
+//Edit Events
+const editProjectButtonEvent = () => {
+  theDOMGet
+    .theCurrentProjectEdit()
+    .addEventListener('click', theDOMGetValue.add);
+  theDOMGet.theCurrentProjectEdit().addEventListener('click', editProject);
 };
 
 // Remove Events
@@ -101,6 +110,15 @@ const addNoteFormEvent = () => {
     .theFormButtonAdd()
     .addEventListener('click', addProjectListTaskNote.note);
 };
+
+//Edit Events
+const editProjectFormEvent = () => {
+  theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
+  theDOMGet
+    .theFormButtonEdit()
+    .addEventListener('click', editProjectListTaskNote.project);
+};
+
 //Remove Events
 const removeProjectFormEvent = () => {
   theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
@@ -150,6 +168,10 @@ const addProjectListTaskNoteEvent = () => {
   addListButtonEvent();
   addTaskButtonEvent();
   addNoteButtonEvent();
+};
+
+const editProjectListTaskNoteEvent = () => {
+  editProjectButtonEvent();
 };
 
 const removeProjectListTaskNoteEvent = () => {
@@ -220,6 +242,16 @@ const addProjectListTaskNote = {
       theDOMGetValue.input.description()
     );
 
+    //Events
+    theDisplayRemove();
+    theProjectStorage.display.project(type);
+
+    theSidebarButtonStyleRemove();
+    theSidebarButtonStyleAdd(
+      theDOMGet.theSidebarCustomButton(theDOMGetValue.id.project())
+    );
+    TheCustomProjectStyleAdd();
+
     theEvents();
     theFormCancel();
   },
@@ -235,6 +267,7 @@ const addProjectListTaskNote = {
       theDOMGetValue.id.project(),
     ]);
 
+    //Events
     theEvents();
     theFormCancel();
   },
@@ -251,6 +284,7 @@ const addProjectListTaskNote = {
       theDOMGetValue.id.project(),
     ]);
 
+    //Events
     theEvents();
     theFormCancel();
   },
@@ -266,6 +300,7 @@ const addProjectListTaskNote = {
       theDOMGetValue.id.project(),
     ]);
 
+    //Events
     theEvents();
     theFormCancel();
   },
@@ -273,6 +308,43 @@ const addProjectListTaskNote = {
 
 const theFormCancel = function () {
   theDOMGet.theForm().remove();
+};
+
+//Edit Functions
+const editProject = function () {
+  theDOMTemplate.editForm('Project');
+  theFormSetValue(
+    theProjectStorage.display.formValue.project(
+      theDOMGetValue.type.project(),
+      theDOMGetValue.id.project()
+    )
+  );
+  editProjectFormEvent();
+};
+
+const editProjectListTaskNote = {
+  project: () => {
+    theDisplaySidebarRemove();
+
+    theProjectStorage.edit.project(
+      [theDOMGetValue.type.project(), theDOMGetValue.id.project()],
+      theDOMGetValue.input.title(),
+      theDOMGetValue.input.description()
+    );
+
+    //Events
+    theEvents();
+    theFormCancel();
+  },
+};
+
+//Set Form Value Function
+const theFormSetValue = ([title, description, date]) => {
+  theDOMGet.theFormTitle().value = title;
+  theDOMGet.theFormDescription().value = description;
+  if (date) {
+    theDOMGet.theFormDate().value = date;
+  }
 };
 
 //Remove Functions
@@ -299,8 +371,6 @@ const removeNote = function () {
 const removeProjectListTaskNote = {
   project: () => {
     theDisplaySidebarRemove();
-
-    console.log(theDOMGetValue.type.project(), theDOMGetValue.id.project());
 
     theProjectStorage.remove.project(
       theDOMGetValue.type.project(),
