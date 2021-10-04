@@ -384,7 +384,7 @@ const theAutomaticProject = () => {
 
 //Default Project
 const theDefaultProject = () => {
-  theProjectStorage.display.project('automaticProject', '1');
+  theProjectStorage.display.project('automaticProject', '0');
 
   //Events
   theEventHandler.publish('theDefaultProjectStyle', true);

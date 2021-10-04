@@ -3,6 +3,7 @@ import { theEventHandler } from './theHandler';
 import { theProjectStorage } from './theList';
 
 const theEvents = () => {
+  theLogoButtonEvent();
   theSidebarButtonEvent();
   addProjectListTaskNoteEvent();
   editProjectListTaskNoteEvent();
@@ -18,6 +19,11 @@ const theSidebarButtonEvent = () => {
   theDOMGet.theSidebarCustomButtons().forEach((button) => {
     button.addEventListener('click', theCurrentProjectEvent);
   });
+};
+
+//Logo Buttton Events
+const theLogoButtonEvent = () => {
+  theDOMGet.theLogo().addEventListener('click', theSidebarCollapse);
 };
 
 //Project-List-Task-Note Button Events
@@ -105,88 +111,82 @@ const removeNoteButtonEvent = () => {
 //Form Events
 //Add Events
 const addProjectFormEvent = () => {
-  theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
+  theDOMGet.theFormCancel().addEventListener('click', theFormCancel);
   theDOMGet
-    .theFormButtonAdd()
+    .theFormAdd()
     .addEventListener('click', addProjectListTaskNote.project);
 };
 
 const addListFormEvent = () => {
-  theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
-  theDOMGet
-    .theFormButtonAdd()
-    .addEventListener('click', addProjectListTaskNote.list);
+  theDOMGet.theFormCancel().addEventListener('click', theFormCancel);
+  theDOMGet.theFormAdd().addEventListener('click', addProjectListTaskNote.list);
 };
 
 const addTaskFormEvent = () => {
-  theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
-  theDOMGet
-    .theFormButtonAdd()
-    .addEventListener('click', addProjectListTaskNote.task);
+  theDOMGet.theFormCancel().addEventListener('click', theFormCancel);
+  theDOMGet.theFormAdd().addEventListener('click', addProjectListTaskNote.task);
 };
 
 const addNoteFormEvent = () => {
-  theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
-  theDOMGet
-    .theFormButtonAdd()
-    .addEventListener('click', addProjectListTaskNote.note);
+  theDOMGet.theFormCancel().addEventListener('click', theFormCancel);
+  theDOMGet.theFormAdd().addEventListener('click', addProjectListTaskNote.note);
 };
 
 //Edit Events
 const editProjectFormEvent = () => {
-  theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
+  theDOMGet.theFormCancel().addEventListener('click', theFormCancel);
   theDOMGet
-    .theFormButtonEdit()
+    .theFormEdit()
     .addEventListener('click', editProjectListTaskNote.project);
 };
 
 const editListFormEvent = () => {
-  theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
+  theDOMGet.theFormCancel().addEventListener('click', theFormCancel);
   theDOMGet
-    .theFormButtonEdit()
+    .theFormEdit()
     .addEventListener('click', editProjectListTaskNote.list);
 };
 
 const editTaskFormEvent = () => {
-  theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
+  theDOMGet.theFormCancel().addEventListener('click', theFormCancel);
   theDOMGet
-    .theFormButtonEdit()
+    .theFormEdit()
     .addEventListener('click', editProjectListTaskNote.task);
 };
 
 const editNoteFormEvent = () => {
-  theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
+  theDOMGet.theFormCancel().addEventListener('click', theFormCancel);
   theDOMGet
-    .theFormButtonEdit()
+    .theFormEdit()
     .addEventListener('click', editProjectListTaskNote.note);
 };
 
 //Remove Events
 const removeProjectFormEvent = () => {
-  theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
+  theDOMGet.theFormCancel().addEventListener('click', theFormCancel);
   theDOMGet
-    .theFormButtonRemove()
+    .theFormRemove()
     .addEventListener('click', removeProjectListTaskNote.project);
 };
 
 const removeListFormEvent = () => {
-  theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
+  theDOMGet.theFormCancel().addEventListener('click', theFormCancel);
   theDOMGet
-    .theFormButtonRemove()
+    .theFormRemove()
     .addEventListener('click', removeProjectListTaskNote.list);
 };
 
 const removeTaskFormEvent = () => {
-  theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
+  theDOMGet.theFormCancel().addEventListener('click', theFormCancel);
   theDOMGet
-    .theFormButtonRemove()
+    .theFormRemove()
     .addEventListener('click', removeProjectListTaskNote.task);
 };
 
 const removeNoteFormEvent = () => {
-  theDOMGet.theFormButtonCancel().addEventListener('click', theFormCancel);
+  theDOMGet.theFormCancel().addEventListener('click', theFormCancel);
   theDOMGet
-    .theFormButtonRemove()
+    .theFormRemove()
     .addEventListener('click', removeProjectListTaskNote.note);
 };
 
@@ -197,6 +197,11 @@ const theDefaultProjectStyle = () => {
 };
 
 //Controller Event Functions
+const theSidebarCollapse = function () {
+  theSidebarSlide();
+  theSidebarFade();
+};
+
 const theCurrentProjectEvent = function () {
   theSidebarButtonStyleRemove();
   theSidebarButtonStyleAdd(this);
@@ -248,7 +253,33 @@ const theDisplayRemove = () => {
   }
 };
 
-const theDisplaySidebarRemove = () => {
+const theSidebarSlide = () => {
+  const sidebar = theDOMGet.theSidebar();
+
+  if (sidebar.classList.contains('--animation-slide-out')) {
+    theSidebarSlideStyleRemove(sidebar);
+  } else {
+    theSidebarSlideStyleAdd(sidebar);
+  }
+};
+
+const theSidebarFade = () => {
+  const automatic = theDOMGet.theSidebarAutomatic();
+  const add = theDOMGet.theSidebarAdd();
+  const custom = theDOMGet.theSidebarCustom();
+
+  if (automatic.classList.contains('--animation-fade-out')) {
+    theSidebarFadeStyleRemove(automatic);
+    theSidebarFadeStyleRemove(add);
+    theSidebarFadeStyleRemove(custom);
+  } else {
+    theSidebarFadeStyleAdd(automatic);
+    theSidebarFadeStyleAdd(add);
+    theSidebarFadeStyleAdd(custom);
+  }
+};
+
+const theSidebarCustomRemove = () => {
   while (theDOMGet.theSidebarCustom().firstChild) {
     theDOMGet
       .theSidebarCustom()
@@ -402,7 +433,7 @@ const editNote = function () {
 
 const editProjectListTaskNote = {
   project: () => {
-    theDisplaySidebarRemove();
+    theSidebarCustomRemove();
 
     theProjectStorage.edit.project(
       [theDOMGetValue.type.project(), theDOMGetValue.id.project()],
@@ -482,7 +513,7 @@ const removeNote = function () {
 
 const removeProjectListTaskNote = {
   project: () => {
-    theDisplaySidebarRemove();
+    theSidebarCustomRemove();
 
     theProjectStorage.remove.project(
       theDOMGetValue.type.project(),
@@ -522,11 +553,25 @@ const removeProjectListTaskNote = {
 //CSS Options
 const theHTMLClass = {
   add: {
+    animation: {
+      inFade: (element) => {
+        element.classList.add('--animation-fade-in');
+      },
+      outFade: (element) => {
+        element.classList.add('--animation-fade-out');
+      },
+      inSlide: (element) => {
+        element.classList.add('--animation-slide-in');
+      },
+      outSlide: (element) => {
+        element.classList.add('--animation-slide-out');
+      },
+    },
     displayFlex: (element) => {
-      element.classList.add('--flex');
+      element.classList.add('--display-flex');
     },
     displayBlock: (element) => {
-      element.classList.add('--block');
+      element.classList.add('--display-block');
     },
     backgroundWhite: (element) => {
       element.classList.add('--background-white');
@@ -536,6 +581,20 @@ const theHTMLClass = {
     },
   },
   remove: {
+    animation: {
+      inFade: (element) => {
+        element.classList.remove('--animation-fade-in');
+      },
+      outFade: (element) => {
+        element.classList.remove('--animation-fade-out');
+      },
+      inSlide: (element) => {
+        element.classList.remove('--animation-slide-in');
+      },
+      outSlide: (element) => {
+        element.classList.remove('--animation-slide-out');
+      },
+    },
     backgroundWhite: (element) => {
       element.classList.remove('--background-white');
     },
@@ -546,6 +605,26 @@ const theHTMLClass = {
 };
 
 //Add CSS
+const theSidebarSlideStyleAdd = (sidebar) => {
+  theHTMLClass.add.animation.outSlide(sidebar);
+  theHTMLClass.remove.animation.inSlide(sidebar);
+};
+
+const theSidebarSlideStyleRemove = (sidebar) => {
+  theHTMLClass.remove.animation.outSlide(sidebar);
+  theHTMLClass.add.animation.inSlide(sidebar);
+};
+
+const theSidebarFadeStyleAdd = (element) => {
+  theHTMLClass.remove.animation.inFade(element);
+  theHTMLClass.add.animation.outFade(element);
+};
+
+const theSidebarFadeStyleRemove = (element) => {
+  theHTMLClass.remove.animation.outFade(element);
+  theHTMLClass.add.animation.inFade(element);
+};
+
 const theSidebarButtonStyleAdd = (button) => {
   theHTMLClass.add.backgroundWhite(button);
   theHTMLClass.add.backgroundHoverBlue(button);

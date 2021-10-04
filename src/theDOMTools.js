@@ -137,23 +137,57 @@ const theDOMGet = {
   theDemo: () => {
     return document.querySelector('.application__demo');
   },
-  theMisc: () => {
-    return document.querySelector('.application__misc');
-  },
   theSidebar: () => {
     return document.querySelector('.demo__sidebar');
   },
   theSidebarAutomatic: () => {
     return document.querySelector('.sidebar__automatic');
   },
+  theSidebarAutomaticButtons: () => {
+    return document.querySelectorAll('.sidebar__automatic button');
+  },
+  theSidebarDefaultProject: () => {
+    return document.querySelector('.button--inbox');
+  },
+  theSidebarAdd: () => {
+    return document.querySelector('.sidebar__add');
+  },
+  theAddProject: () => {
+    return document.querySelector('.sidebar__add .button--add');
+  },
   theSidebarCustom: () => {
     return document.querySelector('.sidebar__custom');
   },
-  theSidebarDefaultProject: () => {
-    return document.querySelector('.button--today');
+  theSidebarProject: (idProject) => {
+    const projects = [...document.querySelectorAll('.sidebar__custom div')];
+    return projects.filter(
+      (project) => project.dataset.id === idProject.toString()
+    )[0];
+  },
+  theSidebarCustomButton: (idProject) => {
+    const button = [...document.querySelectorAll('.sidebar__custom button')];
+
+    return button.filter(
+      (button) => button.dataset.id === idProject.toString()
+    )[0];
+  },
+  theSidebarCustomButtons: () => {
+    return document.querySelectorAll('.sidebar__custom button');
+  },
+  theDisplay: () => {
+    return document.querySelector('.demo__display');
+  },
+  theLogo: () => {
+    return document.querySelector('.button--logo');
   },
   theDisplayBody: () => {
     return document.querySelector('.display__body');
+  },
+  theProject: (idProject) => {
+    const projects = [...document.querySelectorAll('.body__project')];
+    return projects.filter(
+      (project) => project.dataset.id === idProject.toString()
+    )[0];
   },
   theCurrentProject: () => {
     return document.querySelector('.body__project');
@@ -167,53 +201,11 @@ const theDOMGet = {
   theCurrentProjectRemove: () => {
     return document.querySelector('.body__project .button--remove');
   },
-  theAddProject: () => {
-    return document.querySelector('.sidebar__add .button--add');
-  },
-  theAddList: () => {
-    return document.querySelector('.display__misc .button--add');
-  },
-  theAddTask: () => {
-    return document.querySelectorAll('.list__title .button--add');
-  },
-  theAddNote: () => {
-    return document.querySelectorAll('.task__title .button--add');
-  },
   theEditProject: () => {
     return document.querySelectorAll('.project__title .button-edit');
   },
-  theEditList: () => {
-    return document.querySelectorAll('.list__title .button--edit');
-  },
-  theEditTask: () => {
-    return document.querySelectorAll('.task__title .button--edit');
-  },
-  theEditNote: () => {
-    return document.querySelectorAll('.note__title .button--edit');
-  },
   theRemoveProject: () => {
     return document.querySelectorAll('.project__title .button--remove');
-  },
-  theRemoveList: () => {
-    return document.querySelectorAll('.list__title .button--remove');
-  },
-  theRemoveTask: () => {
-    return document.querySelectorAll('.task__title .button--remove');
-  },
-  theRemoveNote: () => {
-    return document.querySelectorAll('.note__title .button--remove');
-  },
-  theSidebarProject: (idProject) => {
-    const projects = [...document.querySelectorAll('.sidebar__custom div')];
-    return projects.filter(
-      (project) => project.dataset.id === idProject.toString()
-    )[0];
-  },
-  theProject: (idProject) => {
-    const projects = [...document.querySelectorAll('.body__project')];
-    return projects.filter(
-      (project) => project.dataset.id === idProject.toString()
-    )[0];
   },
   theList: (idList, idProject) => {
     const lists = [...document.querySelectorAll('.project__list')];
@@ -223,6 +215,15 @@ const theDOMGet = {
         list.dataset.project === idProject.toString()
     )[0];
   },
+  theAddTask: () => {
+    return document.querySelectorAll('.list__title .button--add');
+  },
+  theEditList: () => {
+    return document.querySelectorAll('.list__title .button--edit');
+  },
+  theRemoveList: () => {
+    return document.querySelectorAll('.list__title .button--remove');
+  },
   theTask: (idTask, idProject, idList) => {
     const tasks = [...document.querySelectorAll('.list__task')];
     return tasks.filter(
@@ -231,6 +232,15 @@ const theDOMGet = {
         task.dataset.project === idProject.toString() &&
         task.dataset.list === idList.toString()
     )[0];
+  },
+  theAddNote: () => {
+    return document.querySelectorAll('.task__title .button--add');
+  },
+  theEditTask: () => {
+    return document.querySelectorAll('.task__title .button--edit');
+  },
+  theRemoveTask: () => {
+    return document.querySelectorAll('.task__title .button--remove');
   },
   theNote: (idNote, idTask, idProject, idList) => {
     const notes = [...document.querySelectorAll('.task__note')];
@@ -242,18 +252,14 @@ const theDOMGet = {
         note.dataset.list === idList.toString()
     )[0];
   },
-  theSidebarAutomaticButtons: () => {
-    return document.querySelectorAll('.sidebar__automatic button');
+  theEditNote: () => {
+    return document.querySelectorAll('.note__title .button--edit');
   },
-  theSidebarCustomButton: (idProject) => {
-    const button = [...document.querySelectorAll('.sidebar__custom button')];
-
-    return button.filter(
-      (button) => button.dataset.id === idProject.toString()
-    )[0];
+  theRemoveNote: () => {
+    return document.querySelectorAll('.note__title .button--remove');
   },
-  theSidebarCustomButtons: () => {
-    return document.querySelectorAll('.sidebar__custom button');
+  theAddList: () => {
+    return document.querySelector('.display__misc .button--add');
   },
   theForm: () => {
     return document.querySelector('.display__form');
@@ -261,23 +267,26 @@ const theDOMGet = {
   theFormTitle: () => {
     return document.querySelector('.input--title');
   },
-  theFormDescription: () => {
-    return document.querySelector('.textarea--description');
-  },
   theFormDate: () => {
     return document.querySelector('.input--date');
   },
-  theFormButtonCancel: () => {
+  theFormDescription: () => {
+    return document.querySelector('.textarea--description');
+  },
+  theFormCancel: () => {
     return document.querySelector('.form__button .button--cancel');
   },
-  theFormButtonAdd: () => {
+  theFormAdd: () => {
     return document.querySelector('.form__button .button--add');
   },
-  theFormButtonEdit: () => {
+  theFormEdit: () => {
     return document.querySelector('.form__button .button--edit');
   },
-  theFormButtonRemove: () => {
+  theFormRemove: () => {
     return document.querySelector('.form__button .button--remove');
+  },
+  theMisc: () => {
+    return document.querySelector('.application__misc');
   },
 };
 
@@ -813,7 +822,7 @@ const theDOMCreate = {
           { class: 'form--body' },
           theElement.create(
             'label',
-            { class: '--flex' },
+            { class: '--display-flex' },
             theElement.create(
               'label',
               { class: 'label--title' },
