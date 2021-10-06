@@ -283,7 +283,7 @@ const theProjectStorage = (() => {
 
       tagData.task(tasks, tList.task.at(-1));
 
-      dateProjectSort(tList, tList.task.at(-1));
+      sort.date([tList, tList.task.at(-1)]);
     },
     note: ([type, idTask, idList, idProject], title, description) => {
       const tTask = get.task(type, idTask, idList, idProject);
@@ -297,11 +297,7 @@ const theProjectStorage = (() => {
 
       tagData.note(notes, tTask.note.at(-1));
 
-      dateProjectSort(
-        get.list(type, idList, idProject),
-        tTask,
-        tTask.note.at(-1)
-      );
+      sort.date([get.list(type, idList, idProject), tTask, tTask.note.at(-1)]);
     },
   };
 
@@ -394,18 +390,32 @@ const theProjectStorage = (() => {
   };
 
   //Project Sort
-  const dateProjectSort = (list, task, note) => {
-    const date = new Date().toISOString().slice(0, 10);
-    const tList = objectProtoClone('list', list);
-    const tTask = objectProtoClone('task', task);
-    let tNote;
-    if (note) {
-      tNote = objectProtoClone('note', note);
-    }
+  const sort = {
+    date: ([tList, tTask, tNote]) => {
+      const clonedList = objectProtoClone('list', tList);
+      const clonedTask = objectProtoClone('task', tTask);
 
-    if (tTask.date === date) {
-      dateTodayProjectSort(tList, tTask, tNote);
-    }
+      let clonedNote;
+      if (tNote) {
+        clonedNote = objectProtoClone('note', tNote);
+      }
+
+      if (date.today(tTask.date)) {
+        sort.today([clonedList, clonedTask, clonedNote]);
+      } else if (date.upcoming(tTask.date)) {
+        sort.upcoming([clonedList, clonedTask, clonedNote]);
+      }
+    },
+    today: ([tList, tTask, tNote]) => {
+      const today = automaticProject[1];
+
+      copy.add([today, tList, tTask, tNote]);
+    },
+    upcoming: ([tList, tTask, tNote]) => {
+      const upcoming = automaticProject[2];
+
+      copy.add([upcoming, tList, tTask, tNote]);
+    },
   };
 
   //Misc Functions
@@ -442,6 +452,37 @@ const theProjectStorage = (() => {
 
   //Copy Functions
   const copy = {
+    add: ([target, tList, tTask, tNote]) => {
+      const project = target;
+      const projectList = project.list.find((list) => list.tag === tList.tag);
+
+      copy.clean[project.title.toLowerCase()](tList);
+
+      let projectListTask;
+      if (tNote) {
+        projectListTask = projectList.task.find(
+          (task) => task.tag === tTask.tag
+        );
+      }
+
+      if (projectList) {
+        if (projectListTask) {
+          tTask.note.splice(-1, 1);
+          tTask.note.push(tNote);
+          projectListTask.note.push(tNote);
+        } else {
+          projectList.task.push(tTask);
+        }
+      } else {
+        tList.task.splice(-1, 1);
+        tList.task.push(tTask);
+        project.list.push(tList);
+      }
+
+      copy.clean[project.title.toLowerCase()](projectList);
+
+      idTypeCategoryIndexUpdateData([automaticProject, 'automaticProject']);
+    },
     edit: {
       properties: ([object]) => {
         const tagMatched = tagLookup([object.tag]);
@@ -502,6 +543,28 @@ const theProjectStorage = (() => {
         });
       },
     },
+    clean: {
+      today: (list) => {
+        if (list) {
+          list.task.forEach((task) => {
+            if (!date.today(task.date)) {
+              list.task.splice(task.id, 1);
+              console.log(list);
+            }
+          });
+        }
+      },
+      upcoming: (list) => {
+        if (list) {
+          list.task.forEach((task) => {
+            if (!date.upcoming(task.date)) {
+              list.task.splice(task.id, 1);
+              console.log(list);
+            }
+          });
+        }
+      },
+    },
   };
 
   //Edit Functions
@@ -514,31 +577,26 @@ const theProjectStorage = (() => {
     }
   };
 
-  //Project Sort Functions
-  const dateTodayProjectSort = (tList, tTask, tNote) => {
-    const today = automaticProject[1];
-    const todayList = today.list.find((list) => list.tag === tList.tag);
+  //Sort Functions
+  const date = {
+    today: (date) => {
+      const current = new Date().toISOString().slice(0, 10);
 
-    let todayListTask;
-    if (tNote) {
-      todayListTask = todayList.task.find((task) => task.tag === tTask.tag);
-    }
-
-    if (todayList) {
-      if (todayListTask) {
-        tTask.note.splice(-1, 1);
-        tTask.note.push(tNote);
-        todayListTask.note.push(tNote);
-      } else {
-        todayList.task.push(tTask);
+      if (date === current) {
+        return true;
       }
-    } else {
-      tList.task.splice(-1, 1);
-      tList.task.push(tTask);
-      today.list.push(tList);
-    }
+    },
+    upcoming: (date) => {
+      const current = new Date();
+      const tDate = new Date(date);
 
-    idTypeCategoryIndexUpdateData([automaticProject, 'automaticProject']);
+      const fortnight = new Date(current);
+      fortnight.setDate(fortnight.getDate() + 14);
+
+      if (tDate > current && tDate <= fortnight) {
+        return true;
+      }
+    },
   };
 
   //Display
@@ -734,7 +792,7 @@ const theAutomaticProject = () => {
   const automatic = 'automaticProject';
   theProjectStorage.add.project(automatic, 'Inbox', 'Inbox');
   theProjectStorage.add.project(automatic, 'Today', 'Today');
-  theProjectStorage.add.project(automatic, 'Upcoming ', 'Upcoming ');
+  theProjectStorage.add.project(automatic, 'Upcoming', 'Upcoming');
   theProjectStorage.add.project(automatic, 'Someday', 'Someday ');
   theProjectStorage.add.project(automatic, 'Never', 'Never');
   theProjectStorage.add.project(automatic, 'Logbook', 'Logbook');
