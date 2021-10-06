@@ -208,6 +208,7 @@ project
 //Create Application
 //Application Data
 const theProjectStorage = (() => {
+  //Storage
   let automaticProject = [];
   let customProject = [];
 
@@ -242,6 +243,7 @@ const theProjectStorage = (() => {
     },
   };
 
+  //Add
   const add = {
     project: (type, title, description) => {
       objectTemplate.project(storage(type), title, description);
@@ -303,12 +305,13 @@ const theProjectStorage = (() => {
     },
   };
 
+  //Edit
   const edit = {
     project: ([type, id], title, description) => {
       const tProject = get.project(type, id);
 
       editUpdateProperties([tProject], title, description);
-      editCopyProperties([tProject]);
+      copy.edit.properties([tProject]);
 
       //Events
       theEventHandler.publish('theDisplayUpdate', [type, id]);
@@ -319,7 +322,7 @@ const theProjectStorage = (() => {
       const tList = get.list(type, id, idProject);
 
       editUpdateProperties([tList], title, description);
-      editCopyProperties([tList]);
+      copy.edit.properties([tList]);
 
       //Events
       theEventHandler.publish('theDisplayUpdate', [type, idProject]);
@@ -328,7 +331,7 @@ const theProjectStorage = (() => {
       const tTask = get.task(type, id, idList, idProject);
 
       editUpdateProperties([tTask], title, description, date);
-      editCopyProperties([tTask]);
+      copy.edit.properties([tTask]);
 
       //Events
       theEventHandler.publish('theDisplayUpdate', [type, idProject]);
@@ -337,16 +340,18 @@ const theProjectStorage = (() => {
       const tNote = get.note(type, id, idTask, idList, idProject);
 
       editUpdateProperties([tNote], title, description);
-      editCopyProperties([tNote]);
+      copy.edit.properties([tNote]);
 
       //Events
       theEventHandler.publish('theDisplayUpdate', [type, idProject]);
     },
   };
 
+  //Remove
   const remove = {
     project: (type, id) => {
       if (id) {
+        copy.remove.project([get.project(type, id)]);
         storage(type).splice(id, 1);
       } else {
         storage(type).splice(0);
@@ -357,6 +362,7 @@ const theProjectStorage = (() => {
       theEventHandler.publish(type, [storage(type), type]);
     },
     list: ([type, id, idProject]) => {
+      copy.remove.list([get.list(type, id, idProject)]);
       const tProject = get.project(type, idProject);
 
       tProject.list.splice(id, 1);
@@ -366,6 +372,7 @@ const theProjectStorage = (() => {
       theEventHandler.publish('theDisplayUpdate', [type, idProject]);
     },
     task: ([type, id, idList, idProject]) => {
+      copy.remove.task([get.task(type, id, idList, idProject)]);
       const tList = get.list(type, idList, idProject);
 
       tList.task.splice(id, 1);
@@ -375,6 +382,7 @@ const theProjectStorage = (() => {
       theEventHandler.publish('theDisplayUpdate', [type, idProject]);
     },
     note: ([type, id, idTask, idList, idProject]) => {
+      copy.remove.note([get.note(type, id, idTask, idList, idProject)]);
       const tTask = get.task(type, idTask, idList, idProject);
 
       tTask.note.splice(id, 1);
@@ -400,6 +408,102 @@ const theProjectStorage = (() => {
     }
   };
 
+  //Misc Functions
+  const tagLookup = ([tag]) => {
+    let projectStorage = automaticProject;
+    let tagMatched = [];
+
+    for (let u = 0; u <= 1; u++) {
+      projectStorage.forEach((project) => {
+        if (project.tag === tag) {
+          tagMatched.push(project);
+        }
+        project.list.forEach((list) => {
+          if (list.tag === tag) {
+            tagMatched.push(list);
+          }
+          list.task.forEach((task) => {
+            if (task.tag === tag) {
+              tagMatched.push(task);
+            }
+            task.list = list.id;
+            task.note.forEach((note) => {
+              if (note.tag === tag) {
+                tagMatched.push(note);
+              }
+            });
+          });
+        });
+      });
+      projectStorage = customProject;
+    }
+    return tagMatched;
+  };
+
+  //Copy Functions
+  const copy = {
+    edit: {
+      properties: ([object]) => {
+        const tagMatched = tagLookup([object.tag]);
+
+        if (object.date) {
+          tagMatched.forEach((tag) => {
+            editUpdateProperties(
+              [tag],
+              object.title,
+              object.description,
+              object.date
+            );
+          });
+        } else {
+          tagMatched.forEach((tag) => {
+            editUpdateProperties([tag], object.title, object.description);
+          });
+        }
+      },
+    },
+    remove: {
+      project: ([object]) => {
+        const tagMatched = tagLookup([object.tag]);
+
+        tagMatched.forEach((tag) => {
+          if (tag.project !== object.project) {
+            get.storage(tag.type).splice(tag.id, 1);
+          }
+        });
+      },
+      list: ([object]) => {
+        const tagMatched = tagLookup([object.tag]);
+
+        tagMatched.forEach((tag) => {
+          if (tag.project !== object.project) {
+            get.project(tag.type, tag.project).list.splice(tag.id, 1);
+          }
+        });
+      },
+      task: ([object]) => {
+        const tagMatched = tagLookup([object.tag]);
+
+        tagMatched.forEach((tag) => {
+          if (tag.project !== object.project) {
+            get.list(tag.type, tag.list, tag.project).task.splice(tag.id, 1);
+          }
+        });
+      },
+      note: ([object]) => {
+        const tagMatched = tagLookup([object.tag]);
+
+        tagMatched.forEach((tag) => {
+          if (tag.project !== object.project) {
+            get
+              .task(tag.type, tag.task, tag.list, tag.project)
+              .note.splice(tag.id, 1);
+          }
+        });
+      },
+    },
+  };
+
   //Edit Functions
   const editUpdateProperties = ([object], title, description, date) => {
     object.title = title;
@@ -407,41 +511,6 @@ const theProjectStorage = (() => {
 
     if (date) {
       object.date = date;
-    }
-  };
-
-  const editCopyProperties = ([object]) => {
-    const objectTag = object.tag;
-    let projectStorage = automaticProject;
-
-    for (let u = 0; u <= 1; u++) {
-      projectStorage.forEach((project) => {
-        if (project.tag === objectTag) {
-          editUpdateProperties([project], object.title, object.description);
-        }
-        project.list.forEach((list) => {
-          if (list.tag === objectTag) {
-            editUpdateProperties([list], object.title, object.description);
-          }
-          list.task.forEach((task) => {
-            if (task.tag === objectTag) {
-              editUpdateProperties(
-                [task],
-                object.title,
-                object.description,
-                object.date
-              );
-            }
-            task.list = list.id;
-            task.note.forEach((note) => {
-              if (note.tag === objectTag) {
-                editUpdateProperties([note], object.title, object.description);
-              }
-            });
-          });
-        });
-      });
-      projectStorage = customProject;
     }
   };
 
@@ -472,6 +541,7 @@ const theProjectStorage = (() => {
     idTypeCategoryIndexUpdateData([automaticProject, 'automaticProject']);
   };
 
+  //Display
   const display = {
     project: (type, id) => {
       if (!id) {
