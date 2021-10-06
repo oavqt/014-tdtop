@@ -422,8 +422,6 @@ const editTask = function () {
 const editNote = function () {
   theDOMTemplate.editForm('Note');
 
-  console.log(theDOMGetValue.id.note());
-
   theFormSetValue(
     theProjectStorage.display.formValue.note(theDOMGetValue.id.note())
   );

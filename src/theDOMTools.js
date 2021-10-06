@@ -347,7 +347,11 @@ const theDOMGetValue = {
       return theDOMGet.theFormDescription().value;
     },
     date: () => {
-      return theDOMGet.theFormDate().value;
+      if (theDOMGet.theFormDate().value === '') {
+        return '???';
+      } else {
+        return theDOMGet.theFormDate().value;
+      }
     },
   },
 };
