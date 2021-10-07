@@ -258,6 +258,8 @@ const theProjectStorage = (() => {
       ]);
 
       tagData.project(projects, storage(type).at(-1));
+
+      copy.clean.duplicate.projects([get.storage(type).at(-1)]);
     },
     list: ([type, idProject], title, description) => {
       const tProject = get.project(type, idProject);
@@ -270,6 +272,10 @@ const theProjectStorage = (() => {
       idTypeCategoryIndexUpdateData([storage(type), type]);
 
       tagData.list(lists, tProject.list.at(-1));
+
+      copy.clean.duplicate.list([tProject.list.at(-1)]);
+
+      idTypeCategoryIndexUpdateData([storage(type), type]);
     },
     task: ([type, idList, idProject], title, description, date) => {
       const tList = get.list(type, idList, idProject);
@@ -284,6 +290,10 @@ const theProjectStorage = (() => {
       tagData.task(tasks, tList.task.at(-1));
 
       sort.date([tList, tList.task.at(-1)]);
+
+      copy.clean.duplicate.task([tList.task.at(-1)]);
+
+      idTypeCategoryIndexUpdateData([storage(type), type]);
     },
     note: ([type, idTask, idList, idProject], title, description) => {
       const tTask = get.task(type, idTask, idList, idProject);
@@ -298,6 +308,10 @@ const theProjectStorage = (() => {
       tagData.note(notes, tTask.note.at(-1));
 
       sort.date([get.list(type, idList, idProject), tTask, tTask.note.at(-1)]);
+
+      copy.clean.duplicate.note([tTask.note.at(-1)]);
+
+      idTypeCategoryIndexUpdateData([storage(type), type]);
     },
   };
 
@@ -419,35 +433,87 @@ const theProjectStorage = (() => {
   };
 
   //Misc Functions
-  const tagLookup = ([tag]) => {
-    let projectStorage = automaticProject;
-    let tagMatched = [];
+  const tag = {
+    lookup: {
+      all: ([object]) => {
+        let projectStorage = automaticProject;
+        let tagMatched = [];
 
-    for (let u = 0; u <= 1; u++) {
-      projectStorage.forEach((project) => {
-        if (project.tag === tag) {
-          tagMatched.push(project);
-        }
-        project.list.forEach((list) => {
-          if (list.tag === tag) {
-            tagMatched.push(list);
-          }
-          list.task.forEach((task) => {
-            if (task.tag === tag) {
-              tagMatched.push(task);
+        for (let u = 0; u <= 1; u++) {
+          projectStorage.forEach((project) => {
+            if (project.tag === object.tag) {
+              tagMatched.push(project);
             }
-            task.list = list.id;
-            task.note.forEach((note) => {
-              if (note.tag === tag) {
-                tagMatched.push(note);
+            project.list.forEach((list) => {
+              if (list.tag === object.tag) {
+                tagMatched.push(list);
               }
+              list.task.forEach((task) => {
+                if (task.tag === object.tag) {
+                  tagMatched.push(task);
+                }
+                task.note.forEach((note) => {
+                  if (note.tag === object.tag) {
+                    tagMatched.push(note);
+                  }
+                });
+              });
             });
           });
+          projectStorage = customProject;
+        }
+        return tagMatched;
+      },
+      project: ([object]) => {
+        const storage = get.storage(object.type);
+        let tagMatched = [];
+
+        storage.forEach((project) => {
+          if (project.tag === object.tag) {
+            tagMatched.push(project);
+          }
         });
-      });
-      projectStorage = customProject;
-    }
-    return tagMatched;
+        return tagMatched;
+      },
+      list: ([object]) => {
+        const project = get.project(object.type, object.project);
+        let tagMatched = [];
+
+        project.list.forEach((list) => {
+          if (list.tag === object.tag) {
+            tagMatched.push(list);
+          }
+        });
+        return tagMatched;
+      },
+      task: ([object]) => {
+        const list = get.list(object.type, object.list, object.project);
+        let tagMatched = [];
+
+        list.task.forEach((task) => {
+          if (task.tag === object.tag) {
+            tagMatched.push(task);
+          }
+        });
+        return tagMatched;
+      },
+      note: ([object]) => {
+        const task = get.task(
+          object.type,
+          object.task,
+          object.list,
+          object.project
+        );
+        let tagMatched = [];
+
+        task.note.forEach((note) => {
+          if (note.tag === object.tag) {
+            tagMatched.push(note);
+          }
+        });
+        return tagMatched;
+      },
+    },
   };
 
   //Copy Functions
@@ -485,7 +551,7 @@ const theProjectStorage = (() => {
     },
     edit: {
       properties: ([object]) => {
-        const tagMatched = tagLookup([object.tag]);
+        const tagMatched = tag.lookup.all([object]);
 
         if (object.date) {
           tagMatched.forEach((tag) => {
@@ -505,7 +571,7 @@ const theProjectStorage = (() => {
     },
     remove: {
       project: ([object]) => {
-        const tagMatched = tagLookup([object.tag]);
+        const tagMatched = tag.lookup.all([object]);
 
         tagMatched.forEach((tag) => {
           if (tag.project !== object.project) {
@@ -514,7 +580,7 @@ const theProjectStorage = (() => {
         });
       },
       list: ([object]) => {
-        const tagMatched = tagLookup([object.tag]);
+        const tagMatched = tag.lookup.all([object]);
 
         tagMatched.forEach((tag) => {
           if (tag.project !== object.project) {
@@ -523,7 +589,7 @@ const theProjectStorage = (() => {
         });
       },
       task: ([object]) => {
-        const tagMatched = tagLookup([object.tag]);
+        const tagMatched = tag.lookup.all([object]);
 
         tagMatched.forEach((tag) => {
           if (tag.project !== object.project) {
@@ -532,7 +598,7 @@ const theProjectStorage = (() => {
         });
       },
       note: ([object]) => {
-        const tagMatched = tagLookup([object.tag]);
+        const tagMatched = tag.lookup.all([object]);
 
         tagMatched.forEach((tag) => {
           if (tag.project !== object.project) {
@@ -544,12 +610,69 @@ const theProjectStorage = (() => {
       },
     },
     clean: {
+      duplicate: {
+        projects: ([object]) => {
+          const tagMatched = tag.lookup.project([object]);
+
+          if (tagMatched.length > 1) {
+            const dupe = tagMatched.find(
+              (tag) => tag.project === object.project
+            );
+
+            if (dupe) {
+              get.storage(dupe.type).splice(dupe.id, 1);
+            }
+          }
+        },
+        list: ([object]) => {
+          const tagMatched = tag.lookup.list([object]);
+
+          if (tagMatched.length > 1) {
+            const dupe = tagMatched.find(
+              (tag) => tag.project === object.project
+            );
+
+            if (dupe) {
+              get.project(dupe.type, dupe.project).list.splice(dupe.id, 1);
+            }
+          }
+        },
+        task: ([object]) => {
+          const tagMatched = tag.lookup.task([object]);
+
+          if (tagMatched.length > 1) {
+            const dupe = tagMatched.find(
+              (tag) => tag.project === object.project
+            );
+
+            if (dupe) {
+              get
+                .list(dupe.type, dupe.list, dupe.project)
+                .task.splice(dupe.id, 1);
+            }
+          }
+        },
+        note: ([object]) => {
+          const tagMatched = tag.lookup.note([object]);
+
+          if (tagMatched.length > 1) {
+            const dupe = tagMatched.find(
+              (tag) => tag.project === object.project
+            );
+
+            if (dupe) {
+              get
+                .task(dupe.type, dupe.task, dupe.list, dupe.project)
+                .note.splice(dupe.id, 1);
+            }
+          }
+        },
+      },
       today: (list) => {
         if (list) {
           list.task.forEach((task) => {
             if (!date.today(task.date)) {
               list.task.splice(task.id, 1);
-              console.log(list);
             }
           });
         }
@@ -559,7 +682,6 @@ const theProjectStorage = (() => {
           list.task.forEach((task) => {
             if (!date.upcoming(task.date)) {
               list.task.splice(task.id, 1);
-              console.log(list);
             }
           });
         }
