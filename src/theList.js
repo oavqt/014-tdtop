@@ -259,7 +259,7 @@ const theProjectStorage = (() => {
 
       tagData.project(projects, storage(type).at(-1));
 
-      copy.clean.duplicate.projects([get.storage(type).at(-1)]);
+      clean.duplicate.projects([get.storage(type).at(-1)]);
     },
     list: ([type, idProject], title, description) => {
       const tProject = get.project(type, idProject);
@@ -273,7 +273,9 @@ const theProjectStorage = (() => {
 
       tagData.list(lists, tProject.list.at(-1));
 
-      copy.clean.duplicate.list([tProject.list.at(-1)]);
+      clean.duplicate.list([tProject.list.at(-1)]);
+
+      sort.inbox([tProject.list.at(-1)]);
 
       idTypeCategoryIndexUpdateData([storage(type), type]);
     },
@@ -291,7 +293,7 @@ const theProjectStorage = (() => {
 
       sort.date([tList, tList.task.at(-1)]);
 
-      copy.clean.duplicate.task([tList.task.at(-1)]);
+      clean.duplicate.task([tList.task.at(-1)]);
 
       idTypeCategoryIndexUpdateData([storage(type), type]);
     },
@@ -309,7 +311,7 @@ const theProjectStorage = (() => {
 
       sort.date([get.list(type, idList, idProject), tTask, tTask.note.at(-1)]);
 
-      copy.clean.duplicate.note([tTask.note.at(-1)]);
+      clean.duplicate.note([tTask.note.at(-1)]);
 
       idTypeCategoryIndexUpdateData([storage(type), type]);
     },
@@ -420,6 +422,17 @@ const theProjectStorage = (() => {
         sort.upcoming([clonedList, clonedTask, clonedNote]);
       }
     },
+    inbox: ([tList]) => {
+      const inbox = automaticProject[0];
+      const clonedList = objectProtoClone('list', tList);
+      const tagMatched = inbox.list.find(
+        (list) => list.tag === clonedList.tag && list.type === clonedList.type
+      );
+
+      if (tagMatched === undefined && clonedList.type === 'automaticProject') {
+        inbox.list.push(clonedList);
+      }
+    },
     today: ([tList, tTask, tNote]) => {
       const today = automaticProject[1];
 
@@ -429,6 +442,217 @@ const theProjectStorage = (() => {
       const upcoming = automaticProject[2];
 
       copy.add([upcoming, tList, tTask, tNote]);
+    },
+  };
+
+  //Copy Functions
+  const copy = {
+    add: ([target, tList, tTask, tNote]) => {
+      const project = target;
+      const projectList = project.list.find((list) => list.tag === tList.tag);
+
+      clean[project.title.toLowerCase()](tList);
+
+      let projectListTask;
+      if (tNote) {
+        projectListTask = projectList.task.find(
+          (task) => task.tag === tTask.tag
+        );
+      }
+
+      if (projectList) {
+        if (projectListTask) {
+          tTask.note.splice(-1, 1);
+          tTask.note.push(tNote);
+          projectListTask.note.push(tNote);
+        } else {
+          projectList.task.push(tTask);
+        }
+      } else {
+        tList.task.splice(-1, 1);
+        tList.task.push(tTask);
+        project.list.push(tList);
+      }
+
+      clean[project.title.toLowerCase()](projectList);
+
+      idTypeCategoryIndexUpdateData([automaticProject, 'automaticProject']);
+    },
+    edit: {
+      properties: ([object]) => {
+        const tagMatched = tag.lookup.all([object]);
+
+        if (object.date) {
+          tagMatched.forEach((tag) => {
+            editUpdateProperties(
+              [tag],
+              object.title,
+              object.description,
+              object.date
+            );
+          });
+        } else {
+          tagMatched.forEach((tag) => {
+            editUpdateProperties([tag], object.title, object.description);
+          });
+        }
+      },
+    },
+    remove: {
+      project: ([object]) => {
+        const tagMatched = tag.lookup.all([object]);
+
+        tagMatched.forEach((tag) => {
+          if (tag.project !== object.project) {
+            get.storage(tag.type).splice(tag.id, 1);
+          }
+        });
+      },
+      list: ([object]) => {
+        const tagMatched = tag.lookup.all([object]);
+
+        tagMatched.forEach((tag) => {
+          if (tag.project !== object.project) {
+            get.project(tag.type, tag.project).list.splice(tag.id, 1);
+          }
+        });
+      },
+      task: ([object]) => {
+        const tagMatched = tag.lookup.all([object]);
+
+        tagMatched.forEach((tag) => {
+          if (tag.project !== object.project) {
+            get.list(tag.type, tag.list, tag.project).task.splice(tag.id, 1);
+          }
+        });
+      },
+      note: ([object]) => {
+        const tagMatched = tag.lookup.all([object]);
+
+        tagMatched.forEach((tag) => {
+          if (tag.project !== object.project) {
+            get
+              .task(tag.type, tag.task, tag.list, tag.project)
+              .note.splice(tag.id, 1);
+          }
+        });
+      },
+    },
+  };
+
+  //Clean Functions
+  const clean = {
+    duplicate: {
+      projects: ([object]) => {
+        const tagMatched = tag.lookup.project([object]);
+
+        if (tagMatched.length > 1) {
+          const dupe = tagMatched.find((tag) => tag.project === object.project);
+
+          if (dupe) {
+            get.storage(dupe.type).splice(dupe.id, 1);
+          }
+        }
+      },
+      list: ([object]) => {
+        const tagMatched = tag.lookup.list([object]);
+
+        if (tagMatched.length > 1) {
+          const dupe = tagMatched.find((tag) => tag.project === object.project);
+
+          if (dupe) {
+            get.project(dupe.type, dupe.project).list.splice(dupe.id, 1);
+          }
+        }
+      },
+      task: ([object]) => {
+        const tagMatched = tag.lookup.task([object]);
+
+        if (tagMatched.length > 1) {
+          const dupe = tagMatched.find((tag) => tag.project === object.project);
+
+          if (dupe) {
+            get
+              .list(dupe.type, dupe.list, dupe.project)
+              .task.splice(dupe.id, 1);
+          }
+        }
+      },
+      note: ([object]) => {
+        const tagMatched = tag.lookup.note([object]);
+
+        if (tagMatched.length > 1) {
+          const dupe = tagMatched.find((tag) => tag.project === object.project);
+
+          if (dupe) {
+            get
+              .task(dupe.type, dupe.task, dupe.list, dupe.project)
+              .note.splice(dupe.id, 1);
+          }
+        }
+      },
+    },
+    empty: {
+      list: (project) => {
+        project.list.forEach((list) => {
+          if (!list.task.at(0)) {
+            project.list.splice(list.id, 1);
+          }
+        });
+      },
+    },
+    today: (list) => {
+      if (list) {
+        list.task.forEach((task) => {
+          if (!date.today(task.date)) {
+            list.task.splice(task.id, 1);
+          }
+        });
+        clean.empty.list(automaticProject[1]);
+      }
+    },
+    upcoming: (list) => {
+      if (list) {
+        list.task.forEach((task) => {
+          if (!date.upcoming(task.date)) {
+            list.task.splice(task.id, 1);
+          }
+        });
+        clean.empty.list(automaticProject[2]);
+      }
+    },
+  };
+
+  //Edit Functions
+  const editUpdateProperties = ([object], title, description, date) => {
+    object.title = title;
+    object.description = description;
+
+    if (date) {
+      object.date = date;
+    }
+  };
+
+  //Sort Functions
+  const date = {
+    today: (date) => {
+      const current = new Date().toLocaleDateString();
+      const tDate = new Date(date).toLocaleDateString();
+
+      if (tDate === current) {
+        return true;
+      }
+    },
+    upcoming: (date) => {
+      const current = new Date();
+      const tDate = new Date(date);
+
+      const fortnight = new Date(current);
+      fortnight.setDate(fortnight.getDate() + 14);
+
+      if (tDate > current && tDate <= fortnight) {
+        return true;
+      }
     },
   };
 
@@ -513,211 +737,6 @@ const theProjectStorage = (() => {
         });
         return tagMatched;
       },
-    },
-  };
-
-  //Copy Functions
-  const copy = {
-    add: ([target, tList, tTask, tNote]) => {
-      const project = target;
-      const projectList = project.list.find((list) => list.tag === tList.tag);
-
-      copy.clean[project.title.toLowerCase()](tList);
-
-      let projectListTask;
-      if (tNote) {
-        projectListTask = projectList.task.find(
-          (task) => task.tag === tTask.tag
-        );
-      }
-
-      if (projectList) {
-        if (projectListTask) {
-          tTask.note.splice(-1, 1);
-          tTask.note.push(tNote);
-          projectListTask.note.push(tNote);
-        } else {
-          projectList.task.push(tTask);
-        }
-      } else {
-        tList.task.splice(-1, 1);
-        tList.task.push(tTask);
-        project.list.push(tList);
-      }
-
-      copy.clean[project.title.toLowerCase()](projectList);
-
-      idTypeCategoryIndexUpdateData([automaticProject, 'automaticProject']);
-    },
-    edit: {
-      properties: ([object]) => {
-        const tagMatched = tag.lookup.all([object]);
-
-        if (object.date) {
-          tagMatched.forEach((tag) => {
-            editUpdateProperties(
-              [tag],
-              object.title,
-              object.description,
-              object.date
-            );
-          });
-        } else {
-          tagMatched.forEach((tag) => {
-            editUpdateProperties([tag], object.title, object.description);
-          });
-        }
-      },
-    },
-    remove: {
-      project: ([object]) => {
-        const tagMatched = tag.lookup.all([object]);
-
-        tagMatched.forEach((tag) => {
-          if (tag.project !== object.project) {
-            get.storage(tag.type).splice(tag.id, 1);
-          }
-        });
-      },
-      list: ([object]) => {
-        const tagMatched = tag.lookup.all([object]);
-
-        tagMatched.forEach((tag) => {
-          if (tag.project !== object.project) {
-            get.project(tag.type, tag.project).list.splice(tag.id, 1);
-          }
-        });
-      },
-      task: ([object]) => {
-        const tagMatched = tag.lookup.all([object]);
-
-        tagMatched.forEach((tag) => {
-          if (tag.project !== object.project) {
-            get.list(tag.type, tag.list, tag.project).task.splice(tag.id, 1);
-          }
-        });
-      },
-      note: ([object]) => {
-        const tagMatched = tag.lookup.all([object]);
-
-        tagMatched.forEach((tag) => {
-          if (tag.project !== object.project) {
-            get
-              .task(tag.type, tag.task, tag.list, tag.project)
-              .note.splice(tag.id, 1);
-          }
-        });
-      },
-    },
-    clean: {
-      duplicate: {
-        projects: ([object]) => {
-          const tagMatched = tag.lookup.project([object]);
-
-          if (tagMatched.length > 1) {
-            const dupe = tagMatched.find(
-              (tag) => tag.project === object.project
-            );
-
-            if (dupe) {
-              get.storage(dupe.type).splice(dupe.id, 1);
-            }
-          }
-        },
-        list: ([object]) => {
-          const tagMatched = tag.lookup.list([object]);
-
-          if (tagMatched.length > 1) {
-            const dupe = tagMatched.find(
-              (tag) => tag.project === object.project
-            );
-
-            if (dupe) {
-              get.project(dupe.type, dupe.project).list.splice(dupe.id, 1);
-            }
-          }
-        },
-        task: ([object]) => {
-          const tagMatched = tag.lookup.task([object]);
-
-          if (tagMatched.length > 1) {
-            const dupe = tagMatched.find(
-              (tag) => tag.project === object.project
-            );
-
-            if (dupe) {
-              get
-                .list(dupe.type, dupe.list, dupe.project)
-                .task.splice(dupe.id, 1);
-            }
-          }
-        },
-        note: ([object]) => {
-          const tagMatched = tag.lookup.note([object]);
-
-          if (tagMatched.length > 1) {
-            const dupe = tagMatched.find(
-              (tag) => tag.project === object.project
-            );
-
-            if (dupe) {
-              get
-                .task(dupe.type, dupe.task, dupe.list, dupe.project)
-                .note.splice(dupe.id, 1);
-            }
-          }
-        },
-      },
-      today: (list) => {
-        if (list) {
-          list.task.forEach((task) => {
-            if (!date.today(task.date)) {
-              list.task.splice(task.id, 1);
-            }
-          });
-        }
-      },
-      upcoming: (list) => {
-        if (list) {
-          list.task.forEach((task) => {
-            if (!date.upcoming(task.date)) {
-              list.task.splice(task.id, 1);
-            }
-          });
-        }
-      },
-    },
-  };
-
-  //Edit Functions
-  const editUpdateProperties = ([object], title, description, date) => {
-    object.title = title;
-    object.description = description;
-
-    if (date) {
-      object.date = date;
-    }
-  };
-
-  //Sort Functions
-  const date = {
-    today: (date) => {
-      const current = new Date().toISOString().slice(0, 10);
-
-      if (date === current) {
-        return true;
-      }
-    },
-    upcoming: (date) => {
-      const current = new Date();
-      const tDate = new Date(date);
-
-      const fortnight = new Date(current);
-      fortnight.setDate(fortnight.getDate() + 14);
-
-      if (tDate > current && tDate <= fortnight) {
-        return true;
-      }
     },
   };
 

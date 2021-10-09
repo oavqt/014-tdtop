@@ -350,7 +350,7 @@ const theDOMGetValue = {
       if (theDOMGet.theFormDate().value === '') {
         return '???';
       } else {
-        return theDOMGet.theFormDate().value;
+        return theDOMGet.theFormDate().value.replaceAll('-', '/');
       }
     },
   },
