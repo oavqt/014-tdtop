@@ -538,6 +538,10 @@ const theProjectStorage = (() => {
     },
     remove: {
       project: ([object]) => {
+        object.list.forEach((list) => {
+          copy.remove.list([list]);
+        });
+
         const tagMatched = tag.lookup.all([object]);
 
         tagMatched.forEach((tag) => {
@@ -545,15 +549,25 @@ const theProjectStorage = (() => {
             get.storage(tag.type).splice(tag.id, 1);
           }
         });
+
+        idTypeCategoryIndexUpdateData([automaticProject, 'automaticProject']);
+        idTypeCategoryIndexUpdateData([customProject, 'customProject']);
       },
       list: ([object]) => {
+        object.task.forEach((task) => {
+          copy.remove.task([task]);
+        });
+
         const tagMatched = tag.lookup.all([object]);
 
         tagMatched.forEach((tag) => {
-          if (tag.project !== object.project) {
+          if (tag.project !== object.project && tag.task.length === 0) {
             get.project(tag.type, tag.project).list.splice(tag.id, 1);
           }
         });
+
+        idTypeCategoryIndexUpdateData([automaticProject, 'automaticProject']);
+        idTypeCategoryIndexUpdateData([customProject, 'customProject']);
       },
       task: ([object]) => {
         const tagMatched = tag.lookup.all([object]);
@@ -563,6 +577,9 @@ const theProjectStorage = (() => {
             get.list(tag.type, tag.list, tag.project).task.splice(tag.id, 1);
           }
         });
+
+        idTypeCategoryIndexUpdateData([automaticProject, 'automaticProject']);
+        idTypeCategoryIndexUpdateData([customProject, 'customProject']);
       },
       note: ([object]) => {
         const tagMatched = tag.lookup.all([object]);
@@ -574,6 +591,9 @@ const theProjectStorage = (() => {
               .note.splice(tag.id, 1);
           }
         });
+
+        idTypeCategoryIndexUpdateData([automaticProject, 'automaticProject']);
+        idTypeCategoryIndexUpdateData([customProject, 'customProject']);
       },
     },
   };
