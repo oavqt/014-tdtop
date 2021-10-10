@@ -322,6 +322,8 @@ const theProjectStorage = (() => {
 
       tagData.note(notes, tTask.note.at(-1));
 
+      copy.add.lookup.note([tTask.note.at(-1)]);
+
       clean.duplicate.note([tTask.note.at(-1)]);
 
       idTypeCategoryIndexUpdateData([storage(type), type]);
@@ -461,6 +463,7 @@ const theProjectStorage = (() => {
         project.list.push(list);
 
         idTypeCategoryIndexUpdateData([automaticProject, 'automaticProject']);
+        idTypeCategoryIndexUpdateData([customProject, 'customProject']);
       },
       task: ([target, tTask]) => {
         const list = target;
@@ -470,14 +473,16 @@ const theProjectStorage = (() => {
         list.task.push(task);
 
         idTypeCategoryIndexUpdateData([automaticProject, 'automaticProject']);
+        idTypeCategoryIndexUpdateData([customProject, 'customProject']);
       },
       note: ([target, tNote]) => {
         const task = target;
         const note = clone.object.note([tNote]);
 
-        task.list.push(note);
+        task.note.push(note);
 
         idTypeCategoryIndexUpdateData([automaticProject, 'automaticProject']);
+        idTypeCategoryIndexUpdateData([customProject, 'customProject']);
       },
       lookup: {
         task: ([object]) => {
@@ -488,6 +493,23 @@ const theProjectStorage = (() => {
             tagMatched.forEach((list) => {
               if (list.project !== tList.project) {
                 copy.add.task([list, object]);
+              }
+            });
+          }
+        },
+        note: ([object]) => {
+          const tTask = get.task(
+            object.type,
+            object.task,
+            object.list,
+            object.project
+          );
+          const tagMatched = tag.lookup.task([tTask]);
+
+          if (tagMatched.length > 1) {
+            tagMatched.forEach((task) => {
+              if (task.project !== tTask.project) {
+                copy.add.note([task, object]);
               }
             });
           }
@@ -562,11 +584,18 @@ const theProjectStorage = (() => {
       projects: ([object]) => {
         const tagMatched = tag.lookup.project([object]);
 
-        if (tagMatched.length > 1) {
-          const dupe = tagMatched.find((tag) => tag.project === object.project);
+        let cached;
 
-          if (dupe) {
-            get.storage(dupe.type).splice(dupe.id, 1);
+        if (tagMatched.length > 1) {
+          for (let index = 0; index < tagMatched.length; index++) {
+            if (cached) {
+              if (cached.tag === tagMatched[index].tag) {
+                get
+                  .storage(tagMatched[index].type)
+                  .project.splice(tagMatched[index].id, 1);
+              }
+            }
+            cached = tagMatched[index];
           }
         }
       },
@@ -615,13 +644,25 @@ const theProjectStorage = (() => {
       note: ([object]) => {
         const tagMatched = tag.lookup.note([object]);
 
-        if (tagMatched.length > 1) {
-          const dupe = tagMatched.find((tag) => tag.project === object.project);
+        let cached;
 
-          if (dupe) {
-            get
-              .task(dupe.type, dupe.task, dupe.list, dupe.project)
-              .note.splice(dupe.id, 1);
+        if (tagMatched.length > 1) {
+          for (let index = 0; index < tagMatched.length; index++) {
+            if (cached) {
+              if (cached.project === tagMatched[index].project) {
+                get
+                  .task(
+                    tagMatched[index].type,
+                    tagMatched[index].task,
+                    tagMatched[index].list,
+                    tagMatched[index].project
+                  )
+                  .note.splice(tagMatched[index].id, 1);
+
+                tagMatched.splice(index, 1);
+              }
+            }
+            cached = tagMatched[index];
           }
         }
       },
