@@ -107,7 +107,14 @@ const objectCreate = {
 };
 
 //Clone Objects
-const objectProtoClone = (type, object) => {
+const objectSetProto = (type, object) => {
+  return Object.setPrototypeOf(
+    object,
+    objectOption.addProtoOption('proto', type)
+  );
+};
+
+const objectCloneProto = (type, object) => {
   return Object.assign(
     Object.create(objectOption.addProtoOption('proto', type)),
     JSON.parse(JSON.stringify(object))
@@ -292,8 +299,14 @@ const theProjectStorage = (() => {
       tagData.task(tasks, tList.task.at(-1));
 
       sort.date([tList, tList.task.at(-1)]);
+      copy.add.lookup.task([tList.task.at(-1)]);
 
+      idTypeCategoryIndexUpdateData([storage(type), type]);
+
+      clean.duplicate.list([tList]);
       clean.duplicate.task([tList.task.at(-1)]);
+
+      clean.sort();
 
       idTypeCategoryIndexUpdateData([storage(type), type]);
     },
@@ -308,8 +321,6 @@ const theProjectStorage = (() => {
       idTypeCategoryIndexUpdateData([storage(type), type]);
 
       tagData.note(notes, tTask.note.at(-1));
-
-      sort.date([get.list(type, idList, idProject), tTask, tTask.note.at(-1)]);
 
       clean.duplicate.note([tTask.note.at(-1)]);
 
@@ -406,25 +417,19 @@ const theProjectStorage = (() => {
   };
 
   //Project Sort
+
+  //Sort Functions
   const sort = {
-    date: ([tList, tTask, tNote]) => {
-      const clonedList = objectProtoClone('list', tList);
-      const clonedTask = objectProtoClone('task', tTask);
-
-      let clonedNote;
-      if (tNote) {
-        clonedNote = objectProtoClone('note', tNote);
-      }
-
+    date: ([tList, tTask]) => {
       if (date.today(tTask.date)) {
-        sort.today([clonedList, clonedTask, clonedNote]);
+        sort.today([tList]);
       } else if (date.upcoming(tTask.date)) {
-        sort.upcoming([clonedList, clonedTask, clonedNote]);
+        sort.upcoming([tList]);
       }
     },
     inbox: ([tList]) => {
       const inbox = automaticProject[0];
-      const clonedList = objectProtoClone('list', tList);
+      const clonedList = objectCloneProto('list', tList);
       const tagMatched = inbox.list.find(
         (list) => list.tag === clonedList.tag && list.type === clonedList.type
       );
@@ -433,50 +438,61 @@ const theProjectStorage = (() => {
         inbox.list.push(clonedList);
       }
     },
-    today: ([tList, tTask, tNote]) => {
+    today: ([tList]) => {
       const today = automaticProject[1];
 
-      copy.add([today, tList, tTask, tNote]);
+      copy.add.list([today, tList]);
     },
-    upcoming: ([tList, tTask, tNote]) => {
+    upcoming: ([tList]) => {
       const upcoming = automaticProject[2];
 
-      copy.add([upcoming, tList, tTask, tNote]);
+      copy.add.list([upcoming, tList]);
     },
   };
 
   //Copy Functions
   const copy = {
-    add: ([target, tList, tTask, tNote]) => {
-      const project = target;
-      const projectList = project.list.find((list) => list.tag === tList.tag);
+    add: {
+      list: ([target, tList]) => {
+        const project = target;
+        const list = clone.object.list([tList]);
 
-      clean[project.title.toLowerCase()](tList);
+        clone.prototype.list([list]);
+        project.list.push(list);
 
-      let projectListTask;
-      if (tNote) {
-        projectListTask = projectList.task.find(
-          (task) => task.tag === tTask.tag
-        );
-      }
+        idTypeCategoryIndexUpdateData([automaticProject, 'automaticProject']);
+      },
+      task: ([target, tTask]) => {
+        const list = target;
+        const task = clone.object.task([tTask]);
 
-      if (projectList) {
-        if (projectListTask) {
-          tTask.note.splice(-1, 1);
-          tTask.note.push(tNote);
-          projectListTask.note.push(tNote);
-        } else {
-          projectList.task.push(tTask);
-        }
-      } else {
-        tList.task.splice(-1, 1);
-        tList.task.push(tTask);
-        project.list.push(tList);
-      }
+        clone.prototype.task([task]);
+        list.task.push(task);
 
-      clean[project.title.toLowerCase()](projectList);
+        idTypeCategoryIndexUpdateData([automaticProject, 'automaticProject']);
+      },
+      note: ([target, tNote]) => {
+        const task = target;
+        const note = clone.object.note([tNote]);
 
-      idTypeCategoryIndexUpdateData([automaticProject, 'automaticProject']);
+        task.list.push(note);
+
+        idTypeCategoryIndexUpdateData([automaticProject, 'automaticProject']);
+      },
+      lookup: {
+        task: ([object]) => {
+          const tList = get.list(object.type, object.list, object.project);
+          const tagMatched = tag.lookup.list([tList]);
+
+          if (tagMatched.length > 1) {
+            tagMatched.forEach((list) => {
+              if (list.project !== tList.project) {
+                copy.add.task([list, object]);
+              }
+            });
+          }
+        },
+      },
     },
     edit: {
       properties: ([object]) => {
@@ -557,24 +573,42 @@ const theProjectStorage = (() => {
       list: ([object]) => {
         const tagMatched = tag.lookup.list([object]);
 
-        if (tagMatched.length > 1) {
-          const dupe = tagMatched.find((tag) => tag.project === object.project);
+        let cached;
 
-          if (dupe) {
-            get.project(dupe.type, dupe.project).list.splice(dupe.id, 1);
+        if (tagMatched.length > 1) {
+          for (let index = 0; index < tagMatched.length; index++) {
+            if (cached) {
+              if (cached.project === tagMatched[index].project) {
+                get
+                  .project(tagMatched[index].type, tagMatched[index].project)
+                  .list.splice(tagMatched[index].id, 1);
+              }
+            }
+            cached = tagMatched[index];
           }
         }
       },
       task: ([object]) => {
         const tagMatched = tag.lookup.task([object]);
 
-        if (tagMatched.length > 1) {
-          const dupe = tagMatched.find((tag) => tag.project === object.project);
+        let cached;
 
-          if (dupe) {
-            get
-              .list(dupe.type, dupe.list, dupe.project)
-              .task.splice(dupe.id, 1);
+        if (tagMatched.length > 1) {
+          for (let index = 0; index < tagMatched.length; index++) {
+            if (cached) {
+              if (cached.project === tagMatched[index].project) {
+                get
+                  .list(
+                    tagMatched[index].type,
+                    tagMatched[index].list,
+                    tagMatched[index].project
+                  )
+                  .task.splice(tagMatched[index].id, 1);
+
+                tagMatched.splice(index, 1);
+              }
+            }
+            cached = tagMatched[index];
           }
         }
       },
@@ -601,27 +635,39 @@ const theProjectStorage = (() => {
         });
       },
     },
-    today: (list) => {
-      if (list) {
+    sort: () => {
+      clean.today();
+      clean.upcoming();
+    },
+    today: () => {
+      const today = automaticProject[1];
+
+      today.list.forEach((list) => {
         list.task.forEach((task) => {
           if (!date.today(task.date)) {
             list.task.splice(task.id, 1);
           }
         });
-        clean.empty.list(automaticProject[1]);
-      }
+      });
+
+      clean.empty.list(today);
     },
-    upcoming: (list) => {
-      if (list) {
+    upcoming: () => {
+      const upcoming = automaticProject[2];
+
+      upcoming.list.forEach((list) => {
         list.task.forEach((task) => {
           if (!date.upcoming(task.date)) {
             list.task.splice(task.id, 1);
           }
         });
-        clean.empty.list(automaticProject[2]);
-      }
+      });
+
+      clean.empty.list(upcoming);
     },
   };
+
+  //Misc Functions
 
   //Edit Functions
   const editUpdateProperties = ([object], title, description, date) => {
@@ -633,7 +679,8 @@ const theProjectStorage = (() => {
     }
   };
 
-  //Sort Functions
+  //Project Sort
+  //Date Functions
   const date = {
     today: (date) => {
       const current = new Date().toLocaleDateString();
@@ -641,6 +688,8 @@ const theProjectStorage = (() => {
 
       if (tDate === current) {
         return true;
+      } else {
+        return false;
       }
     },
     upcoming: (date) => {
@@ -652,19 +701,21 @@ const theProjectStorage = (() => {
 
       if (tDate > current && tDate <= fortnight) {
         return true;
+      } else {
+        return false;
       }
     },
   };
 
-  //Misc Functions
+  //Tag Functions
   const tag = {
     lookup: {
       all: ([object]) => {
-        let projectStorage = automaticProject;
+        let storage = automaticProject;
         let tagMatched = [];
 
         for (let u = 0; u <= 1; u++) {
-          projectStorage.forEach((project) => {
+          storage.forEach((project) => {
             if (project.tag === object.tag) {
               tagMatched.push(project);
             }
@@ -684,58 +735,135 @@ const theProjectStorage = (() => {
               });
             });
           });
-          projectStorage = customProject;
+          storage = customProject;
         }
         return tagMatched;
       },
-      project: ([object]) => {
-        const storage = get.storage(object.type);
+      project: ([tProject]) => {
+        let storage = automaticProject;
         let tagMatched = [];
 
+        for (let u = 0; u <= 1; u++) {
+          storage.forEach((project) => {
+            if (project.tag === tProject.tag) {
+              tagMatched.push(project);
+            }
+          });
+          storage = customProject;
+        }
+        return tagMatched;
+      },
+      list: ([tList]) => {
+        let storage = automaticProject;
+        let tagMatched = [];
+
+        for (let u = 0; u <= 1; u++) {
+          storage.forEach((project) => {
+            project.list.forEach((list) => {
+              if (list.tag === tList.tag) {
+                tagMatched.push(list);
+              }
+            });
+          });
+          storage = customProject;
+        }
+        return tagMatched;
+      },
+      task: ([tTask]) => {
+        let storage = automaticProject;
+        let tagMatched = [];
+
+        for (let u = 0; u <= 1; u++) {
+          storage.forEach((project) => {
+            project.list.forEach((list) => {
+              list.task.forEach((task) => {
+                if (task.tag === tTask.tag) {
+                  tagMatched.push(task);
+                }
+              });
+            });
+          });
+          storage = customProject;
+        }
+        return tagMatched;
+      },
+      note: ([tNote]) => {
+        let storage = automaticProject;
+        let tagMatched = [];
+
+        for (let u = 0; u <= 1; u++) {
+          storage.forEach((project) => {
+            project.list.forEach((list) => {
+              list.task.forEach((task) => {
+                task.note.forEach((note) => {
+                  if (note.tag === tNote.tag) {
+                    tagMatched.push(note);
+                  }
+                });
+              });
+            });
+          });
+          storage = customProject;
+        }
+        return tagMatched;
+      },
+    },
+  };
+
+  //Clone Functions
+  const clone = {
+    object: {
+      project: ([project]) => {
+        return objectCloneProto('project', project);
+      },
+      list: ([list]) => {
+        return objectCloneProto('list', list);
+      },
+      task: ([task]) => {
+        return objectCloneProto('task', task);
+      },
+      note: ([note]) => {
+        return objectCloneProto('note', note);
+      },
+    },
+    prototype: {
+      all: ([storage]) => {
         storage.forEach((project) => {
-          if (project.tag === object.tag) {
-            tagMatched.push(project);
-          }
+          objectSetProto('project', project);
+          project.list.forEach((list) => {
+            objectSetProto('list', list);
+            list.task.forEach((task) => {
+              objectSetProto('task', task);
+              task.note.forEach((note) => {
+                objectSetProto('note', note);
+              });
+            });
+          });
         });
-        return tagMatched;
       },
-      list: ([object]) => {
-        const project = get.project(object.type, object.project);
-        let tagMatched = [];
-
+      project: ([project]) => {
         project.list.forEach((list) => {
-          if (list.tag === object.tag) {
-            tagMatched.push(list);
-          }
+          objectSetProto('list', list);
+          list.task.forEach((task) => {
+            objectSetProto('task', task);
+            task.note.forEach((note) => {
+              objectSetProto('note', note);
+            });
+          });
         });
-        return tagMatched;
       },
-      task: ([object]) => {
-        const list = get.list(object.type, object.list, object.project);
-        let tagMatched = [];
-
+      list: ([list]) => {
         list.task.forEach((task) => {
-          if (task.tag === object.tag) {
-            tagMatched.push(task);
-          }
+          objectSetProto('task', task);
+          task.note.forEach((note) => {
+            objectSetProto('note', note);
+          });
         });
-        return tagMatched;
       },
-      note: ([object]) => {
-        const task = get.task(
-          object.type,
-          object.task,
-          object.list,
-          object.project
-        );
-        let tagMatched = [];
-
+      task: ([task]) => {
         task.note.forEach((note) => {
-          if (note.tag === object.tag) {
-            tagMatched.push(note);
-          }
+          objectSetProto('note', note);
         });
-        return tagMatched;
       },
     },
   };
