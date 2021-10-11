@@ -427,6 +427,8 @@ const theProjectStorage = (() => {
         sort.today([tList]);
       } else if (date.upcoming(tTask.date)) {
         sort.upcoming([tList]);
+      } else if (date.someday(tTask.date)) {
+        sort.someday([tList]);
       }
     },
     inbox: ([tList]) => {
@@ -449,6 +451,11 @@ const theProjectStorage = (() => {
       const upcoming = automaticProject[2];
 
       copy.add.list([upcoming, tList]);
+    },
+    someday: ([tList]) => {
+      const someday = automaticProject[3];
+
+      copy.add.list([someday, tList]);
     },
   };
 
@@ -699,32 +706,87 @@ const theProjectStorage = (() => {
     sort: () => {
       clean.today();
       clean.upcoming();
+      clean.someday();
     },
     today: () => {
       const today = automaticProject[1];
+      let taskMatched = [];
 
       today.list.forEach((list) => {
         list.task.forEach((task) => {
           if (!date.today(task.date)) {
-            list.task.splice(task.id, 1);
+            taskMatched.push(task);
           }
         });
       });
+
+      for (let index = 0; index < taskMatched.length; index++) {
+        idTypeCategoryIndexUpdateData([automaticProject, 'automaticProject']);
+        idTypeCategoryIndexUpdateData([customProject, 'customProject']);
+
+        get
+          .list(
+            taskMatched[index].type,
+            taskMatched[index].list,
+            taskMatched[index].project
+          )
+          .task.splice(taskMatched[index].id, 1);
+      }
 
       clean.empty.list(today);
     },
     upcoming: () => {
       const upcoming = automaticProject[2];
+      let taskMatched = [];
 
       upcoming.list.forEach((list) => {
         list.task.forEach((task) => {
           if (!date.upcoming(task.date)) {
-            list.task.splice(task.id, 1);
+            taskMatched.push(task);
           }
         });
       });
 
+      for (let index = 0; index < taskMatched.length; index++) {
+        idTypeCategoryIndexUpdateData([automaticProject, 'automaticProject']);
+        idTypeCategoryIndexUpdateData([customProject, 'customProject']);
+
+        get
+          .list(
+            taskMatched[index].type,
+            taskMatched[index].list,
+            taskMatched[index].project
+          )
+          .task.splice(taskMatched[index].id, 1);
+      }
+
       clean.empty.list(upcoming);
+    },
+    someday: () => {
+      const someday = automaticProject[3];
+      let taskMatched = [];
+
+      someday.list.forEach((list) => {
+        list.task.forEach((task) => {
+          if (!date.someday(task.date)) {
+            taskMatched.push(task);
+          }
+        });
+      });
+
+      for (let index = 0; index < taskMatched.length; index++) {
+        idTypeCategoryIndexUpdateData([automaticProject, 'automaticProject']);
+        idTypeCategoryIndexUpdateData([customProject, 'customProject']);
+
+        get
+          .list(
+            taskMatched[index].type,
+            taskMatched[index].list,
+            taskMatched[index].project
+          )
+          .task.splice(taskMatched[index].id, 1);
+      }
+      clean.empty.list(someday);
     },
   };
 
@@ -761,6 +823,19 @@ const theProjectStorage = (() => {
       fortnight.setDate(fortnight.getDate() + 14);
 
       if (tDate > current && tDate <= fortnight) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+    someday: (date) => {
+      const current = new Date();
+      const tDate = new Date(date);
+
+      const fortnight = new Date(current);
+      fortnight.setDate(fortnight.getDate() + 14);
+
+      if (tDate > fortnight) {
         return true;
       } else {
         return false;
