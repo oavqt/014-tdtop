@@ -423,12 +423,14 @@ const theProjectStorage = (() => {
   //Sort Functions
   const sort = {
     date: ([tList, tTask]) => {
-      if (date.today(tTask.date)) {
+      if (date.today([tTask.date])) {
         sort.today([tList]);
-      } else if (date.upcoming(tTask.date)) {
+      } else if (date.upcoming([tTask.date])) {
         sort.upcoming([tList]);
-      } else if (date.someday(tTask.date)) {
+      } else if (date.someday([tTask.date])) {
         sort.someday([tList]);
+      } else if (date.never([tTask.date])) {
+        sort.never([tList]);
       }
     },
     inbox: ([tList]) => {
@@ -456,6 +458,11 @@ const theProjectStorage = (() => {
       const someday = automaticProject[3];
 
       copy.add.list([someday, tList]);
+    },
+    never: ([tList]) => {
+      const never = automaticProject[4];
+
+      copy.add.list([never, tList]);
     },
   };
 
@@ -707,6 +714,7 @@ const theProjectStorage = (() => {
       clean.today();
       clean.upcoming();
       clean.someday();
+      clean.never();
     },
     today: () => {
       const today = automaticProject[1];
@@ -714,7 +722,7 @@ const theProjectStorage = (() => {
 
       today.list.forEach((list) => {
         list.task.forEach((task) => {
-          if (!date.today(task.date)) {
+          if (!date.today([task.date])) {
             taskMatched.push(task);
           }
         });
@@ -741,7 +749,7 @@ const theProjectStorage = (() => {
 
       upcoming.list.forEach((list) => {
         list.task.forEach((task) => {
-          if (!date.upcoming(task.date)) {
+          if (!date.upcoming([task.date])) {
             taskMatched.push(task);
           }
         });
@@ -768,7 +776,7 @@ const theProjectStorage = (() => {
 
       someday.list.forEach((list) => {
         list.task.forEach((task) => {
-          if (!date.someday(task.date)) {
+          if (!date.someday([task.date])) {
             taskMatched.push(task);
           }
         });
@@ -788,6 +796,32 @@ const theProjectStorage = (() => {
       }
       clean.empty.list(someday);
     },
+    never: () => {
+      const never = automaticProject[4];
+      let taskMatched = [];
+
+      never.list.forEach((list) => {
+        list.task.forEach((task) => {
+          if (!date.never([task.date])) {
+            taskMatched.push(task);
+          }
+        });
+      });
+
+      for (let index = 0; index < taskMatched.length; index++) {
+        idTypeCategoryIndexUpdateData([automaticProject, 'automaticProject']);
+        idTypeCategoryIndexUpdateData([customProject, 'customProject']);
+
+        get
+          .list(
+            taskMatched[index].type,
+            taskMatched[index].list,
+            taskMatched[index].project
+          )
+          .task.splice(taskMatched[index].id, 1);
+      }
+      clean.empty.list(never);
+    },
   };
 
   //Misc Functions
@@ -805,7 +839,8 @@ const theProjectStorage = (() => {
   //Project Sort
   //Date Functions
   const date = {
-    today: (date) => {
+    today: ([date]) => {
+      console.log(date);
       const current = new Date().toLocaleDateString();
       const tDate = new Date(date).toLocaleDateString();
 
@@ -815,7 +850,7 @@ const theProjectStorage = (() => {
         return false;
       }
     },
-    upcoming: (date) => {
+    upcoming: ([date]) => {
       const current = new Date();
       const tDate = new Date(date);
 
@@ -828,7 +863,7 @@ const theProjectStorage = (() => {
         return false;
       }
     },
-    someday: (date) => {
+    someday: ([date]) => {
       const current = new Date();
       const tDate = new Date(date);
 
@@ -836,6 +871,13 @@ const theProjectStorage = (() => {
       fortnight.setDate(fortnight.getDate() + 14);
 
       if (tDate > fortnight) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+    never: ([date]) => {
+      if (date === '???') {
         return true;
       } else {
         return false;
