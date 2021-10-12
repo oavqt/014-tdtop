@@ -281,7 +281,6 @@ const theProjectStorage = (() => {
       tagData.list(lists, tProject.list.at(-1));
 
       clean.duplicate.list([tProject.list.at(-1)]);
-
       sort.inbox([tProject.list.at(-1)]);
 
       idTypeCategoryIndexUpdateData([storage(type), type]);
@@ -299,7 +298,10 @@ const theProjectStorage = (() => {
       tagData.task(tasks, tList.task.at(-1));
 
       sort.date([tList, tList.task.at(-1)]);
+
       copy.add.lookup.task([tList.task.at(-1)]);
+
+      sort.inbox([tList]);
 
       idTypeCategoryIndexUpdateData([storage(type), type]);
 
@@ -388,7 +390,10 @@ const theProjectStorage = (() => {
     },
     list: ([type, id, idProject]) => {
       copy.remove.list([get.list(type, id, idProject)]);
+
       const tProject = get.project(type, idProject);
+
+      log.sort.list([get.list(type, id, idProject)]);
 
       tProject.list.splice(id, 1);
 
@@ -398,7 +403,10 @@ const theProjectStorage = (() => {
     },
     task: ([type, id, idList, idProject]) => {
       copy.remove.task([get.task(type, id, idList, idProject)]);
+
       const tList = get.list(type, idList, idProject);
+
+      log.sort.task([get.task(type, id, idList, idProject)]);
 
       tList.task.splice(id, 1);
 
@@ -415,6 +423,47 @@ const theProjectStorage = (() => {
       //Events
       idUpdateDataIndex(storage(type));
       theEventHandler.publish('theDisplayUpdate', [type, idProject]);
+    },
+  };
+
+  const log = {
+    sort: {
+      list: ([tList]) => {
+        const logbook = automaticProject[5];
+        const tagMatched = log.lookup.logbook([tList]);
+
+        if (tagMatched) {
+          tList.task.forEach((task) => {
+            copy.add.task([tagMatched, task]);
+          });
+        } else {
+          copy.add.list([logbook, tList]);
+        }
+      },
+      task: ([tTask]) => {
+        const logbook = automaticProject[5];
+        const tList = get.list(tTask.type, tTask.list, tTask.project);
+        const tagMatched = log.lookup.logbook([tList]);
+
+        if (tagMatched) {
+          copy.add.task([tagMatched, tTask]);
+        } else {
+          copy.add.list([logbook, tList]);
+        }
+      },
+    },
+    lookup: {
+      logbook: ([tList]) => {
+        let logbook = automaticProject[5];
+        let tagMatched;
+
+        logbook.list.forEach((list) => {
+          if (list.tag === tList.tag) {
+            tagMatched = list;
+          }
+        });
+        return tagMatched;
+      },
     },
   };
 
@@ -435,12 +484,18 @@ const theProjectStorage = (() => {
     },
     inbox: ([tList]) => {
       const inbox = automaticProject[0];
-      const clonedList = objectCloneProto('list', tList);
+      const clonedList = clone.object.list([tList]);
       const tagMatched = inbox.list.find(
         (list) => list.tag === clonedList.tag && list.type === clonedList.type
       );
+      if (tagMatched === undefined && clonedList.category === 'logbook') {
+        clone.prototype.list([clonedList]);
 
-      if (tagMatched === undefined && clonedList.type === 'automaticProject') {
+        inbox.list.push(clonedList);
+      } else if (
+        tagMatched === undefined &&
+        clonedList.type === 'automaticProject'
+      ) {
         inbox.list.push(clonedList);
       }
     },
@@ -715,6 +770,7 @@ const theProjectStorage = (() => {
       clean.upcoming();
       clean.someday();
       clean.never();
+      clean.logbook();
     },
     today: () => {
       const today = automaticProject[1];
@@ -822,6 +878,11 @@ const theProjectStorage = (() => {
       }
       clean.empty.list(never);
     },
+    logbook: () => {
+      const logbook = automaticProject[5];
+
+      clean.empty.list(logbook);
+    },
   };
 
   //Misc Functions
@@ -840,7 +901,6 @@ const theProjectStorage = (() => {
   //Date Functions
   const date = {
     today: ([date]) => {
-      console.log(date);
       const current = new Date().toLocaleDateString();
       const tDate = new Date(date).toLocaleDateString();
 
