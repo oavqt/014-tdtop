@@ -219,6 +219,7 @@ const theProjectStorage = (() => {
   let automaticProject = [];
   let customProject = [];
 
+  //Number Of
   let projects = 0;
   let lists = 0;
   let tasks = 0;
@@ -253,20 +254,20 @@ const theProjectStorage = (() => {
   //Add
   const add = {
     project: (type, title, description) => {
-      objectTemplate.project(storage(type), title, description);
+      objectTemplate.project(get.storage(type), title, description);
 
       //Events
       projects++;
 
-      theEventHandler.publish(type, [
-        storage(type),
-        type,
-        storage(type).at(-1),
-      ]);
-
-      tagData.project(projects, storage(type).at(-1));
+      tagData.project(projects, get.storage(type).at(-1));
 
       clean.duplicate.projects([get.storage(type).at(-1)]);
+
+      theEventHandler.publish(type, [
+        get.storage(type),
+        type,
+        get.storage(type).at(-1),
+      ]);
     },
     list: ([type, idProject], title, description) => {
       const tProject = get.project(type, idProject);
@@ -276,14 +277,15 @@ const theProjectStorage = (() => {
       //Events
       lists++;
 
-      idTypeCategoryIndexUpdateData([storage(type), type]);
+      idTypeCategoryIndexUpdateData([get.storage(type), type]);
 
       tagData.list(lists, tProject.list.at(-1));
 
       clean.duplicate.list([tProject.list.at(-1)]);
+
       sort.inbox([tProject.list.at(-1)]);
 
-      idTypeCategoryIndexUpdateData([storage(type), type]);
+      idTypeCategoryIndexUpdateData([get.storage(type), type]);
     },
     task: ([type, idList, idProject], title, description, date) => {
       const tList = get.list(type, idList, idProject);
@@ -293,7 +295,7 @@ const theProjectStorage = (() => {
       //Events
       tasks++;
 
-      idTypeCategoryIndexUpdateData([storage(type), type]);
+      idTypeCategoryIndexUpdateData([get.storage(type), type]);
 
       tagData.task(tasks, tList.task.at(-1));
 
@@ -303,14 +305,19 @@ const theProjectStorage = (() => {
 
       sort.inbox([tList]);
 
-      idTypeCategoryIndexUpdateData([storage(type), type]);
+      idTypeCategoryIndexUpdateData([get.storage(type), type]);
 
       clean.duplicate.list([tList]);
+
       clean.duplicate.task([tList.task.at(-1)]);
 
       clean.sort();
 
-      idTypeCategoryIndexUpdateData([storage(type), type]);
+      display.countValue(automaticProject);
+
+      display.countValue(customProject);
+
+      idTypeCategoryIndexUpdateData([get.storage(type), type]);
     },
     note: ([type, idTask, idList, idProject], title, description) => {
       const tTask = get.task(type, idTask, idList, idProject);
@@ -320,7 +327,7 @@ const theProjectStorage = (() => {
       //Events
       notes++;
 
-      idTypeCategoryIndexUpdateData([storage(type), type]);
+      idTypeCategoryIndexUpdateData([get.storage(type), type]);
 
       tagData.note(notes, tTask.note.at(-1));
 
@@ -328,7 +335,7 @@ const theProjectStorage = (() => {
 
       clean.duplicate.note([tTask.note.at(-1)]);
 
-      idTypeCategoryIndexUpdateData([storage(type), type]);
+      idTypeCategoryIndexUpdateData([get.storage(type), type]);
     },
   };
 
@@ -338,17 +345,19 @@ const theProjectStorage = (() => {
       const tProject = get.project(type, id);
 
       editUpdateProperties([tProject], title, description);
+
       copy.edit.properties([tProject]);
 
       //Events
       theEventHandler.publish('theDisplayUpdate', [type, id]);
 
-      theEventHandler.publish(type, [storage(type), type]);
+      theEventHandler.publish(type, [get.storage(type), type]);
     },
     list: ([type, id, idProject], title, description) => {
       const tList = get.list(type, id, idProject);
 
       editUpdateProperties([tList], title, description);
+
       copy.edit.properties([tList]);
 
       //Events
@@ -358,6 +367,7 @@ const theProjectStorage = (() => {
       const tTask = get.task(type, id, idList, idProject);
 
       editUpdateProperties([tTask], title, description, date);
+
       copy.edit.properties([tTask]);
 
       //Events
@@ -367,6 +377,7 @@ const theProjectStorage = (() => {
       const tNote = get.note(type, id, idTask, idList, idProject);
 
       editUpdateProperties([tNote], title, description);
+
       copy.edit.properties([tNote]);
 
       //Events
@@ -379,55 +390,91 @@ const theProjectStorage = (() => {
     project: (type, id) => {
       if (id) {
         copy.remove.project([get.project(type, id)]);
-        storage(type).splice(id, 1);
+
+        log.sort.project([get.project(type, id)]);
+
+        get.storage(type).splice(id, 1);
       } else {
-        storage(type).splice(0);
+        //Server HMR
+        get.storage(type).splice(0);
       }
 
       //Events
-      idUpdateDataIndex(storage(type));
-      theEventHandler.publish(type, [storage(type), type]);
+      idUpdateDataIndex(get.storage(type));
+
+      display.countValue(automaticProject);
+
+      display.countValue(customProject);
+
+      theEventHandler.publish(type, [get.storage(type), type]);
     },
     list: ([type, id, idProject]) => {
-      copy.remove.list([get.list(type, id, idProject)]);
-
       const tProject = get.project(type, idProject);
+
+      copy.remove.list([get.list(type, id, idProject)]);
 
       log.sort.list([get.list(type, id, idProject)]);
 
       tProject.list.splice(id, 1);
 
       //Events
-      idUpdateDataIndex(storage(type));
+      idUpdateDataIndex(get.storage(type));
+
+      display.countValue(automaticProject);
+
+      display.countValue(customProject);
+
       theEventHandler.publish('theDisplayUpdate', [type, idProject]);
     },
     task: ([type, id, idList, idProject]) => {
-      copy.remove.task([get.task(type, id, idList, idProject)]);
-
       const tList = get.list(type, idList, idProject);
+
+      copy.remove.task([get.task(type, id, idList, idProject)]);
 
       log.sort.task([get.task(type, id, idList, idProject)]);
 
       tList.task.splice(id, 1);
 
       //Events
-      idUpdateDataIndex(storage(type));
+      idUpdateDataIndex(get.storage(type));
+
+      display.countValue(automaticProject);
+
+      display.countValue(customProject);
+
       theEventHandler.publish('theDisplayUpdate', [type, idProject]);
     },
     note: ([type, id, idTask, idList, idProject]) => {
-      copy.remove.note([get.note(type, id, idTask, idList, idProject)]);
       const tTask = get.task(type, idTask, idList, idProject);
+
+      copy.remove.note([get.note(type, id, idTask, idList, idProject)]);
 
       tTask.note.splice(id, 1);
 
       //Events
-      idUpdateDataIndex(storage(type));
+      idUpdateDataIndex(get.storage(type));
+
       theEventHandler.publish('theDisplayUpdate', [type, idProject]);
     },
   };
 
   const log = {
     sort: {
+      project: ([project]) => {
+        const logbook = automaticProject[5];
+
+        project.list.forEach((list) => {
+          let tagMatched = log.lookup.logbook([list]);
+
+          if (tagMatched) {
+            list.task.forEach((task) => {
+              copy.add.task([tagMatched, task]);
+            });
+          } else {
+            copy.add.list([logbook, list]);
+          }
+        });
+      },
       list: ([tList]) => {
         const logbook = automaticProject[5];
         const tagMatched = log.lookup.logbook([tList]);
@@ -448,7 +495,13 @@ const theProjectStorage = (() => {
         if (tagMatched) {
           copy.add.task([tagMatched, tTask]);
         } else {
-          copy.add.list([logbook, tList]);
+          const tempList = clone.object.list([tList]);
+
+          tempList.task.splice(0);
+
+          tempList.task.push(tTask);
+
+          copy.add.list([logbook, tempList]);
         }
       },
     },
@@ -484,19 +537,19 @@ const theProjectStorage = (() => {
     },
     inbox: ([tList]) => {
       const inbox = automaticProject[0];
-      const clonedList = clone.object.list([tList]);
+      const tempList = clone.object.list([tList]);
       const tagMatched = inbox.list.find(
-        (list) => list.tag === clonedList.tag && list.type === clonedList.type
+        (list) => list.tag === tempList.tag && list.type === tempList.type
       );
-      if (tagMatched === undefined && clonedList.category === 'logbook') {
-        clone.prototype.list([clonedList]);
+      if (tagMatched === undefined && tempList.category === 'logbook') {
+        clone.prototype.list([tempList]);
 
-        inbox.list.push(clonedList);
+        inbox.list.push(tempList);
       } else if (
         tagMatched === undefined &&
-        clonedList.type === 'automaticProject'
+        tempList.type === 'automaticProject'
       ) {
-        inbox.list.push(clonedList);
+        inbox.list.push(tempList);
       }
     },
     today: ([tList]) => {
@@ -763,6 +816,8 @@ const theProjectStorage = (() => {
             project.list.splice(list.id, 1);
           }
         });
+        idTypeCategoryIndexUpdateData([automaticProject, 'automaticProject']);
+        idTypeCategoryIndexUpdateData([customProject, 'customProject']);
       },
     },
     sort: () => {
@@ -1106,15 +1161,47 @@ const theProjectStorage = (() => {
     },
   };
 
+  //Count Functions
+  const count = ([project]) => {
+    let lists = 0;
+    let tasks = 0;
+    let notes = 0;
+
+    project.list.forEach((list) => {
+      lists++;
+      list.task.forEach((task) => {
+        tasks++;
+        task.note.forEach((note) => {
+          notes++;
+        });
+      });
+    });
+
+    project.lists = lists;
+    project.tasks = tasks;
+    project.notes = notes;
+  };
+
   //Display
   const display = {
     project: (type, id) => {
       if (!id) {
-        id = storage(type).length - 1;
+        id = get.storage(type).length - 1;
       }
-      const displayProject = storage(type)[id];
+      const displayProject = get.storage(type)[id];
 
       theEventHandler.publish('displayProject', [displayProject]);
+    },
+    countValue: (projectStorage) => {
+      projectStorage.forEach((project) => {
+        count([project]);
+
+        theEventHandler.publish('theCount', [
+          project.type,
+          project.id,
+          project.tasks,
+        ]);
+      });
     },
     formValue: {
       project: (type, id) => {
@@ -1243,10 +1330,20 @@ const theDOMDisplaySidebar = ([projectStorage, type, project]) => {
   }
 
   if (project) {
-    project[addDOMAutoCutomProject](project.title, project.type, project.id);
+    project[addDOMAutoCutomProject](
+      project.title,
+      project.type,
+      project.id,
+      project.tasks
+    );
   } else {
     projectStorage.forEach((project) => {
-      project[addDOMAutoCutomProject](project.title, project.type, project.id);
+      project[addDOMAutoCutomProject](
+        project.title,
+        project.type,
+        project.id,
+        project.tasks
+      );
     });
   }
 };

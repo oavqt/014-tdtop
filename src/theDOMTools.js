@@ -6,14 +6,26 @@ import trash from './images/myTrash.png';
 //DOM Tools
 //Create DOM Template
 const theDOMTemplate = {
-  sidebarAutomaticProject: (title, type, id) => {
+  sidebarAutomaticProject: (title, type, id, tasks) => {
+    let count;
+
+    if (tasks === 0) {
+      count = '';
+    }
+
     theDOMAppendTo.theSidebarAutomatic(
-      theDOMCreate.sidebarAutomaticProject(title, type, id)
+      theDOMCreate.sidebarAutomaticProject(title, type, id, count)
     );
   },
-  sidebarCustomProject: (title, type, id) => {
+  sidebarCustomProject: (title, type, id, tasks) => {
+    let count;
+
+    if (tasks === 0) {
+      count = '';
+    }
+
     theDOMAppendTo.theSidebarCustom(
-      theDOMCreate.sidebarCustomProject(title, type, id)
+      theDOMCreate.sidebarCustomProject(title, type, id, count)
     );
   },
   project: (title, description, type, id) => {
@@ -143,8 +155,23 @@ const theDOMGet = {
   theSidebarAutomatic: () => {
     return document.querySelector('.sidebar__automatic');
   },
+  theSidebarAutomaticButton: (idProject) => {
+    const button = [...document.querySelectorAll('.sidebar__automatic button')];
+    return button.filter(
+      (project) => button.dataset.id === idProject.toString()
+    )[0];
+  },
   theSidebarAutomaticButtons: () => {
     return document.querySelectorAll('.sidebar__automatic button');
+  },
+  theSidebarAutomaticCount: (idProject) => {
+    const count = [
+      ...document.querySelectorAll('.sidebar__automatic .--count'),
+    ];
+
+    return count.filter(
+      (count) => count.dataset.id === idProject.toString()
+    )[0];
   },
   theSidebarDefaultProject: () => {
     return document.querySelector('.button--inbox');
@@ -158,12 +185,6 @@ const theDOMGet = {
   theSidebarCustom: () => {
     return document.querySelector('.sidebar__custom');
   },
-  theSidebarProject: (idProject) => {
-    const projects = [...document.querySelectorAll('.sidebar__custom div')];
-    return projects.filter(
-      (project) => project.dataset.id === idProject.toString()
-    )[0];
-  },
   theSidebarCustomButton: (idProject) => {
     const button = [...document.querySelectorAll('.sidebar__custom button')];
 
@@ -173,6 +194,13 @@ const theDOMGet = {
   },
   theSidebarCustomButtons: () => {
     return document.querySelectorAll('.sidebar__custom button');
+  },
+  theSidebarCustomCount: (idProject) => {
+    const count = [...document.querySelectorAll('.sidebar__custom .--count')];
+
+    return count.filter(
+      (count) => count.dataset.id === idProject.toString()
+    )[0];
   },
   theDisplay: () => {
     return document.querySelector('.demo__display');
@@ -378,7 +406,15 @@ const theDOMCreate = {
           { class: `${title}__title` },
           `${title[0].toUpperCase() + title.slice(1)}`
         ),
-        theElement.create('span', { class: `${title}__count` }, count)
+        theElement.create(
+          'span',
+          {
+            class: `${title}__count --count`,
+            ['data.type']: type,
+            ['data-id']: id,
+          },
+          count.toString()
+        )
       )
     );
     return element;
@@ -399,7 +435,15 @@ const theDOMCreate = {
           ['data-id']: id,
         },
         theElement.create('span', { class: `${title}__title` }, title),
-        theElement.create('span', { class: `${title}__count` }, count)
+        theElement.create(
+          'span',
+          {
+            class: `${title}__count --count`,
+            ['data.type']: type,
+            ['data-id']: id,
+          },
+          count.toString()
+        )
       )
     );
     return element;

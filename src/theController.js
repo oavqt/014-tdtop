@@ -253,6 +253,20 @@ const theDisplayRemove = () => {
   }
 };
 
+const theSidebarDisplayCount = ([type, id, tasks]) => {
+  let count = tasks;
+
+  if (tasks === 0) {
+    count = '';
+  }
+
+  if (type === 'automaticProject') {
+    theDOMGet.theSidebarAutomaticCount(id).textContent = count;
+  } else {
+    theDOMGet.theSidebarCustomCount(id).textContent = count;
+  }
+};
+
 const theSidebarSlide = () => {
   const sidebar = theDOMGet.theSidebar();
 
@@ -649,5 +663,6 @@ const TheCustomProjectStyleAdd = () => {
 //Events
 theEventHandler.subscribe('theDefaultProjectStyle', theDefaultProjectStyle);
 theEventHandler.subscribe('theDisplayUpdate', theDisplayUpdate);
+theEventHandler.subscribe('theCount', theSidebarDisplayCount);
 
 export { theEvents };
