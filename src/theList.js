@@ -4,7 +4,7 @@ import { theEventHandler } from './theHandler';
 //Application Tools
 //Object Templates
 const objectTemplate = {
-  project: (projectStorage, title, description) => {
+  project: (storage, title, description) => {
     const proto = {
       addList: objectTemplate.list,
       addDOMAutomaticProject: theDOMTemplate.sidebarAutomaticProject,
@@ -14,69 +14,81 @@ const objectTemplate = {
     };
 
     objectAdd(
-      projectStorage,
+      storage,
       Object.assign(
         Object.create(
-          Object.assign(objectOption.addProtoOption('proto', 'project'), proto)
+          Object.assign(
+            objectProperties.get.protoProperties('proto', 'project'),
+            proto
+          )
         ),
         objectCreate.projectListNote(title, description),
-        objectOption.addOption('object', 'project'),
+        objectProperties.get.objectProperties('object', 'project'),
         { list: [] }
       )
     );
   },
 
-  list: (projectStorage, title, description) => {
+  list: (storage, title, description) => {
     const proto = {
       addDOMList: theDOMTemplate.list,
       addTask: objectTemplate.task,
     };
 
     objectAdd(
-      projectStorage,
+      storage,
       Object.assign(
         Object.create(
-          Object.assign(objectOption.addProtoOption('proto', 'list'), proto)
+          Object.assign(
+            objectProperties.get.protoProperties('proto', 'list'),
+            proto
+          )
         ),
         objectCreate.projectListNote(title, description),
-        objectOption.addOption('object', 'list'),
+        objectProperties.get.objectProperties('object', 'list'),
         { task: [] }
       )
     );
   },
 
-  task: (projectStorage, title, description, date) => {
+  task: (storage, title, description, date) => {
     const proto = {
       addDOMTask: theDOMTemplate.task,
       addNote: objectTemplate.note,
     };
 
     objectAdd(
-      projectStorage,
+      storage,
       Object.assign(
         Object.create(
-          Object.assign(objectOption.addProtoOption('proto', 'task'), proto)
+          Object.assign(
+            objectProperties.get.protoProperties('proto', 'task'),
+            proto
+          )
         ),
         objectCreate.task(title, description, date),
-        objectOption.addOption('object', 'task'),
+        objectProperties.get.objectProperties('object', 'task'),
         { note: [] }
       )
     );
   },
 
-  note: (projectStorage, title, description) => {
+  note: (storage, title, description) => {
     const proto = {
       addDOMNote: theDOMTemplate.note,
     };
 
     objectAdd(
-      projectStorage,
+      storage,
       Object.assign(
         Object.create(
-          Object.assign(objectOption.addProtoOption('proto', 'note'), proto)
+          Object.assign(
+            objectProperties.get.protoProperties('proto', 'note'),
+            proto
+          )
         ),
         objectCreate.projectListNote(title, description),
-        objectOption.addOption('object', 'note')
+        objectProperties.get.objectProperties('object', 'note')
       )
     );
   },
@@ -110,27 +122,45 @@ const objectCreate = {
 const objectSetProto = (type, object) => {
   return Object.setPrototypeOf(
     object,
-    objectOption.addProtoOption('proto', type)
+    objectProperties.get.protoProperties('proto', type)
   );
 };
 
 const objectCloneProto = (type, object) => {
   return Object.assign(
-    Object.create(objectOption.addProtoOption('proto', type)),
+    Object.create(objectProperties.get.protoProperties('proto', type)),
     JSON.parse(JSON.stringify(object))
   );
 };
 
 //Object Options
-const objectOption = (() => {
-  let objectStorage = {
-    project: { type: 'project', test: 'object' },
-    list: { type: 'list' },
-    task: { type: 'task' },
-    note: { type: 'note' },
+const objectProperties = (() => {
+  let objectProperties = {
+    project: {
+      type: 'project',
+      lists: 0,
+      tasks: 0,
+      notes: 0,
+      checkmark: false,
+    },
+    list: {
+      type: 'list',
+      tasks: 0,
+      notes: 0,
+      checkmark: false,
+    },
+    task: {
+      type: 'task',
+      notes: 0,
+      checkmark: false,
+    },
+    note: {
+      type: 'note',
+      checkmark: false,
+    },
   };
 
-  let objectProtoStorage = {
+  let objectProtoProperties = {
     project: {
       addList: objectTemplate.list,
       addDOMAutomaticProject: theDOMTemplate.sidebarAutomaticProject,
@@ -146,27 +176,27 @@ const objectOption = (() => {
     note: { addDOMNote: theDOMTemplate.note },
   };
 
-  const objectType = (proto, type) => {
-    let tStorage;
+  const objectPropertiesType = (proto, type) => {
+    let storage;
 
-    if (proto === 'proto') tStorage = objectProtoStorage;
-    else tStorage = objectStorage;
+    if (proto === 'proto') storage = objectProtoProperties;
+    else storage = objectProperties;
 
-    if (type === 'project') return tStorage.project;
-    else if (type === 'list') return tStorage.list;
-    else if (type === 'task') return tStorage.task;
-    else return tStorage.note;
+    if (type === 'project') return storage.project;
+    else if (type === 'list') return storage.list;
+    else if (type === 'task') return storage.task;
+    else return storage.note;
   };
 
-  //Manipulate the Storage Data
-  const setOption = (proto, type, object) => {
+  //Manipulate the Properties Data
+  const add = (proto, type, object) => {
     for (let key in object) {
-      objectType(proto, type)[key] = object[key];
+      objectPropertiesType(proto, type)[key] = object[key];
     }
   };
 
-  const getOptionSet = (proto, type) => {
-    let object = objectType(proto, type);
+  const read = (proto, type) => {
+    let object = objectPropertiesType(proto, type);
     let option = {};
     for (let key in object) {
       option[key] = key;
@@ -174,8 +204,8 @@ const objectOption = (() => {
     return option;
   };
 
-  const removeOption = (proto, type, property) => {
-    let object = objectType(proto, type);
+  const remove = (proto, type, property) => {
+    let object = objectPropertiesType(proto, type);
     for (let key in object) {
       if (key.toString() === property) {
         delete object[key];
@@ -183,16 +213,17 @@ const objectOption = (() => {
     }
   };
 
-  //Add Options to an Object
-  const addOption = (proto, type) => {
-    return JSON.parse(JSON.stringify(objectType(proto, type)));
+  //Add Properties to an Object
+  const get = {
+    objectProperties: (proto, type) => {
+      return JSON.parse(JSON.stringify(objectPropertiesType(proto, type)));
+    },
+    protoProperties: (proto, type) => {
+      return objectPropertiesType(proto, type);
+    },
   };
 
-  const addProtoOption = (proto, type) => {
-    return objectType(proto, type);
-  };
-
-  return { setOption, getOptionSet, removeOption, addOption, addProtoOption };
+  return { add, read, remove, get };
 })();
 
 /* 
@@ -253,15 +284,16 @@ const theProjectStorage = (() => {
 
   //Add
   const add = {
-    project: (type, title, description) => {
-      objectTemplate.project(get.storage(type), title, description);
+    project: ([type], title, description) => {
+      const storage = get.storage(type);
+      objectTemplate.project(storage, title, description);
 
       //Events
       projects++;
 
       tagData.project(projects, get.storage(type).at(-1));
 
-      clean.duplicate.projects([get.storage(type).at(-1)]);
+      clean.duplicate.projects(get.storage(type).at(-1));
 
       theEventHandler.publish(type, [
         get.storage(type),
@@ -281,9 +313,9 @@ const theProjectStorage = (() => {
 
       tagData.list(lists, tProject.list.at(-1));
 
-      clean.duplicate.list([tProject.list.at(-1)]);
+      clean.duplicate.list(tProject.list.at(-1));
 
-      sort.inbox([tProject.list.at(-1)]);
+      sort.inbox(tProject.list.at(-1));
 
       idTypeCategoryIndexUpdateData([get.storage(type), type]);
     },
@@ -299,17 +331,17 @@ const theProjectStorage = (() => {
 
       tagData.task(tasks, tList.task.at(-1));
 
-      sort.date([tList, tList.task.at(-1)]);
+      sort.date(tList, tList.task.at(-1));
 
-      copy.add.lookup.task([tList.task.at(-1)]);
+      copy.add.lookup.task(tList.task.at(-1));
 
-      sort.inbox([tList]);
+      sort.inbox(tList);
 
       idTypeCategoryIndexUpdateData([get.storage(type), type]);
 
-      clean.duplicate.list([tList]);
+      clean.duplicate.list(tList);
 
-      clean.duplicate.task([tList.task.at(-1)]);
+      clean.duplicate.task(tList.task.at(-1));
 
       clean.sort();
 
@@ -331,9 +363,9 @@ const theProjectStorage = (() => {
 
       tagData.note(notes, tTask.note.at(-1));
 
-      copy.add.lookup.note([tTask.note.at(-1)]);
+      copy.add.lookup.note(tTask.note.at(-1));
 
-      clean.duplicate.note([tTask.note.at(-1)]);
+      clean.duplicate.note(tTask.note.at(-1));
 
       idTypeCategoryIndexUpdateData([get.storage(type), type]);
     },
@@ -344,9 +376,9 @@ const theProjectStorage = (() => {
     project: ([type, id], title, description) => {
       const tProject = get.project(type, id);
 
-      editUpdateProperties([tProject], title, description);
+      editUpdateProperties(tProject, title, description);
 
-      copy.edit.properties([tProject]);
+      copy.edit.objectProperties(tProject);
 
       //Events
       theEventHandler.publish('theDisplayUpdate', [type, id]);
@@ -356,9 +388,9 @@ const theProjectStorage = (() => {
     list: ([type, id, idProject], title, description) => {
       const tList = get.list(type, id, idProject);
 
-      editUpdateProperties([tList], title, description);
+      editUpdateProperties(tList, title, description);
 
-      copy.edit.properties([tList]);
+      copy.edit.objectProperties(tList);
 
       //Events
       theEventHandler.publish('theDisplayUpdate', [type, idProject]);
@@ -366,9 +398,9 @@ const theProjectStorage = (() => {
     task: ([type, id, idList, idProject], title, description, date) => {
       const tTask = get.task(type, id, idList, idProject);
 
-      editUpdateProperties([tTask], title, description, date);
+      editUpdateProperties(tTask, title, description, date);
 
-      copy.edit.properties([tTask]);
+      copy.edit.objectProperties(tTask);
 
       //Events
       theEventHandler.publish('theDisplayUpdate', [type, idProject]);
@@ -376,9 +408,9 @@ const theProjectStorage = (() => {
     note: ([type, id, idTask, idList, idProject], title, description) => {
       const tNote = get.note(type, id, idTask, idList, idProject);
 
-      editUpdateProperties([tNote], title, description);
+      editUpdateProperties(tNote, title, description);
 
-      copy.edit.properties([tNote]);
+      copy.edit.objectProperties(tNote);
 
       //Events
       theEventHandler.publish('theDisplayUpdate', [type, idProject]);
@@ -387,11 +419,11 @@ const theProjectStorage = (() => {
 
   //Remove
   const remove = {
-    project: (type, id) => {
+    project: ([type, id]) => {
       if (id) {
-        copy.remove.project([get.project(type, id)]);
+        copy.remove.project(get.project(type, id));
 
-        log.sort.project([get.project(type, id)]);
+        log.sort.project(get.project(type, id));
 
         get.storage(type).splice(id, 1);
       } else {
@@ -400,20 +432,20 @@ const theProjectStorage = (() => {
       }
 
       //Events
-      idUpdateDataIndex(get.storage(type));
+      idTypeCategoryIndexUpdateData([get.storage(type), type]);
+
+      theEventHandler.publish(type, [get.storage(type), type]);
 
       display.countValue(automaticProject);
 
       display.countValue(customProject);
-
-      theEventHandler.publish(type, [get.storage(type), type]);
     },
     list: ([type, id, idProject]) => {
       const tProject = get.project(type, idProject);
 
-      copy.remove.list([get.list(type, id, idProject)]);
+      copy.remove.list(get.list(type, id, idProject));
 
-      log.sort.list([get.list(type, id, idProject)]);
+      log.sort.list(get.list(type, id, idProject));
 
       tProject.list.splice(id, 1);
 
@@ -429,9 +461,9 @@ const theProjectStorage = (() => {
     task: ([type, id, idList, idProject]) => {
       const tList = get.list(type, idList, idProject);
 
-      copy.remove.task([get.task(type, id, idList, idProject)]);
+      copy.remove.task(get.task(type, id, idList, idProject));
 
-      log.sort.task([get.task(type, id, idList, idProject)]);
+      log.sort.task(get.task(type, id, idList, idProject));
 
       tList.task.splice(id, 1);
 
@@ -447,7 +479,7 @@ const theProjectStorage = (() => {
     note: ([type, id, idTask, idList, idProject]) => {
       const tTask = get.task(type, idTask, idList, idProject);
 
-      copy.remove.note([get.note(type, id, idTask, idList, idProject)]);
+      copy.remove.note(get.note(type, id, idTask, idList, idProject));
 
       tTask.note.splice(id, 1);
 
@@ -460,53 +492,53 @@ const theProjectStorage = (() => {
 
   const log = {
     sort: {
-      project: ([project]) => {
+      project: (project) => {
         const logbook = automaticProject[5];
 
         project.list.forEach((list) => {
-          let tagMatched = log.lookup.logbook([list]);
+          let tagMatched = log.lookup.logbook(list);
 
           if (tagMatched) {
             list.task.forEach((task) => {
-              copy.add.task([tagMatched, task]);
+              copy.add.task(tagMatched, task);
             });
           } else {
-            copy.add.list([logbook, list]);
+            copy.add.list(logbook, list);
           }
         });
       },
-      list: ([tList]) => {
+      list: (tList) => {
         const logbook = automaticProject[5];
-        const tagMatched = log.lookup.logbook([tList]);
+        const tagMatched = log.lookup.logbook(tList);
 
         if (tagMatched) {
           tList.task.forEach((task) => {
-            copy.add.task([tagMatched, task]);
+            copy.add.task(tagMatched, task);
           });
         } else {
-          copy.add.list([logbook, tList]);
+          copy.add.list(logbook, tList);
         }
       },
-      task: ([tTask]) => {
+      task: (tTask) => {
         const logbook = automaticProject[5];
         const tList = get.list(tTask.type, tTask.list, tTask.project);
-        const tagMatched = log.lookup.logbook([tList]);
+        const tagMatched = log.lookup.logbook(tList);
 
         if (tagMatched) {
-          copy.add.task([tagMatched, tTask]);
+          copy.add.task(tagMatched, tTask);
         } else {
-          const tempList = clone.object.list([tList]);
+          const tempList = clone.object.list(tList);
 
           tempList.task.splice(0);
 
           tempList.task.push(tTask);
 
-          copy.add.list([logbook, tempList]);
+          copy.add.list(logbook, tempList);
         }
       },
     },
     lookup: {
-      logbook: ([tList]) => {
+      logbook: (tList) => {
         let logbook = automaticProject[5];
         let tagMatched;
 
@@ -524,25 +556,25 @@ const theProjectStorage = (() => {
 
   //Sort Functions
   const sort = {
-    date: ([tList, tTask]) => {
-      if (date.today([tTask.date])) {
-        sort.today([tList]);
-      } else if (date.upcoming([tTask.date])) {
-        sort.upcoming([tList]);
-      } else if (date.someday([tTask.date])) {
-        sort.someday([tList]);
-      } else if (date.never([tTask.date])) {
-        sort.never([tList]);
+    date: (tList, tTask) => {
+      if (date.today(tTask.date)) {
+        sort.today(tList);
+      } else if (date.upcoming(tTask.date)) {
+        sort.upcoming(tList);
+      } else if (date.someday(tTask.date)) {
+        sort.someday(tList);
+      } else if (date.never(tTask.date)) {
+        sort.never(tList);
       }
     },
-    inbox: ([tList]) => {
+    inbox: (tList) => {
       const inbox = automaticProject[0];
-      const tempList = clone.object.list([tList]);
+      const tempList = clone.object.list(tList);
       const tagMatched = inbox.list.find(
         (list) => list.tag === tempList.tag && list.type === tempList.type
       );
       if (tagMatched === undefined && tempList.category === 'logbook') {
-        clone.prototype.list([tempList]);
+        clone.prototype.list(tempList);
 
         inbox.list.push(tempList);
       } else if (
@@ -552,54 +584,54 @@ const theProjectStorage = (() => {
         inbox.list.push(tempList);
       }
     },
-    today: ([tList]) => {
+    today: (tList) => {
       const today = automaticProject[1];
 
-      copy.add.list([today, tList]);
+      copy.add.list(today, tList);
     },
-    upcoming: ([tList]) => {
+    upcoming: (tList) => {
       const upcoming = automaticProject[2];
 
-      copy.add.list([upcoming, tList]);
+      copy.add.list(upcoming, tList);
     },
-    someday: ([tList]) => {
+    someday: (tList) => {
       const someday = automaticProject[3];
 
-      copy.add.list([someday, tList]);
+      copy.add.list(someday, tList);
     },
-    never: ([tList]) => {
+    never: (tList) => {
       const never = automaticProject[4];
 
-      copy.add.list([never, tList]);
+      copy.add.list(never, tList);
     },
   };
 
   //Copy Functions
   const copy = {
     add: {
-      list: ([target, tList]) => {
+      list: (target, tList) => {
         const project = target;
-        const list = clone.object.list([tList]);
+        const list = clone.object.list(tList);
 
-        clone.prototype.list([list]);
+        clone.prototype.list(list);
         project.list.push(list);
 
         idTypeCategoryIndexUpdateData([automaticProject, 'automaticProject']);
         idTypeCategoryIndexUpdateData([customProject, 'customProject']);
       },
-      task: ([target, tTask]) => {
+      task: (target, tTask) => {
         const list = target;
-        const task = clone.object.task([tTask]);
+        const task = clone.object.task(tTask);
 
-        clone.prototype.task([task]);
+        clone.prototype.task(task);
         list.task.push(task);
 
         idTypeCategoryIndexUpdateData([automaticProject, 'automaticProject']);
         idTypeCategoryIndexUpdateData([customProject, 'customProject']);
       },
-      note: ([target, tNote]) => {
+      note: (target, tNote) => {
         const task = target;
-        const note = clone.object.note([tNote]);
+        const note = clone.object.note(tNote);
 
         task.note.push(note);
 
@@ -607,31 +639,31 @@ const theProjectStorage = (() => {
         idTypeCategoryIndexUpdateData([customProject, 'customProject']);
       },
       lookup: {
-        task: ([object]) => {
+        task: (object) => {
           const tList = get.list(object.type, object.list, object.project);
-          const tagMatched = tag.lookup.list([tList]);
+          const tagMatched = tag.lookup.list(tList);
 
           if (tagMatched.length > 1) {
             tagMatched.forEach((list) => {
               if (list.project !== tList.project) {
-                copy.add.task([list, object]);
+                copy.add.task(list, object);
               }
             });
           }
         },
-        note: ([object]) => {
+        note: (object) => {
           const tTask = get.task(
             object.type,
             object.task,
             object.list,
             object.project
           );
-          const tagMatched = tag.lookup.task([tTask]);
+          const tagMatched = tag.lookup.task(tTask);
 
           if (tagMatched.length > 1) {
             tagMatched.forEach((task) => {
               if (task.project !== tTask.project) {
-                copy.add.note([task, object]);
+                copy.add.note(task, object);
               }
             });
           }
@@ -639,13 +671,13 @@ const theProjectStorage = (() => {
       },
     },
     edit: {
-      properties: ([object]) => {
-        const tagMatched = tag.lookup.all([object]);
+      objectProperties: (object) => {
+        const tagMatched = tag.lookup.all(object);
 
         if (object.date) {
           tagMatched.forEach((tag) => {
             editUpdateProperties(
-              [tag],
+              tag,
               object.title,
               object.description,
               object.date
@@ -653,18 +685,18 @@ const theProjectStorage = (() => {
           });
         } else {
           tagMatched.forEach((tag) => {
-            editUpdateProperties([tag], object.title, object.description);
+            editUpdateProperties(tag, object.title, object.description);
           });
         }
       },
     },
     remove: {
-      project: ([object]) => {
+      project: (object) => {
         object.list.forEach((list) => {
-          copy.remove.list([list]);
+          copy.remove.list(list);
         });
 
-        const tagMatched = tag.lookup.all([object]);
+        const tagMatched = tag.lookup.all(object);
 
         tagMatched.forEach((tag) => {
           if (tag.project !== object.project) {
@@ -675,12 +707,12 @@ const theProjectStorage = (() => {
         idTypeCategoryIndexUpdateData([automaticProject, 'automaticProject']);
         idTypeCategoryIndexUpdateData([customProject, 'customProject']);
       },
-      list: ([object]) => {
+      list: (object) => {
         object.task.forEach((task) => {
-          copy.remove.task([task]);
+          copy.remove.task(task);
         });
 
-        const tagMatched = tag.lookup.all([object]);
+        const tagMatched = tag.lookup.all(object);
 
         tagMatched.forEach((tag) => {
           if (tag.project !== object.project && tag.task.length === 0) {
@@ -691,8 +723,8 @@ const theProjectStorage = (() => {
         idTypeCategoryIndexUpdateData([automaticProject, 'automaticProject']);
         idTypeCategoryIndexUpdateData([customProject, 'customProject']);
       },
-      task: ([object]) => {
-        const tagMatched = tag.lookup.all([object]);
+      task: (object) => {
+        const tagMatched = tag.lookup.all(object);
 
         tagMatched.forEach((tag) => {
           if (tag.project !== object.project) {
@@ -703,8 +735,8 @@ const theProjectStorage = (() => {
         idTypeCategoryIndexUpdateData([automaticProject, 'automaticProject']);
         idTypeCategoryIndexUpdateData([customProject, 'customProject']);
       },
-      note: ([object]) => {
-        const tagMatched = tag.lookup.all([object]);
+      note: (object) => {
+        const tagMatched = tag.lookup.all(object);
 
         tagMatched.forEach((tag) => {
           if (tag.project !== object.project) {
@@ -723,33 +755,51 @@ const theProjectStorage = (() => {
   //Clean Functions
   const clean = {
     duplicate: {
-      projects: ([object]) => {
-        const tagMatched = tag.lookup.project([object]);
+      projects: (object) => {
+        const tagMatched = tag.lookup.project(object);
 
         let cached;
 
         if (tagMatched.length > 1) {
           for (let index = 0; index < tagMatched.length; index++) {
             if (cached) {
-              if (cached.tag === tagMatched[index].tag) {
+              if (
+                cached.tag === tagMatched[index].tag &&
+                cached.type === tagMatched[index].type
+              ) {
+                idTypeCategoryIndexUpdateData([
+                  automaticProject,
+                  'automaticProject',
+                ]);
+                idTypeCategoryIndexUpdateData([customProject, 'customProject']);
+
                 get
                   .storage(tagMatched[index].type)
-                  .project.splice(tagMatched[index].id, 1);
+                  .splice(tagMatched[index].id, 1);
               }
             }
             cached = tagMatched[index];
           }
         }
       },
-      list: ([object]) => {
-        const tagMatched = tag.lookup.list([object]);
+      list: (object) => {
+        const tagMatched = tag.lookup.list(object);
 
         let cached;
 
         if (tagMatched.length > 1) {
           for (let index = 0; index < tagMatched.length; index++) {
             if (cached) {
-              if (cached.project === tagMatched[index].project) {
+              if (
+                cached.project === tagMatched[index].project &&
+                cached.type === tagMatched[index].type
+              ) {
+                idTypeCategoryIndexUpdateData([
+                  automaticProject,
+                  'automaticProject',
+                ]);
+                idTypeCategoryIndexUpdateData([customProject, 'customProject']);
+
                 get
                   .project(tagMatched[index].type, tagMatched[index].project)
                   .list.splice(tagMatched[index].id, 1);
@@ -759,15 +809,24 @@ const theProjectStorage = (() => {
           }
         }
       },
-      task: ([object]) => {
-        const tagMatched = tag.lookup.task([object]);
+      task: (object) => {
+        const tagMatched = tag.lookup.task(object);
 
         let cached;
 
         if (tagMatched.length > 1) {
           for (let index = 0; index < tagMatched.length; index++) {
             if (cached) {
-              if (cached.project === tagMatched[index].project) {
+              if (
+                cached.project === tagMatched[index].project &&
+                cached.type === tagMatched[index].type
+              ) {
+                idTypeCategoryIndexUpdateData([
+                  automaticProject,
+                  'automaticProject',
+                ]);
+                idTypeCategoryIndexUpdateData([customProject, 'customProject']);
+
                 get
                   .list(
                     tagMatched[index].type,
@@ -783,15 +842,24 @@ const theProjectStorage = (() => {
           }
         }
       },
-      note: ([object]) => {
-        const tagMatched = tag.lookup.note([object]);
+      note: (object) => {
+        const tagMatched = tag.lookup.note(object);
 
         let cached;
 
         if (tagMatched.length > 1) {
           for (let index = 0; index < tagMatched.length; index++) {
             if (cached) {
-              if (cached.project === tagMatched[index].project) {
+              if (
+                cached.project === tagMatched[index].project &&
+                cached.type === tagMatched[index].type
+              ) {
+                idTypeCategoryIndexUpdateData([
+                  automaticProject,
+                  'automaticProject',
+                ]);
+                idTypeCategoryIndexUpdateData([customProject, 'customProject']);
+
                 get
                   .task(
                     tagMatched[index].type,
@@ -833,7 +901,7 @@ const theProjectStorage = (() => {
 
       today.list.forEach((list) => {
         list.task.forEach((task) => {
-          if (!date.today([task.date])) {
+          if (!date.today(task.date)) {
             taskMatched.push(task);
           }
         });
@@ -842,7 +910,6 @@ const theProjectStorage = (() => {
       for (let index = 0; index < taskMatched.length; index++) {
         idTypeCategoryIndexUpdateData([automaticProject, 'automaticProject']);
         idTypeCategoryIndexUpdateData([customProject, 'customProject']);
-
         get
           .list(
             taskMatched[index].type,
@@ -860,7 +927,7 @@ const theProjectStorage = (() => {
 
       upcoming.list.forEach((list) => {
         list.task.forEach((task) => {
-          if (!date.upcoming([task.date])) {
+          if (!date.upcoming(task.date)) {
             taskMatched.push(task);
           }
         });
@@ -869,7 +936,6 @@ const theProjectStorage = (() => {
       for (let index = 0; index < taskMatched.length; index++) {
         idTypeCategoryIndexUpdateData([automaticProject, 'automaticProject']);
         idTypeCategoryIndexUpdateData([customProject, 'customProject']);
-
         get
           .list(
             taskMatched[index].type,
@@ -887,7 +953,7 @@ const theProjectStorage = (() => {
 
       someday.list.forEach((list) => {
         list.task.forEach((task) => {
-          if (!date.someday([task.date])) {
+          if (!date.someday(task.date)) {
             taskMatched.push(task);
           }
         });
@@ -896,7 +962,6 @@ const theProjectStorage = (() => {
       for (let index = 0; index < taskMatched.length; index++) {
         idTypeCategoryIndexUpdateData([automaticProject, 'automaticProject']);
         idTypeCategoryIndexUpdateData([customProject, 'customProject']);
-
         get
           .list(
             taskMatched[index].type,
@@ -913,7 +978,7 @@ const theProjectStorage = (() => {
 
       never.list.forEach((list) => {
         list.task.forEach((task) => {
-          if (!date.never([task.date])) {
+          if (!date.never(task.date)) {
             taskMatched.push(task);
           }
         });
@@ -922,7 +987,6 @@ const theProjectStorage = (() => {
       for (let index = 0; index < taskMatched.length; index++) {
         idTypeCategoryIndexUpdateData([automaticProject, 'automaticProject']);
         idTypeCategoryIndexUpdateData([customProject, 'customProject']);
-
         get
           .list(
             taskMatched[index].type,
@@ -943,7 +1007,7 @@ const theProjectStorage = (() => {
   //Misc Functions
 
   //Edit Functions
-  const editUpdateProperties = ([object], title, description, date) => {
+  const editUpdateProperties = (object, title, description, date) => {
     object.title = title;
     object.description = description;
 
@@ -955,7 +1019,7 @@ const theProjectStorage = (() => {
   //Project Sort
   //Date Functions
   const date = {
-    today: ([date]) => {
+    today: (date) => {
       const current = new Date().toLocaleDateString();
       const tDate = new Date(date).toLocaleDateString();
 
@@ -965,7 +1029,7 @@ const theProjectStorage = (() => {
         return false;
       }
     },
-    upcoming: ([date]) => {
+    upcoming: (date) => {
       const current = new Date();
       const tDate = new Date(date);
 
@@ -978,7 +1042,7 @@ const theProjectStorage = (() => {
         return false;
       }
     },
-    someday: ([date]) => {
+    someday: (date) => {
       const current = new Date();
       const tDate = new Date(date);
 
@@ -991,7 +1055,7 @@ const theProjectStorage = (() => {
         return false;
       }
     },
-    never: ([date]) => {
+    never: (date) => {
       if (date === '???') {
         return true;
       } else {
@@ -1003,11 +1067,11 @@ const theProjectStorage = (() => {
   //Tag Functions
   const tag = {
     lookup: {
-      all: ([object]) => {
+      all: (object) => {
         let storage = automaticProject;
         let tagMatched = [];
 
-        for (let u = 0; u <= 1; u++) {
+        for (let index = 0; index <= 1; index++) {
           storage.forEach((project) => {
             if (project.tag === object.tag) {
               tagMatched.push(project);
@@ -1032,11 +1096,11 @@ const theProjectStorage = (() => {
         }
         return tagMatched;
       },
-      project: ([tProject]) => {
+      project: (tProject) => {
         let storage = automaticProject;
         let tagMatched = [];
 
-        for (let u = 0; u <= 1; u++) {
+        for (let index = 0; index <= 1; index++) {
           storage.forEach((project) => {
             if (project.tag === tProject.tag) {
               tagMatched.push(project);
@@ -1046,11 +1110,11 @@ const theProjectStorage = (() => {
         }
         return tagMatched;
       },
-      list: ([tList]) => {
+      list: (tList) => {
         let storage = automaticProject;
         let tagMatched = [];
 
-        for (let u = 0; u <= 1; u++) {
+        for (let index = 0; index <= 1; index++) {
           storage.forEach((project) => {
             project.list.forEach((list) => {
               if (list.tag === tList.tag) {
@@ -1062,11 +1126,11 @@ const theProjectStorage = (() => {
         }
         return tagMatched;
       },
-      task: ([tTask]) => {
+      task: (tTask) => {
         let storage = automaticProject;
         let tagMatched = [];
 
-        for (let u = 0; u <= 1; u++) {
+        for (let index = 0; index <= 1; index++) {
           storage.forEach((project) => {
             project.list.forEach((list) => {
               list.task.forEach((task) => {
@@ -1080,11 +1144,11 @@ const theProjectStorage = (() => {
         }
         return tagMatched;
       },
-      note: ([tNote]) => {
+      note: (tNote) => {
         let storage = automaticProject;
         let tagMatched = [];
 
-        for (let u = 0; u <= 1; u++) {
+        for (let index = 0; index <= 1; index++) {
           storage.forEach((project) => {
             project.list.forEach((list) => {
               list.task.forEach((task) => {
@@ -1106,21 +1170,21 @@ const theProjectStorage = (() => {
   //Clone Functions
   const clone = {
     object: {
-      project: ([project]) => {
+      project: (project) => {
         return objectCloneProto('project', project);
       },
-      list: ([list]) => {
+      list: (list) => {
         return objectCloneProto('list', list);
       },
-      task: ([task]) => {
+      task: (task) => {
         return objectCloneProto('task', task);
       },
-      note: ([note]) => {
+      note: (note) => {
         return objectCloneProto('note', note);
       },
     },
     prototype: {
-      all: ([storage]) => {
+      all: (storage) => {
         storage.forEach((project) => {
           objectSetProto('project', project);
           project.list.forEach((list) => {
@@ -1134,7 +1198,7 @@ const theProjectStorage = (() => {
           });
         });
       },
-      project: ([project]) => {
+      project: (project) => {
         project.list.forEach((list) => {
           objectSetProto('list', list);
           list.task.forEach((task) => {
@@ -1145,7 +1209,7 @@ const theProjectStorage = (() => {
           });
         });
       },
-      list: ([list]) => {
+      list: (list) => {
         list.task.forEach((task) => {
           objectSetProto('task', task);
           task.note.forEach((note) => {
@@ -1153,7 +1217,7 @@ const theProjectStorage = (() => {
           });
         });
       },
-      task: ([task]) => {
+      task: (task) => {
         task.note.forEach((note) => {
           objectSetProto('note', note);
         });
@@ -1161,8 +1225,10 @@ const theProjectStorage = (() => {
     },
   };
 
+  //CheckMark Functions
+
   //Count Functions
-  const count = ([project]) => {
+  const count = (project) => {
     let lists = 0;
     let tasks = 0;
     let notes = 0;
@@ -1192,9 +1258,10 @@ const theProjectStorage = (() => {
 
       theEventHandler.publish('displayProject', [displayProject]);
     },
-    countValue: (projectStorage) => {
-      projectStorage.forEach((project) => {
-        count([project]);
+    checkMarkValue: () => {},
+    countValue: (storage) => {
+      storage.forEach((project) => {
+        count(project);
 
         theEventHandler.publish('theCount', [
           project.type,
@@ -1204,7 +1271,7 @@ const theProjectStorage = (() => {
       });
     },
     formValue: {
-      project: (type, id) => {
+      project: ([type, id]) => {
         const tProject = get.project(type, id);
 
         return [tProject.title, tProject.description];
@@ -1236,11 +1303,11 @@ const theProjectStorage = (() => {
 })();
 
 //Application Data
-const idTypeCategoryIndexUpdateData = ([projectStorage, type]) => {
-  typeUpdateData(projectStorage, type);
-  categoryUpdateData(projectStorage);
-  idUpdateDataIndex(projectStorage);
-  idUpdateData(projectStorage);
+const idTypeCategoryIndexUpdateData = ([storage, type]) => {
+  typeUpdateData(storage, type);
+  categoryUpdateData(storage);
+  idUpdateDataIndex(storage);
+  idUpdateData(storage);
 };
 
 const tagData = {
@@ -1258,8 +1325,8 @@ const tagData = {
   },
 };
 
-const idUpdateData = (projectStorage) => {
-  projectStorage.forEach((project) => {
+const idUpdateData = (storage) => {
+  storage.forEach((project) => {
     project.list.forEach((list) => {
       list.project = project.id;
       list.task.forEach((task) => {
@@ -1275,9 +1342,9 @@ const idUpdateData = (projectStorage) => {
   });
 };
 
-const idUpdateDataIndex = (projectStorage) => {
-  projectStorage.forEach((project) => {
-    project.id = projectStorage.indexOf(project);
+const idUpdateDataIndex = (storage) => {
+  storage.forEach((project) => {
+    project.id = storage.indexOf(project);
     project.list.forEach((list) => {
       list.id = project.list.indexOf(list);
       list.task.forEach((task) => {
@@ -1290,8 +1357,8 @@ const idUpdateDataIndex = (projectStorage) => {
   });
 };
 
-const typeUpdateData = (projectStorage, type) => {
-  projectStorage.forEach((project) => {
+const typeUpdateData = (storage, type) => {
+  storage.forEach((project) => {
     project.type = type;
     project.list.forEach((list) => {
       list.type = type;
@@ -1305,8 +1372,8 @@ const typeUpdateData = (projectStorage, type) => {
   });
 };
 
-const categoryUpdateData = (projectStorage) => {
-  projectStorage.forEach((project) => {
+const categoryUpdateData = (storage) => {
+  storage.forEach((project) => {
     project.list.forEach((list) => {
       list.category = project.title.toLowerCase();
       list.task.forEach((task) => {
@@ -1320,7 +1387,7 @@ const categoryUpdateData = (projectStorage) => {
 };
 
 //Display Functions
-const theDOMDisplaySidebar = ([projectStorage, type, project]) => {
+const theDOMDisplaySidebar = ([storage, type, project]) => {
   let addDOMAutoCutomProject;
 
   if (type === 'automaticProject') {
@@ -1337,7 +1404,7 @@ const theDOMDisplaySidebar = ([projectStorage, type, project]) => {
       project.tasks
     );
   } else {
-    projectStorage.forEach((project) => {
+    storage.forEach((project) => {
       project[addDOMAutoCutomProject](
         project.title,
         project.type,
@@ -1394,12 +1461,12 @@ const theDOMDisplay = ([project]) => {
 //Automatic Projects
 const theAutomaticProject = () => {
   const automatic = 'automaticProject';
-  theProjectStorage.add.project(automatic, 'Inbox', 'Inbox');
-  theProjectStorage.add.project(automatic, 'Today', 'Today');
-  theProjectStorage.add.project(automatic, 'Upcoming', 'Upcoming');
-  theProjectStorage.add.project(automatic, 'Someday', 'Someday ');
-  theProjectStorage.add.project(automatic, 'Never', 'Never');
-  theProjectStorage.add.project(automatic, 'Logbook', 'Logbook');
+  theProjectStorage.add.project([automatic], 'Inbox', 'Inbox');
+  theProjectStorage.add.project([automatic], 'Today', 'Today');
+  theProjectStorage.add.project([automatic], 'Upcoming', 'Upcoming');
+  theProjectStorage.add.project([automatic], 'Someday', 'Someday ');
+  theProjectStorage.add.project([automatic], 'Never', 'Never');
+  theProjectStorage.add.project([automatic], 'Logbook', 'Logbook');
   theDefaultProject();
 };
 
@@ -1413,7 +1480,7 @@ const theDefaultProject = () => {
 
 //Application Functions
 const theAutomaticApplication = () => {
-  theProjectStorage.remove.project('automaticProject');
+  theProjectStorage.remove.project(['automaticProject']);
   theAutomaticProject();
 };
 

@@ -328,9 +328,16 @@ const theDOMGetValue = {
 
     return { element, add };
   })(),
-  type: {
-    project: () => {
-      return theDOMGet.theCurrentProject().dataset.type;
+  current: {
+    type: {
+      project: () => {
+        return theDOMGet.theCurrentProject().dataset.type;
+      },
+    },
+    id: {
+      project: () => {
+        return theDOMGet.theCurrentProject().dataset.id;
+      },
     },
   },
   category: {
@@ -340,7 +347,10 @@ const theDOMGetValue = {
   },
   id: {
     project: () => {
-      return theDOMGet.theCurrentProject().dataset.id;
+      return [
+        theDOMGetValue.cached.element.type,
+        theDOMGetValue.cached.element.id,
+      ];
     },
     list: () => {
       return [
@@ -439,7 +449,7 @@ const theDOMCreate = {
           'span',
           {
             class: `${title}__count --count`,
-            ['data.type']: type,
+            ['data-type']: type,
             ['data-id']: id,
           },
           count.toString()

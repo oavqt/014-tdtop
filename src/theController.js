@@ -33,6 +33,7 @@ const addProjectButtonEvent = () => {
 };
 
 const addListButtonEvent = () => {
+  theDOMGet.theAddList().addEventListener('click', theDOMGetValue.cached.add);
   theDOMGet.theAddList().addEventListener('click', addList);
 };
 
@@ -190,10 +191,16 @@ const removeNoteFormEvent = () => {
     .addEventListener('click', removeProjectListTaskNote.note);
 };
 
+//CheckMark Events
+
 //Controller Tools
 //Default Project
 const theDefaultProjectStyle = () => {
   theSidebarButtonStyleAdd(theDOMGet.theSidebarDefaultProject());
+  theDatasetList(
+    theDOMGet.theSidebarDefaultProject().dataset.type,
+    theDOMGet.theSidebarDefaultProject().dataset.id
+  );
 };
 
 //Controller Event Functions
@@ -203,10 +210,13 @@ const theSidebarCollapse = function () {
 };
 
 const theCurrentProjectEvent = function () {
+  const element = this;
+
   theSidebarButtonStyleRemove();
-  theSidebarButtonStyleAdd(this);
+  theSidebarButtonStyleAdd(element);
   theDisplayRemove();
-  theDisplayAdd(this.dataset.type, this.dataset.id);
+  theDisplayAdd(element.dataset.type, element.dataset.id);
+  theDatasetList(element.dataset.type, element.dataset.id);
   theEvents();
 };
 
@@ -327,7 +337,7 @@ const addProjectListTaskNote = {
     const type = 'customProject';
 
     theProjectStorage.add.project(
-      type,
+      [type],
       theDOMGetValue.input.title(),
       theDOMGetValue.input.description()
     );
@@ -338,23 +348,27 @@ const addProjectListTaskNote = {
 
     theSidebarButtonStyleRemove();
     theSidebarButtonStyleAdd(
-      theDOMGet.theSidebarCustomButton(theDOMGetValue.id.project())
+      theDOMGet.theSidebarCustomButton(theDOMGetValue.current.id.project())
     );
     TheCustomProjectStyleAdd();
+    theDatasetList(
+      theDOMGetValue.current.type.project(),
+      theDOMGetValue.current.id.project()
+    );
 
     theEvents();
     theFormCancel();
   },
   list: () => {
     theProjectStorage.add.list(
-      [theDOMGetValue.type.project(), theDOMGetValue.id.project()],
+      theDOMGetValue.id.project(),
       theDOMGetValue.input.title(),
       theDOMGetValue.input.description()
     );
 
     theDisplayUpdate([
-      theDOMGetValue.type.project(),
-      theDOMGetValue.id.project(),
+      theDOMGetValue.current.type.project(),
+      theDOMGetValue.current.id.project(),
     ]);
 
     //Events
@@ -370,8 +384,8 @@ const addProjectListTaskNote = {
     );
 
     theDisplayUpdate([
-      theDOMGetValue.type.project(),
-      theDOMGetValue.id.project(),
+      theDOMGetValue.current.type.project(),
+      theDOMGetValue.current.id.project(),
     ]);
 
     //Events
@@ -386,8 +400,8 @@ const addProjectListTaskNote = {
     );
 
     theDisplayUpdate([
-      theDOMGetValue.type.project(),
-      theDOMGetValue.id.project(),
+      theDOMGetValue.current.type.project(),
+      theDOMGetValue.current.id.project(),
     ]);
 
     //Events
@@ -405,10 +419,7 @@ const editProject = function () {
   theDOMTemplate.editForm('Project');
 
   theFormSetValue(
-    theProjectStorage.display.formValue.project(
-      theDOMGetValue.type.project(),
-      theDOMGetValue.id.project()
-    )
+    theProjectStorage.display.formValue.project(theDOMGetValue.id.project())
   );
   editProjectFormEvent();
 };
@@ -448,7 +459,7 @@ const editProjectListTaskNote = {
     theSidebarCustomRemove();
 
     theProjectStorage.edit.project(
-      [theDOMGetValue.type.project(), theDOMGetValue.id.project()],
+      theDOMGetValue.id.project(),
       theDOMGetValue.input.title(),
       theDOMGetValue.input.description()
     );
@@ -527,10 +538,7 @@ const removeProjectListTaskNote = {
   project: () => {
     theSidebarCustomRemove();
 
-    theProjectStorage.remove.project(
-      theDOMGetValue.type.project(),
-      theDOMGetValue.id.project()
-    );
+    theProjectStorage.remove.project(theDOMGetValue.id.project());
 
     //Events
     theDisplayRemove();
@@ -559,6 +567,22 @@ const removeProjectListTaskNote = {
     theEvents();
     theFormCancel();
   },
+};
+
+//Add Dataset Classes
+const theDataset = {
+  type: (element, type) => {
+    element.dataset.type = type;
+  },
+  id: (element, id) => {
+    element.dataset.id = id;
+  },
+};
+
+//Add Dataset
+const theDatasetList = (type, id) => {
+  theDataset.type(theDOMGet.theAddList(), type);
+  theDataset.id(theDOMGet.theAddList(), id);
 };
 
 //Add HTMLCSS Classes
