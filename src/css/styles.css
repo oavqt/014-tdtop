@@ -26,6 +26,14 @@ a:hover {
   animation: fade-out 0.1s ease-out forwards;
 }
 
+.--animation-in-line-through {
+  animation: in-line-through 0.3s ease-out forwards;
+}
+
+.--animation-out-line-through {
+  animation: out-line-through 0.3s ease-out forwards;
+}
+
 .--animation-slide-in {
   animation: slide-in 0.3s ease-out forwards;
 }
@@ -217,7 +225,7 @@ input:checked + .checkbox__custom {
 }
 
 input:checked + .checkbox__custom::after {
-  animation: scale-in 0.2s ease-out;
+  animation: scale-in 0.3s ease-out;
   border: solid white;
   border-width: 0 0.2em 0.2em 0;
   content: '';
@@ -244,6 +252,30 @@ input:checked + .checkbox__custom::after {
   }
   to {
     opacity: 0;
+  }
+}
+
+@keyframes in-line-through {
+  from {
+    text-decoration-color: transparent;
+    text-decoration: unset;
+  }
+  to {
+    text-decoration: line-through;
+    text-decoration-color: #58a6ff;
+    text-decoration-thickness: 0.3em;
+  }
+}
+
+@keyframes out-line-through {
+  from {
+    text-decoration: line-through;
+    text-decoration-color: #58a6ff;
+    text-decoration-thickness: 0.3em;
+  }
+  to {
+    text-decoration-color: transparent;
+    text-decoration: unset;
   }
 }
 

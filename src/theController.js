@@ -3,8 +3,9 @@ import { theEventHandler } from './theHandler';
 import { theProjectStorage } from './theList';
 
 const theEvents = () => {
-  theLogoButtonEvent();
   theSidebarButtonEvent();
+  theLogoButtonEvent();
+  theCheckMarkEvent();
   addProjectListTaskNoteEvent();
   editProjectListTaskNoteEvent();
   removeProjectListTaskNoteEvent();
@@ -24,6 +25,31 @@ const theSidebarButtonEvent = () => {
 //Logo Buttton Events
 const theLogoButtonEvent = () => {
   theDOMGet.theLogo().addEventListener('click', theSidebarCollapse);
+};
+
+//CheckMark Events
+const theCheckMarkProjectEvent = () => {
+  theDOMGet.theCheckMarkProjects().forEach((checkMark) => {
+    checkMark.addEventListener('change', theCheckMark.update.project);
+  });
+};
+
+const theCheckMarkListEvent = () => {
+  theDOMGet.theCheckMarkLists().forEach((checkMark) => {
+    checkMark.addEventListener('change', theCheckMark.update.list);
+  });
+};
+
+const theCheckMarkTaskEvent = () => {
+  theDOMGet.theCheckMarkTasks().forEach((checkMark) => {
+    checkMark.addEventListener('change', theCheckMark.update.task);
+  });
+};
+
+const theCheckMarkNoteEvent = () => {
+  theDOMGet.theCheckMarkNotes().forEach((checkMark) => {
+    checkMark.addEventListener('change', theCheckMark.update.note);
+  });
 };
 
 //Project-List-Task-Note Button Events
@@ -191,18 +217,7 @@ const removeNoteFormEvent = () => {
     .addEventListener('click', removeProjectListTaskNote.note);
 };
 
-//CheckMark Events
-
 //Controller Tools
-//Default Project
-const theDefaultProjectStyle = () => {
-  theSidebarButtonStyleAdd(theDOMGet.theSidebarDefaultProject());
-  theDatasetList(
-    theDOMGet.theSidebarDefaultProject().dataset.type,
-    theDOMGet.theSidebarDefaultProject().dataset.id
-  );
-};
-
 //Controller Event Functions
 const theSidebarCollapse = function () {
   theSidebarSlide();
@@ -218,6 +233,13 @@ const theCurrentProjectEvent = function () {
   theDisplayAdd(element.dataset.type, element.dataset.id);
   theDatasetList(element.dataset.type, element.dataset.id);
   theEvents();
+};
+
+const theCheckMarkEvent = () => {
+  theCheckMarkProjectEvent();
+  theCheckMarkListEvent();
+  theCheckMarkTaskEvent();
+  theCheckMarkNoteEvent();
 };
 
 const addProjectListTaskNoteEvent = () => {
@@ -263,6 +285,7 @@ const theDisplayRemove = () => {
   }
 };
 
+//Sidebar Functions
 const theSidebarDisplayCount = ([type, id, tasks]) => {
   let count = tasks;
 
@@ -309,6 +332,55 @@ const theSidebarCustomRemove = () => {
       .theSidebarCustom()
       .removeChild(theDOMGet.theSidebarCustom().lastChild);
   }
+};
+
+//CheckMark Functions
+const theCheckMark = {
+  value: ([tag, checked]) => {
+    theDOMGet.theCheckMarks(tag).checked = checked;
+
+    if (checked === false) {
+      theCheckMarkStyleRemove(tag);
+    } else {
+      theCheckMarkStyleAdd(tag);
+    }
+  },
+  update: {
+    project: function () {
+      theProjectStorage.display.check.update.project(
+        this.dataset.type,
+        this.dataset.id,
+        this.checked
+      );
+    },
+    list: function () {
+      theProjectStorage.display.check.update.list(
+        this.dataset.type,
+        this.dataset.id,
+        this.dataset.project,
+        this.checked
+      );
+    },
+    task: function () {
+      theProjectStorage.display.check.update.task(
+        this.dataset.type,
+        this.dataset.id,
+        this.dataset.list,
+        this.dataset.project,
+        this.checked
+      );
+    },
+    note: function () {
+      theProjectStorage.display.check.update.note(
+        this.dataset.type,
+        this.dataset.id,
+        this.dataset.task,
+        this.dataset.list,
+        this.dataset.project,
+        this.checked
+      );
+    },
+  },
 };
 
 //Add Functions
@@ -419,7 +491,7 @@ const editProject = function () {
   theDOMTemplate.editForm('Project');
 
   theFormSetValue(
-    theProjectStorage.display.formValue.project(theDOMGetValue.id.project())
+    theProjectStorage.display.form.value.project(theDOMGetValue.id.project())
   );
   editProjectFormEvent();
 };
@@ -428,7 +500,7 @@ const editList = function () {
   theDOMTemplate.editForm('List');
 
   theFormSetValue(
-    theProjectStorage.display.formValue.list(theDOMGetValue.id.list())
+    theProjectStorage.display.form.value.list(theDOMGetValue.id.list())
   );
 
   editListFormEvent();
@@ -438,7 +510,7 @@ const editTask = function () {
   theDOMTemplate.editForm('Task');
 
   theFormSetValue(
-    theProjectStorage.display.formValue.task(theDOMGetValue.id.task())
+    theProjectStorage.display.form.value.task(theDOMGetValue.id.task())
   );
 
   editTaskFormEvent();
@@ -448,7 +520,7 @@ const editNote = function () {
   theDOMTemplate.editForm('Note');
 
   theFormSetValue(
-    theProjectStorage.display.formValue.note(theDOMGetValue.id.note())
+    theProjectStorage.display.form.value.note(theDOMGetValue.id.note())
   );
 
   editNoteFormEvent();
@@ -504,7 +576,7 @@ const editProjectListTaskNote = {
   },
 };
 
-//Set Form Value Function
+//Value Functions
 const theFormSetValue = ([title, description, date]) => {
   theDOMGet.theFormTitle().value = title;
   theDOMGet.theFormDescription().value = description;
@@ -596,6 +668,12 @@ const theHTMLClass = {
       outFade: (element) => {
         element.classList.add('--animation-fade-out');
       },
+      inLineThrough: (element) => {
+        element.classList.add('--animation-in-line-through');
+      },
+      outLineThrough: (element) => {
+        element.classList.add('--animation-out-line-through');
+      },
       inSlide: (element) => {
         element.classList.add('--animation-slide-in');
       },
@@ -623,6 +701,12 @@ const theHTMLClass = {
       },
       outFade: (element) => {
         element.classList.remove('--animation-fade-out');
+      },
+      inLineThrough: (element) => {
+        element.classList.remove('--animation-in-line-through');
+      },
+      outLineThrough: (element) => {
+        element.classList.remove('--animation-out-line-through');
       },
       inSlide: (element) => {
         element.classList.remove('--animation-slide-in');
@@ -681,12 +765,41 @@ const theSidebarButtonStyleRemove = () => {
 const TheCustomProjectStyleAdd = () => {
   theHTMLClass.add.displayFlex(theDOMGet.theCurrentProjectEdit());
   theHTMLClass.add.displayFlex(theDOMGet.theCurrentProjectRemove());
-  theHTMLClass.add.displayBlock(theDOMGet.theCurrentProjectCheckbox());
+  theHTMLClass.add.displayBlock(theDOMGet.theCurrentProjectCheckMark());
+};
+
+const theCheckMarkStyleAdd = (tag) => {
+  if (theDOMGet.theCurrentProjectListTaskNote(tag)) {
+    theHTMLClass.remove.animation.outLineThrough(
+      theDOMGet.theCurrentProjectListTaskNote(tag)
+    );
+    theHTMLClass.add.animation.inLineThrough(
+      theDOMGet.theCurrentProjectListTaskNote(tag)
+    );
+  }
+};
+
+const theCheckMarkStyleRemove = (tag) => {
+  if (theDOMGet.theCurrentProjectListTaskNote(tag)) {
+    theHTMLClass.remove.animation.inLineThrough(
+      theDOMGet.theCurrentProjectListTaskNote(tag)
+    );
+  }
+};
+
+//Default Project
+const theDefaultProjectStyle = () => {
+  theSidebarButtonStyleAdd(theDOMGet.theSidebarDefaultProject());
+  theDatasetList(
+    theDOMGet.theSidebarDefaultProject().dataset.type,
+    theDOMGet.theSidebarDefaultProject().dataset.id
+  );
 };
 
 //Events
 theEventHandler.subscribe('theDefaultProjectStyle', theDefaultProjectStyle);
 theEventHandler.subscribe('theDisplayUpdate', theDisplayUpdate);
 theEventHandler.subscribe('theCount', theSidebarDisplayCount);
+theEventHandler.subscribe('theCheckMark', theCheckMark.value);
 
 export { theEvents };

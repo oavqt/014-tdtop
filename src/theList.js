@@ -141,22 +141,22 @@ const objectProperties = (() => {
       lists: 0,
       tasks: 0,
       notes: 0,
-      checkmark: false,
+      checkMark: false,
     },
     list: {
       type: 'list',
       tasks: 0,
       notes: 0,
-      checkmark: false,
+      checkMark: false,
     },
     task: {
       type: 'task',
       notes: 0,
-      checkmark: false,
+      checkMark: false,
     },
     note: {
       type: 'note',
-      checkmark: false,
+      checkMark: false,
     },
   };
 
@@ -291,7 +291,7 @@ const theProjectStorage = (() => {
       //Events
       projects++;
 
-      tagData.project(projects, get.storage(type).at(-1));
+      tagData.project(get.storage(type).at(-1), projects);
 
       clean.duplicate.projects(get.storage(type).at(-1));
 
@@ -311,7 +311,7 @@ const theProjectStorage = (() => {
 
       idTypeCategoryIndexUpdateData([get.storage(type), type]);
 
-      tagData.list(lists, tProject.list.at(-1));
+      tagData.list(tProject.list.at(-1), lists);
 
       clean.duplicate.list(tProject.list.at(-1));
 
@@ -329,7 +329,7 @@ const theProjectStorage = (() => {
 
       idTypeCategoryIndexUpdateData([get.storage(type), type]);
 
-      tagData.task(tasks, tList.task.at(-1));
+      tagData.task(tList.task.at(-1), tasks);
 
       sort.date(tList, tList.task.at(-1));
 
@@ -345,9 +345,9 @@ const theProjectStorage = (() => {
 
       clean.sort();
 
-      display.countValue(automaticProject);
+      display.count.value(automaticProject);
 
-      display.countValue(customProject);
+      display.count.value(customProject);
 
       idTypeCategoryIndexUpdateData([get.storage(type), type]);
     },
@@ -361,7 +361,7 @@ const theProjectStorage = (() => {
 
       idTypeCategoryIndexUpdateData([get.storage(type), type]);
 
-      tagData.note(notes, tTask.note.at(-1));
+      tagData.note(tTask.note.at(-1), notes);
 
       copy.add.lookup.note(tTask.note.at(-1));
 
@@ -436,9 +436,9 @@ const theProjectStorage = (() => {
 
       theEventHandler.publish(type, [get.storage(type), type]);
 
-      display.countValue(automaticProject);
+      display.count.value(automaticProject);
 
-      display.countValue(customProject);
+      display.count.value(customProject);
     },
     list: ([type, id, idProject]) => {
       const tProject = get.project(type, idProject);
@@ -452,9 +452,9 @@ const theProjectStorage = (() => {
       //Events
       idUpdateDataIndex(get.storage(type));
 
-      display.countValue(automaticProject);
+      display.count.value(automaticProject);
 
-      display.countValue(customProject);
+      display.count.value(customProject);
 
       theEventHandler.publish('theDisplayUpdate', [type, idProject]);
     },
@@ -470,9 +470,9 @@ const theProjectStorage = (() => {
       //Events
       idUpdateDataIndex(get.storage(type));
 
-      display.countValue(automaticProject);
+      display.count.value(automaticProject);
 
-      display.countValue(customProject);
+      display.count.value(customProject);
 
       theEventHandler.publish('theDisplayUpdate', [type, idProject]);
     },
@@ -573,14 +573,18 @@ const theProjectStorage = (() => {
       const tagMatched = inbox.list.find(
         (list) => list.tag === tempList.tag && list.type === tempList.type
       );
+
       if (tagMatched === undefined && tempList.category === 'logbook') {
         clone.prototype.list(tempList);
 
         inbox.list.push(tempList);
       } else if (
         tagMatched === undefined &&
-        tempList.type === 'automaticProject'
+        tempList.type === 'automaticProject' &&
+        !/(customProject)/.test(tempList.tag)
       ) {
+        clone.prototype.list(tempList);
+
         inbox.list.push(tempList);
       }
     },
@@ -1225,71 +1229,269 @@ const theProjectStorage = (() => {
     },
   };
 
-  //CheckMark Functions
-
-  //Count Functions
-  const count = (project) => {
-    let lists = 0;
-    let tasks = 0;
-    let notes = 0;
-
-    project.list.forEach((list) => {
-      lists++;
-      list.task.forEach((task) => {
-        tasks++;
-        task.note.forEach((note) => {
-          notes++;
-        });
-      });
-    });
-
-    project.lists = lists;
-    project.tasks = tasks;
-    project.notes = notes;
-  };
-
   //Display
   const display = {
     project: (type, id) => {
       if (!id) {
         id = get.storage(type).length - 1;
       }
+
       const displayProject = get.storage(type)[id];
 
       theEventHandler.publish('displayProject', [displayProject]);
-    },
-    checkMarkValue: () => {},
-    countValue: (storage) => {
-      storage.forEach((project) => {
-        count(project);
 
-        theEventHandler.publish('theCount', [
-          project.type,
-          project.id,
-          project.tasks,
+      display.check.value(displayProject);
+    },
+    check: {
+      update: {
+        project: (type, id, checkMark) => {
+          const tProject = get.project(type, id);
+          const projectMatched = tag.lookup.project(tProject);
+
+          projectMatched.forEach((project) => {
+            project.checkMark = checkMark;
+            project.list.forEach((list) => {
+              display.check.update.list(type, list.id, list.project, checkMark);
+            });
+          });
+
+          display.check.value(tProject);
+          display.count.value(automaticProject);
+          display.count.value(customProject);
+        },
+        list: (type, id, idProject, checkMark) => {
+          const tProject = get.project(type, idProject);
+          const tList = get.list(type, id, idProject);
+          const listMatched = tag.lookup.list(tList);
+
+          if (
+            tList.category === 'today' ||
+            tList.category === 'upcoming' ||
+            tList.category === 'someday' ||
+            tList.category === 'never' ||
+            tList.category === 'logbook'
+          ) {
+            if (checkMark === false) {
+              listMatched.forEach((list) => {
+                if (
+                  list.category !== 'today' &&
+                  list.category !== 'upcoming' &&
+                  list.category !== 'someday' &&
+                  list.category !== 'never' &&
+                  list.category !== 'logbook'
+                ) {
+                  const project = get.project(list.type, list.project);
+
+                  project.checkMark = checkMark;
+                  list.checkMark = checkMark;
+                }
+              });
+            }
+
+            tList.checkMark = checkMark;
+            tList.task.forEach((task) => {
+              display.check.update.task(
+                task.type,
+                task.id,
+                task.list,
+                task.project,
+                checkMark
+              );
+            });
+          } else {
+            listMatched.forEach((list) => {
+              const project = get.project(list.type, list.project);
+
+              list.checkMark = checkMark;
+
+              display.check.update.allListComplete(project);
+              list.task.forEach((task) => {
+                task.checkMark = checkMark;
+                task.note.forEach((note) => {
+                  note.checkMark = checkMark;
+                });
+              });
+            });
+          }
+
+          display.check.value(tProject);
+          display.count.value(automaticProject);
+          display.count.value(customProject);
+        },
+        task: (type, id, idList, idProject, checkMark) => {
+          const tProject = get.project(type, idProject);
+          const tTask = get.task(type, id, idList, idProject);
+          const taskMatched = tag.lookup.task(tTask);
+
+          taskMatched.forEach((task) => {
+            const project = get.project(task.type, task.project);
+            const list = get.list(task.type, task.list, task.project);
+
+            task.checkMark = checkMark;
+
+            display.check.update.allTaskComplete(list);
+            display.check.update.allListComplete(project);
+            task.note.forEach((note) => {
+              note.checkMark = checkMark;
+            });
+          });
+
+          display.check.value(tProject);
+          display.count.value(automaticProject);
+          display.count.value(customProject);
+        },
+        note: (type, id, idTask, idList, idProject, checkMark) => {
+          const tProject = get.project(type, idProject);
+          const tNote = get.note(type, id, idTask, idList, idProject);
+          const noteMatched = tag.lookup.note(tNote);
+
+          noteMatched.forEach((note) => {
+            const project = get.project(note.type, note.project);
+            const list = get.list(note.type, note.list, note.project);
+            const task = get.task(
+              note.type,
+              note.task,
+              note.list,
+              note.project
+            );
+
+            note.checkMark = checkMark;
+
+            display.check.update.allNoteComplete(task);
+            display.check.update.allTaskComplete(list);
+            display.check.update.allListComplete(project);
+          });
+
+          display.check.value(tProject);
+          display.count.value(automaticProject);
+          display.count.value(customProject);
+        },
+        allListComplete: (tProject) => {
+          let complete = true;
+
+          tProject.list.forEach((list) => {
+            if (list.checkMark === false) {
+              complete = false;
+            }
+          });
+
+          if (complete === true) {
+            tProject.checkMark = true;
+          } else {
+            tProject.checkMark = false;
+          }
+        },
+        allTaskComplete: (tList) => {
+          let complete = true;
+
+          tList.task.forEach((task) => {
+            if (task.checkMark === false) {
+              complete = false;
+            }
+          });
+
+          if (complete === true) {
+            tList.checkMark = true;
+          } else {
+            tList.checkMark = false;
+          }
+        },
+        allNoteComplete: (tTask) => {
+          let complete = true;
+
+          tTask.note.forEach((note) => {
+            if (note.checkMark === false) {
+              complete = false;
+            }
+          });
+
+          if (complete === true) {
+            tTask.checkMark = true;
+          } else {
+            tTask.checkMark = false;
+          }
+        },
+      },
+      value: (project) => {
+        theEventHandler.publish('theCheckMark', [
+          project.tag,
+          project.checkMark,
         ]);
-      });
+
+        project.list.forEach((list) => {
+          theEventHandler.publish('theCheckMark', [list.tag, list.checkMark]);
+          list.task.forEach((task) => {
+            theEventHandler.publish('theCheckMark', [task.tag, task.checkMark]);
+            task.note.forEach((note) => {
+              theEventHandler.publish('theCheckMark', [
+                note.tag,
+                note.checkMark,
+              ]);
+            });
+          });
+        });
+      },
     },
-    formValue: {
-      project: ([type, id]) => {
-        const tProject = get.project(type, id);
+    count: {
+      update: (project) => {
+        let lists = 0;
+        let tasks = 0;
+        let notes = 0;
 
-        return [tProject.title, tProject.description];
+        project.list.forEach((list) => {
+          if (list.checkMark === false) {
+            lists++;
+          }
+          list.task.forEach((task) => {
+            if (task.checkMark === false) {
+              tasks++;
+            }
+            task.note.forEach((note) => {
+              if (note.checkMark === false) {
+                notes++;
+              }
+            });
+          });
+        });
+
+        project.lists = lists;
+        project.tasks = tasks;
+        project.notes = notes;
       },
-      list: ([type, id, idProject]) => {
-        const tList = get.list(type, id, idProject);
+      value: (storage) => {
+        storage.forEach((project) => {
+          display.count.update(project);
 
-        return [tList.title, tList.description];
+          theEventHandler.publish('theCount', [
+            project.type,
+            project.id,
+            project.tasks,
+          ]);
+        });
       },
-      task: ([type, id, idList, idProject]) => {
-        const tTask = get.task(type, id, idList, idProject);
+    },
+    form: {
+      value: {
+        project: ([type, id]) => {
+          const tProject = get.project(type, id);
 
-        return [tTask.title, tTask.description, tTask.date];
-      },
-      note: ([type, id, idTask, idList, idProject]) => {
-        const tNote = get.note(type, id, idTask, idList, idProject);
+          return [tProject.title, tProject.description];
+        },
+        list: ([type, id, idProject]) => {
+          const tList = get.list(type, id, idProject);
 
-        return [tNote.title, tNote.description];
+          return [tList.title, tList.description];
+        },
+        task: ([type, id, idList, idProject]) => {
+          const tTask = get.task(type, id, idList, idProject);
+
+          return [tTask.title, tTask.description, tTask.date];
+        },
+        note: ([type, id, idTask, idList, idProject]) => {
+          const tNote = get.note(type, id, idTask, idList, idProject);
+
+          return [tNote.title, tNote.description];
+        },
       },
     },
   };
@@ -1311,17 +1513,17 @@ const idTypeCategoryIndexUpdateData = ([storage, type]) => {
 };
 
 const tagData = {
-  project: (count, object) => {
-    object.tag = `${count}${object.type}${object.id}`;
+  project: (object, count) => {
+    object.tag = `${object.type}${object.id}${count}`;
   },
-  list: (count, object) => {
-    object.tag = `${count}${object.type}${object.project}${object.id}`;
+  list: (object, count) => {
+    object.tag = `${object.type}${object.project}${object.id}${count}`;
   },
-  task: (count, object) => {
-    object.tag = `${count}${object.type}${object.project}${object.list}${object.id}`;
+  task: (object, count) => {
+    object.tag = `${object.type}${object.project}${object.list}${object.id}${count}`;
   },
-  note: (count, object) => {
-    object.tag = `${count}${object.type}${object.project}${object.list}${object.task}${object.id}`;
+  note: (object, count) => {
+    object.tag = `${object.type}${object.project}${object.list}${object.task}${object.id}${count}`;
   },
 };
 
@@ -1398,17 +1600,17 @@ const theDOMDisplaySidebar = ([storage, type, project]) => {
 
   if (project) {
     project[addDOMAutoCutomProject](
-      project.title,
+      [project.id, project.tag],
       project.type,
-      project.id,
+      project.title,
       project.tasks
     );
   } else {
     storage.forEach((project) => {
       project[addDOMAutoCutomProject](
-        project.title,
+        [project.id, project.tag],
         project.type,
-        project.id,
+        project.title,
         project.tasks
       );
     });
@@ -1417,41 +1619,36 @@ const theDOMDisplaySidebar = ([storage, type, project]) => {
 
 const theDOMDisplay = ([project]) => {
   project.addDOMProject(
-    project.title,
-    project.description,
+    [project.id, project.tag],
     project.type,
-    project.id
+    project.title,
+    project.description
   );
   project.list.forEach((list) => {
     list.addDOMList(
-      project.id,
-      list.title,
-      list.description,
+      [list.id, project.id, list.tag],
+
       list.type,
       list.category,
-      list.id
+      list.title,
+      list.description
     );
     list.task.forEach((task) => {
       task.addDOMTask(
-        list.id,
-        task.title,
-        task.description,
-        task.date,
+        [task.id, list.id, project.id, task.tag],
         task.type,
         task.category,
-        task.id,
-        project.id
+        task.title,
+        task.description,
+        task.date
       );
       task.note.forEach((note) => {
         note.addDOMNote(
-          task.id,
-          note.title,
-          note.description,
+          [note.id, task.id, list.id, project.id, note.tag],
           note.type,
           note.category,
-          note.id,
-          project.id,
-          list.id
+          note.title,
+          note.description
         );
       });
     });
