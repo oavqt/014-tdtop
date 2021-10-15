@@ -275,6 +275,7 @@ const theDisplayAdd = (type, idProject) => {
 const theDisplayUpdate = ([type, idProject]) => {
   theDisplayRemove();
   theDisplayAdd(type, idProject);
+  theEvents();
 };
 
 const theDisplayRemove = () => {
@@ -347,14 +348,14 @@ const theCheckMark = {
   },
   update: {
     project: function () {
-      theProjectStorage.display.check.update.project(
+      theProjectStorage.display.checkMark.update.project(
         this.dataset.type,
         this.dataset.id,
         this.checked
       );
     },
     list: function () {
-      theProjectStorage.display.check.update.list(
+      theProjectStorage.display.checkMark.update.list(
         this.dataset.type,
         this.dataset.id,
         this.dataset.project,
@@ -362,16 +363,21 @@ const theCheckMark = {
       );
     },
     task: function () {
-      theProjectStorage.display.check.update.task(
+      theProjectStorage.display.checkMark.update.task(
         this.dataset.type,
         this.dataset.id,
         this.dataset.list,
         this.dataset.project,
         this.checked
       );
+
+      theEventHandler.publish('theTaskSort', [
+        this.dataset.type,
+        this.dataset.project,
+      ]);
     },
     note: function () {
-      theProjectStorage.display.check.update.note(
+      theProjectStorage.display.checkMark.update.note(
         this.dataset.type,
         this.dataset.id,
         this.dataset.task,
@@ -379,6 +385,10 @@ const theCheckMark = {
         this.dataset.project,
         this.checked
       );
+      theEventHandler.publish('theTaskSort', [
+        this.dataset.type,
+        this.dataset.project,
+      ]);
     },
   },
 };
