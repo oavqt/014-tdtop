@@ -75,6 +75,8 @@ const theProjectStorage = (() => {
 
       sort.task();
 
+      sort.list();
+
       update.data.all([get.storage(type), type]);
     },
     task: ([type, idList, idProject], title, description, tdate) => {
@@ -109,6 +111,8 @@ const theProjectStorage = (() => {
 
       sort.task();
 
+      sort.list();
+
       display.taskCount.value(automaticProject);
 
       display.taskCount.value(customProject);
@@ -140,6 +144,8 @@ const theProjectStorage = (() => {
       display.checkMark.update.allListComplete(get.project(type, idProject));
 
       sort.task();
+
+      sort.list();
 
       display.taskCount.value(automaticProject);
 
@@ -367,6 +373,66 @@ const theProjectStorage = (() => {
   //Project Sort
   //Sort Functions
   const sort = {
+    list: () => {
+      let storage = automaticProject;
+
+      for (let index = 0; index <= 1; index++) {
+        storage.forEach((project) => {
+          project.list.forEach((list) => {
+            if (list.task[0]) {
+              list.date = list.task[0].date;
+            } else {
+              list.date = '???';
+            }
+          });
+
+          project.list.sort((firstTask, secondTask) => {
+            let firstDate = new Date(firstTask.date);
+            let secondDate = new Date(secondTask.date);
+
+            if (isNaN(firstDate)) {
+              firstDate = Infinity;
+            }
+            if (isNaN(secondDate)) {
+              secondDate = Infinity;
+            }
+
+            if (firstDate < secondDate) {
+              if (firstTask.checkMark === secondTask.checkMark) {
+                return -1;
+              } else {
+                if (firstTask.checkMark) {
+                  return 1;
+                } else {
+                  return -1;
+                }
+              }
+            } else if (firstDate > secondDate) {
+              if (firstTask.checkMark === secondTask.checkMark) {
+                return 1;
+              } else {
+                if (firstTask.checkMark) {
+                  return 1;
+                } else {
+                  return -1;
+                }
+              }
+            } else {
+              if (firstTask.checkMark === secondTask.checkMark) {
+                return 0;
+              } else {
+                if (firstTask.checkMark) {
+                  1;
+                } else {
+                  return -1;
+                }
+              }
+            }
+          });
+        });
+        storage = customProject;
+      }
+    },
     task: () => {
       let storage = automaticProject;
 
@@ -424,6 +490,8 @@ const theProjectStorage = (() => {
     update: {
       display: ([type, id]) => {
         sort.task();
+
+        sort.list();
 
         update.data.all([automaticProject, 'automaticProject']);
         update.data.all([customProject, 'customProject']);
