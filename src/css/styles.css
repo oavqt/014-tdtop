@@ -79,7 +79,6 @@ button:hover {
   align-items: center;
   background: transparent;
   display: flex;
-  justify-content: flex-end;
   padding: 0;
   width: 7em;
 }
@@ -148,6 +147,10 @@ form {
   width: 100%;
 }
 
+.form__title .title__text {
+  text-align: center;
+}
+
 .form__body {
   width: 75%;
 }
@@ -201,13 +204,16 @@ input {
   border: 0.1em solid transparent;
   box-shadow: inset 0 0 1rem 0 #31313133;
   height: 2em;
-  width: 15em;
   min-width: 100%;
 }
 
 input:focus {
   border: 0.1em solid #1c87c9;
   outline: none;
+}
+
+input::placeholder {
+  font-size: 0.9rem;
 }
 
 .input--checkbox {
@@ -235,6 +241,12 @@ input:checked + .checkbox__custom::after {
   top: 0.15em;
   transform: rotate(35deg);
   width: 0.45em;
+}
+
+.input--search {
+  border-radius: 1em;
+  text-indent: 1em;
+  width: 100%;
 }
 
 @keyframes fade-in {
@@ -333,12 +345,19 @@ textarea:focus {
   margin: 0;
 }
 
+.demo__display .title__text {
+  max-width: 8em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /*Content*/
 .content {
   align-items: center;
   display: flex;
   height: 100vh;
   justify-content: center;
+  padding: 1em;
   width: 100vw;
 }
 
@@ -346,20 +365,39 @@ textarea:focus {
   display: flex;
   height: 65vh;
   justify-content: space-between;
-  width: 85vw;
+  width: 100vw;
 }
 
 /*Application Demo*/
 .application__demo {
+  box-shadow: 0 0 0.5em 0 #31313133;
   display: flex;
   position: relative;
   width: 69%;
 }
 
+.application__demo::after {
+  bottom: -2em;
+  content: "The demo is an early preview and doesn't represent the final product.";
+  font-size: 0.9rem;
+  padding: 0 5em;
+  position: absolute;
+  text-align: center;
+  width: 100%;
+}
+
 /*Sidebar*/
 .demo__sidebar {
   background: #31313111;
+  border-top-right-radius: 25%;
+  overflow-x: hidden;
+  overflow-y: scroll;
   width: 25%;
+}
+
+.sidebar__automatic,
+.sidebar__custom {
+  background: #efefef;
 }
 
 .sidebar__automatic button,
@@ -376,6 +414,16 @@ textarea:focus {
 .sidebar__custom button:hover {
   color: white;
   background: #58a6ff;
+}
+
+.sidebar__automatic button span:nth-child(1),
+.sidebar__custom button span:nth-child(1) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar__add {
+  background: #efefef;
 }
 
 .sidebar__add .button--add {
@@ -404,10 +452,7 @@ textarea:focus {
 .title__logo {
   align-items: center;
   display: flex;
-}
-
-.logo__title .title__text {
-  font-size: 1.5rem;
+  font-size: 0.8rem;
 }
 
 .display__body {
@@ -434,8 +479,18 @@ textarea:focus {
   justify-content: center;
 }
 
+.misc__information .description__text {
+  margin-left: unset;
+}
+
 .information__title {
   align-self: flex-start;
+}
+
+.information__tag {
+  position: absolute;
+  right: 1em;
+  top: 0.5em;
 }
 
 /*Project*/
@@ -491,6 +546,13 @@ textarea:focus {
   justify-content: space-between;
 }
 
+.misc__category {
+  max-width: 8em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .misc__date {
   margin-left: 1em;
 }
@@ -503,4 +565,153 @@ textarea:focus {
 .note__title {
   display: flex;
   justify-content: space-between;
+}
+
+/*Mobile*/
+@media screen and (max-width: 1069px) {
+  .demo__display .title__text {
+    max-width: 5em;
+  }
+
+  .content__application {
+    align-items: center;
+    flex-direction: column;
+    height: 100vh;
+    justify-content: center;
+    width: 100vw;
+  }
+
+  .application__demo {
+    height: 69%;
+    order: 2;
+    width: 100%;
+  }
+
+  .misc__category {
+    max-width: 7em;
+  }
+
+  .application__misc {
+    order: 1;
+    width: 100%;
+  }
+
+  .misc__information {
+    width: 75%;
+  }
+}
+
+@media screen and (max-width: 769px) {
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  @keyframes slide-in {
+    from {
+      height: 0%;
+    }
+    to {
+      height: 75%;
+    }
+  }
+
+  @keyframes slide-out {
+    from {
+      visibility: visible;
+    }
+    to {
+      visibility: hidden;
+      height: 0%;
+    }
+  }
+
+  .demo__display .title__text {
+    max-width: 4.6em;
+  }
+
+  .content {
+    padding: 0;
+  }
+
+  .application__demo {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .application__demo::after {
+    content: none;
+  }
+
+  .demo__sidebar {
+    box-shadow: 0 0 0.5em 0 #31313133;
+    bottom: 0;
+    height: 75%;
+    position: absolute;
+    width: 100%;
+    z-index: 1;
+  }
+
+  .sidebar__custom::after {
+    background: #f5cac3;
+    content: "The demo is an early preview and doesn't represent the final product.";
+    font-size: 0.9rem;
+    padding: 1em 5em;
+    position: absolute;
+    text-align: center;
+    width: 100%;
+  }
+
+  .display__title .title__misc {
+    width: 100%;
+  }
+
+  .misc__search {
+    width: 100%;
+  }
+
+  .project__list {
+    margin-left: 0.8em;
+  }
+
+  .list__task {
+    margin-left: 1em;
+  }
+
+  .task__note {
+    margin-left: 1.2em;
+  }
+
+  .display__form {
+    z-index: 2;
+  }
+
+  .form__body .--display-flex {
+    flex-direction: column;
+  }
+
+  .--display-flex .label--title {
+    order: 2;
+  }
+
+  .--display-flex .label--date {
+    order: 1;
+  }
+
+  .application__misc {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 569px) {
+  .body__add .button--add {
+    width: 2em;
+  }
+
+  .body__add .add__text {
+    display: none;
+  }
+
+  .task__body {
+    justify-content: center;
+  }
 }

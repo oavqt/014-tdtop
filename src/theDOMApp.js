@@ -65,11 +65,6 @@ const theApplicationDisplay = () => {
             { class: 'button--logo' },
             theElement.create('img', { class: 'img--logo', src: logo })
           )
-        ),
-        theElement.create(
-          'div',
-          { class: 'logo__title' },
-          theElement.create('h1', { class: 'title__text' }, 'Tudoui Le Daq')
         )
       ),
       theElement.create(
