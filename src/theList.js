@@ -49,11 +49,16 @@ const theProjectStorage = (() => {
       //Events
       projects++;
 
+      update.data.all([get.storage(type), type]);
+
       tag.data.project(get.storage(type).at(-1), projects);
 
       clean.duplicate.projects(get.storage(type).at(-1));
 
       theEventHandler.publish(type, [storage, type, storage.at(-1)]);
+
+      local.storage.add.local('automaticProject', automaticProject);
+      local.storage.add.local('customProject', customProject);
     },
     list: ([type, idProject], title, description) => {
       const tProject = get.project(type, idProject);
@@ -78,6 +83,9 @@ const theProjectStorage = (() => {
       sort.list();
 
       update.data.all([get.storage(type), type]);
+
+      local.storage.add.local('automaticProject', automaticProject);
+      local.storage.add.local('customProject', customProject);
     },
     task: ([type, idList, idProject], title, description, tdate) => {
       const tList = get.list(type, idList, idProject);
@@ -118,6 +126,9 @@ const theProjectStorage = (() => {
       display.taskCount.value(customProject);
 
       update.data.all([get.storage(type), type]);
+
+      local.storage.add.local('automaticProject', automaticProject);
+      local.storage.add.local('customProject', customProject);
     },
     note: ([type, idTask, idList, idProject], title, description) => {
       const tTask = get.task(type, idTask, idList, idProject);
@@ -152,6 +163,9 @@ const theProjectStorage = (() => {
       display.taskCount.value(customProject);
 
       update.data.all([get.storage(type), type]);
+
+      local.storage.add.local('automaticProject', automaticProject);
+      local.storage.add.local('customProject', customProject);
     },
   };
 
@@ -168,6 +182,9 @@ const theProjectStorage = (() => {
       theEventHandler.publish('theDisplayUpdate', [type, id]);
 
       theEventHandler.publish(type, [get.storage(type), type]);
+
+      local.storage.add.local('automaticProject', automaticProject);
+      local.storage.add.local('customProject', customProject);
     },
     list: ([type, id, idProject], title, description) => {
       const tList = get.list(type, id, idProject);
@@ -178,6 +195,9 @@ const theProjectStorage = (() => {
 
       //Events
       theEventHandler.publish('theDisplayUpdate', [type, idProject]);
+
+      local.storage.add.local('automaticProject', automaticProject);
+      local.storage.add.local('customProject', customProject);
     },
     task: ([type, id, idList, idProject], title, description, date) => {
       const tTask = get.task(type, id, idList, idProject);
@@ -188,6 +208,9 @@ const theProjectStorage = (() => {
 
       //Events
       theEventHandler.publish('theDisplayUpdate', [type, idProject]);
+
+      local.storage.add.local('automaticProject', automaticProject);
+      local.storage.add.local('customProject', customProject);
     },
     note: ([type, id, idTask, idList, idProject], title, description) => {
       const tNote = get.note(type, id, idTask, idList, idProject);
@@ -198,6 +221,9 @@ const theProjectStorage = (() => {
 
       //Events
       theEventHandler.publish('theDisplayUpdate', [type, idProject]);
+
+      local.storage.add.local('automaticProject', automaticProject);
+      local.storage.add.local('customProject', customProject);
     },
   };
 
@@ -234,6 +260,9 @@ const theProjectStorage = (() => {
       display.taskCount.value(automaticProject);
 
       display.taskCount.value(customProject);
+
+      local.storage.add.local('automaticProject', automaticProject);
+      local.storage.add.local('customProject', customProject);
     },
     list: ([type, id, idProject]) => {
       const tProject = get.project(type, idProject);
@@ -252,6 +281,9 @@ const theProjectStorage = (() => {
       display.taskCount.value(customProject);
 
       theEventHandler.publish('theDisplayUpdate', [type, idProject]);
+
+      local.storage.add.local('automaticProject', automaticProject);
+      local.storage.add.local('customProject', customProject);
     },
     task: ([type, id, idList, idProject]) => {
       const tList = get.list(type, idList, idProject);
@@ -270,6 +302,9 @@ const theProjectStorage = (() => {
       display.taskCount.value(customProject);
 
       theEventHandler.publish('theDisplayUpdate', [type, idProject]);
+
+      local.storage.add.local('automaticProject', automaticProject);
+      local.storage.add.local('customProject', customProject);
     },
     note: ([type, id, idTask, idList, idProject]) => {
       const tTask = get.task(type, idTask, idList, idProject);
@@ -282,6 +317,9 @@ const theProjectStorage = (() => {
       update.data.index(get.storage(type));
 
       theEventHandler.publish('theDisplayUpdate', [type, idProject]);
+
+      local.storage.add.local('automaticProject', automaticProject);
+      local.storage.add.local('customProject', customProject);
     },
   };
 
@@ -1247,6 +1285,10 @@ const theProjectStorage = (() => {
 
       theDOMDisplay(displayProject);
 
+      display.taskCount.value(automaticProject);
+
+      display.taskCount.value(customProject);
+
       display.checkMark.value(displayProject);
     },
     checkMark: {
@@ -1450,6 +1492,9 @@ const theProjectStorage = (() => {
             });
           });
         });
+
+        local.storage.add.local('automaticProject', automaticProject);
+        local.storage.add.local('customProject', customProject);
       },
     },
     taskCount: {
@@ -1488,6 +1533,9 @@ const theProjectStorage = (() => {
             project.tasks,
           ]);
         });
+
+        local.storage.add.local('automaticProject', automaticProject);
+        local.storage.add.local('customProject', customProject);
       },
     },
     form: {
@@ -1583,12 +1631,102 @@ const theProjectStorage = (() => {
     });
   };
 
+  //Local Storage
+  const local = {
+    storage: {
+      available: (type) => {
+        let storage;
+
+        try {
+          let test = 'Hope';
+
+          storage = window[type];
+
+          storage.setItem(test, test);
+
+          storage.removeItem(test);
+          return true;
+        } catch (error) {
+          return (
+            error instanceof DOMException &&
+            (error.code === 22 ||
+              error.code === 1014 ||
+              error.name === 'QuotaExceededError' ||
+              error.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
+            storage &&
+            storage.length !== 0
+          );
+        }
+      },
+      add: {
+        local: (name, value) => {
+          if (local.storage.available('localStorage')) {
+            localStorage.setItem(name, JSON.stringify(value));
+          } else {
+            console.log('No Local Storage');
+          }
+        },
+      },
+      get: {
+        local: (name) => {
+          return localStorage.getItem(name);
+        },
+      },
+    },
+  };
+
+  //Local Storage Project
+  const theLocalStorageProject = () => {
+    let automatic = JSON.parse(local.storage.get.local('automaticProject'));
+    let custom = JSON.parse(local.storage.get.local('customProject'));
+
+    clone.prototype.all(automatic);
+    clone.prototype.all(custom);
+
+    automaticProject = automatic;
+    customProject = custom;
+
+    update.data.all([automaticProject, 'automaticProject']);
+    update.data.all([customProject, 'customProject']);
+
+    theDOMDisplaySidebar([automaticProject, 'automaticProject']);
+    theDOMDisplaySidebar([customProject, 'customProject']);
+
+    theDefaultProjectDisplay();
+  };
+
   //Default Project
-  const theDefaultProject = () => {
+  const theDefaultProjectDisplay = () => {
     theProjectStorage.display.project('automaticProject', '0');
 
     //Events
     theEventHandler.publish('theDefaultProjectStyle', true);
+  };
+
+  //Automatic Projects
+  const theDefaultProject = () => {
+    const automatic = 'automaticProject';
+
+    theProjectStorage.remove.project(['automaticProject']);
+
+    theProjectStorage.add.project([automatic], 'Inbox', 'Inbox');
+    theProjectStorage.add.project([automatic], 'Today', 'Today');
+    theProjectStorage.add.project([automatic], 'Upcoming', 'Upcoming');
+    theProjectStorage.add.project([automatic], 'Someday', 'Someday ');
+    theProjectStorage.add.project([automatic], 'Never', 'Never');
+    theProjectStorage.add.project([automatic], 'Logbook', 'Logbook');
+
+    theDefaultProjectDisplay();
+  };
+
+  const theProjectStart = () => {
+    let automatic = JSON.parse(local.storage.get.local('automaticProject'));
+
+    if (automatic.length === 6) {
+      theLocalStorageProject();
+    } else {
+      theDefaultProject();
+    }
   };
 
   //Events
@@ -1604,28 +1742,8 @@ const theProjectStorage = (() => {
     edit,
     remove,
     display,
-    theDefaultProject,
+    theProjectStart,
   };
 })();
 
-//Automatic Projects
-const theAutomaticProject = () => {
-  const automatic = 'automaticProject';
-  theProjectStorage.add.project([automatic], 'Inbox', 'Inbox');
-  theProjectStorage.add.project([automatic], 'Today', 'Today');
-  theProjectStorage.add.project([automatic], 'Upcoming', 'Upcoming');
-  theProjectStorage.add.project([automatic], 'Someday', 'Someday ');
-  theProjectStorage.add.project([automatic], 'Never', 'Never');
-  theProjectStorage.add.project([automatic], 'Logbook', 'Logbook');
-
-  theProjectStorage.theDefaultProject();
-};
-
-//Application Functions
-const theAutomaticApplication = () => {
-  theProjectStorage.remove.project(['automaticProject']);
-  theAutomaticProject();
-};
-
-//Events
-export { theAutomaticApplication, theProjectStorage };
+export { theProjectStorage };

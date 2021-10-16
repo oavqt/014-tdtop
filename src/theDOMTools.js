@@ -536,7 +536,12 @@ const theDOMCreate = {
       },
       theElement.create(
         'div',
-        { class: 'project__title' },
+        {
+          class: 'project__title',
+          ['data-id']: id,
+          ['data-tag']: tag,
+          ['data-type']: type,
+        },
         theElement.create(
           'div',
           { class: 'title__body' },

@@ -1,9 +1,7 @@
 import './css/styles.css';
-import { theBuild } from './theBuild';
-import { theEvents } from './theController';
+import { theProjectBuild } from './theBuild';
 
-theBuild();
-theEvents();
+theProjectBuild();
 
 //Server HMR
 if (module.hot) {
@@ -14,6 +12,5 @@ if (module.hot) {
     content.removeChild(content.lastChild);
   }
 
-  theBuild();
-  theEvents();
+  theProjectBuild();
 }

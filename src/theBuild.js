@@ -1,9 +1,11 @@
+import { theEvents } from './theController';
 import { theDOMApplication } from './theDOMApp';
-import { theAutomaticApplication } from './theList';
+import { theProjectStorage } from './theList';
 
-const theBuild = () => {
+const theProjectBuild = () => {
   theDOMApplication();
-  theAutomaticApplication();
+  theProjectStorage.theProjectStart();
+  theEvents();
 };
 
-export { theBuild };
+export { theProjectBuild };
