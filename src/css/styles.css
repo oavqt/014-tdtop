@@ -388,7 +388,7 @@ textarea:focus {
 
 /*Sidebar*/
 .demo__sidebar {
-  background: #31313111;
+  background: #efefef;
   border-top-right-radius: 25%;
   overflow-x: hidden;
   overflow-y: scroll;
@@ -653,10 +653,11 @@ textarea:focus {
 
   .sidebar__custom::after {
     background: #f5cac3;
+    bottom: 0;
     content: "The demo is an early preview and doesn't represent the final product.";
     font-size: 0.9rem;
     padding: 1em 5em;
-    position: absolute;
+    position: fixed;
     text-align: center;
     width: 100%;
   }

@@ -51,6 +51,8 @@ const theProjectStorage = (() => {
 
       update.data.all([get.storage(type), type]);
 
+      update.data['sort-id'](get.storage(type).at(-1));
+
       tag.data.project(get.storage(type).at(-1), projects);
 
       clean.duplicate.projects(get.storage(type).at(-1));
@@ -70,6 +72,8 @@ const theProjectStorage = (() => {
 
       update.data.all([get.storage(type), type]);
 
+      update.data['sort-id'](tProject.list.at(-1));
+
       tag.data.list(tProject.list.at(-1), lists);
 
       clean.duplicate.list(tProject.list.at(-1));
@@ -77,6 +81,8 @@ const theProjectStorage = (() => {
       copy.add.target.inbox(tProject.list.at(-1));
 
       display.checkMark.update.allListComplete(get.project(type, idProject));
+
+      sort.note();
 
       sort.task();
 
@@ -97,6 +103,8 @@ const theProjectStorage = (() => {
 
       update.data.all([get.storage(type), type]);
 
+      update.data['sort-id'](tList.task.at(-1));
+
       tag.data.task(tList.task.at(-1), tasks);
 
       date.sort(tList, tList.task.at(-1));
@@ -116,6 +124,8 @@ const theProjectStorage = (() => {
       display.checkMark.update.allTaskComplete(tList);
 
       display.checkMark.update.allListComplete(get.project(type, idProject));
+
+      sort.note();
 
       sort.task();
 
@@ -140,6 +150,8 @@ const theProjectStorage = (() => {
 
       update.data.all([get.storage(type), type]);
 
+      update.data['sort-id'](tTask.note.at(-1));
+
       tag.data.note(tTask.note.at(-1), notes);
 
       copy.add.lookup.note(tTask.note.at(-1));
@@ -153,6 +165,8 @@ const theProjectStorage = (() => {
       );
 
       display.checkMark.update.allListComplete(get.project(type, idProject));
+
+      sort.note();
 
       sort.task();
 
@@ -424,9 +438,9 @@ const theProjectStorage = (() => {
             }
           });
 
-          project.list.sort((firstTask, secondTask) => {
-            let firstDate = new Date(firstTask.date);
-            let secondDate = new Date(secondTask.date);
+          project.list.sort((firstList, secondList) => {
+            let firstDate = new Date(firstList.date);
+            let secondDate = new Date(secondList.date);
 
             if (isNaN(firstDate)) {
               firstDate = Infinity;
@@ -436,30 +450,30 @@ const theProjectStorage = (() => {
             }
 
             if (firstDate < secondDate) {
-              if (firstTask.checkMark === secondTask.checkMark) {
+              if (firstList.checkMark === secondList.checkMark) {
                 return -1;
               } else {
-                if (firstTask.checkMark) {
+                if (firstList.checkMark) {
                   return 1;
                 } else {
                   return -1;
                 }
               }
             } else if (firstDate > secondDate) {
-              if (firstTask.checkMark === secondTask.checkMark) {
+              if (firstList.checkMark === secondList.checkMark) {
                 return 1;
               } else {
-                if (firstTask.checkMark) {
+                if (firstList.checkMark) {
                   return 1;
                 } else {
                   return -1;
                 }
               }
             } else {
-              if (firstTask.checkMark === secondTask.checkMark) {
+              if (firstList.checkMark === secondList.checkMark) {
                 return 0;
               } else {
-                if (firstTask.checkMark) {
+                if (firstList.checkMark) {
                   1;
                 } else {
                   return -1;
@@ -525,8 +539,57 @@ const theProjectStorage = (() => {
         storage = customProject;
       }
     },
+    note: () => {
+      let storage = automaticProject;
+
+      for (let index = 0; index <= 1; index++) {
+        storage.forEach((project) => {
+          project.list.forEach((list) => {
+            list.task.forEach((task) => {
+              task.note.sort((firstNote, secondNote) => {
+                console.log(firstNote);
+                if (firstNote['sort-id'] < secondNote['sort-id']) {
+                  if (firstNote.checkMark === secondNote.checkMark) {
+                    return -1;
+                  } else {
+                    if (firstNote.checkMark) {
+                      return 1;
+                    } else {
+                      return -1;
+                    }
+                  }
+                } else if (firstNote['sort-id'] > secondNote['sort-id']) {
+                  if (firstNote.checkMark === secondNote.checkMark) {
+                    return 1;
+                  } else {
+                    if (firstNote.checkMark) {
+                      return 1;
+                    } else {
+                      return -1;
+                    }
+                  }
+                } else {
+                  if (firstNote.checkMark === secondNote.checkMark) {
+                    return 0;
+                  } else {
+                    if (firstNote.checkMark) {
+                      1;
+                    } else {
+                      return -1;
+                    }
+                  }
+                }
+              });
+            });
+          });
+        });
+        storage = customProject;
+      }
+    },
     update: {
       display: ([type, id]) => {
+        sort.note();
+
         sort.task();
 
         sort.list();
@@ -1125,6 +1188,9 @@ const theProjectStorage = (() => {
             });
           });
         });
+      },
+      ['sort-id']: (object) => {
+        object['sort-id'] = object.id;
       },
       type: (storage, type) => {
         storage.forEach((project) => {
