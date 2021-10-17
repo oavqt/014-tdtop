@@ -476,13 +476,13 @@ const theDOMCreate = {
         },
         theElement.create(
           'span',
-          { class: `${title}__title` },
+          { class: `${title.toLowerCase()}__title` },
           `${title[0].toUpperCase() + title.slice(1)}`
         ),
         theElement.create(
           'span',
           {
-            class: `${title}__count --count`,
+            class: `${title.toLowerCase()}__count --count`,
             ['data-id']: id,
             ['data-tag']: tag,
             ['data-type']: type,
@@ -510,11 +510,15 @@ const theDOMCreate = {
           ['data-tag']: tag,
           ['data-type']: type,
         },
-        theElement.create('span', { class: `${title}__title` }, title),
+        theElement.create(
+          'span',
+          { class: `${title.toLowerCase()}__title` },
+          title
+        ),
         theElement.create(
           'span',
           {
-            class: `${title}__count --count`,
+            class: `${title.toLowerCase()}__count --count`,
             ['data-id']: id,
             ['data-tag']: tag,
             ['data-type']: type,

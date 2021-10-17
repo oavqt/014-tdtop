@@ -294,6 +294,8 @@ const theProjectStorage = (() => {
 
       display.taskCount.value(customProject);
 
+      display.checkMark.update.empty();
+
       theEventHandler.publish('theDisplayUpdate', [type, idProject]);
 
       local.storage.add.local('automaticProject', automaticProject);
@@ -387,9 +389,9 @@ const theProjectStorage = (() => {
           tempList.task.push(tTask);
 
           copy.add.list(logbook, tempList);
-
-          log.complete.project();
         }
+
+        log.complete.project();
       },
     },
     complete: {
@@ -405,6 +407,7 @@ const theProjectStorage = (() => {
             });
           });
         });
+        console.log(logbook);
       },
     },
     lookup: {
@@ -744,7 +747,7 @@ const theProjectStorage = (() => {
 
           if (tagMatched.length > 1) {
             tagMatched.forEach((list) => {
-              if (list.project !== tList.project) {
+              if (list.project !== tList.project && list.project !== 5) {
                 copy.add.task(list, object);
               }
             });
@@ -1359,6 +1362,18 @@ const theProjectStorage = (() => {
     },
     checkMark: {
       update: {
+        empty: () => {
+          let storage = automaticProject;
+
+          for (let index = 0; index <= 1; index++) {
+            storage.forEach((project) => {
+              if (project.list.length === 0) {
+                project.checkMark = false;
+              }
+            });
+            storage = customProject;
+          }
+        },
         project: (type, id, checkMark) => {
           const tProject = get.project(type, id);
           const projectMatched = tag.lookup.project(tProject);
@@ -1788,8 +1803,12 @@ const theProjectStorage = (() => {
   const theProjectStart = () => {
     let automatic = JSON.parse(local.storage.get.local('automaticProject'));
 
-    if (automatic.length === 6) {
-      theLocalStorageProject();
+    if (automatic) {
+      if (automatic.length === 6) {
+        theLocalStorageProject();
+      } else {
+        theDefaultProject();
+      }
     } else {
       theDefaultProject();
     }
@@ -1801,7 +1820,10 @@ const theProjectStorage = (() => {
   theEventHandler.subscribe('customProject', update.data.all);
   theEventHandler.subscribe('customProject', theDOMDisplaySidebar);
   theEventHandler.subscribe('theTaskSort', sort.update.display);
-  theEventHandler.subscribe('theDefaultProject', theDefaultProject);
+  theEventHandler.subscribe(
+    'theDefaultProjectDisplay',
+    theDefaultProjectDisplay
+  );
 
   return {
     add,

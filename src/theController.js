@@ -217,6 +217,17 @@ const removeNoteFormEvent = () => {
     .addEventListener('click', removeProjectListTaskNote.note);
 };
 
+//Data Functions
+const theFormDateMin = () => {
+  const day = new Date().getDate().toString().padStart(2, '0');
+  const month = new Date().getMonth() + 1;
+  const year = new Date().getFullYear();
+
+  const date = `${year}-${month}-${day}`;
+
+  theDOMGet.theFormDate().setAttribute('min', date);
+};
+
 //Controller Tools
 //Controller Event Functions
 const theSidebarCollapse = function () {
@@ -361,6 +372,11 @@ const theCheckMark = {
         this.dataset.project,
         this.checked
       );
+
+      theEventHandler.publish('theTaskSort', [
+        this.dataset.type,
+        this.dataset.project,
+      ]);
     },
     task: function () {
       theProjectStorage.display.checkMark.update.task(
@@ -406,6 +422,7 @@ const addList = function () {
 
 const addTask = function () {
   theDOMTemplate.addForm('Task');
+  theFormDateMin();
   addTaskFormEvent();
 };
 
@@ -519,6 +536,8 @@ const editList = function () {
 const editTask = function () {
   theDOMTemplate.editForm('Task');
 
+  theFormDateMin();
+
   theFormSetValue(
     theProjectStorage.display.form.value.task(theDOMGetValue.id.task())
   );
@@ -624,7 +643,7 @@ const removeProjectListTaskNote = {
 
     //Events
     theDisplayRemove();
-    theEventHandler.publish('theDefaultProject', true);
+    theEventHandler.publish('theDefaultProjectDisplay', true);
     theEvents();
     theFormCancel();
   },

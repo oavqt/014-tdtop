@@ -20,7 +20,6 @@ const config = {
     path: path.resolve(__dirname, 'dist'),
     publicPath: './',
   },
-
   plugins: [
     new HTMLWebpackPlugin({
       template: './src/index.html',
